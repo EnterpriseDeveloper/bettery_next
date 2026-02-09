@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { PopoverGroup } from "@headlessui/react";
+import { Button, PopoverGroup } from "@headlessui/react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { mintToken } from "../tx/wallet";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,6 +46,14 @@ export default function Navbar() {
           <Link className="text-sm/6 font-semibold text-white" href="/create">
             Create
           </Link>
+          <Button
+            className="text-sm/6 font-semibold text-white"
+            onClick={() => {
+              mintToken();
+            }}
+          >
+            Connect Wallet
+          </Button>
         </PopoverGroup>
       </nav>
       <Dialog
