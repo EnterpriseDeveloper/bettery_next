@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import Long from "long";
 
 export const protobufPackage = "cosmos_proto";
 
@@ -15,6 +14,38 @@ export enum ScalarType {
   SCALAR_TYPE_STRING = 1,
   SCALAR_TYPE_BYTES = 2,
   UNRECOGNIZED = -1,
+}
+
+export function scalarTypeFromJSON(object: any): ScalarType {
+  switch (object) {
+    case 0:
+    case "SCALAR_TYPE_UNSPECIFIED":
+      return ScalarType.SCALAR_TYPE_UNSPECIFIED;
+    case 1:
+    case "SCALAR_TYPE_STRING":
+      return ScalarType.SCALAR_TYPE_STRING;
+    case 2:
+    case "SCALAR_TYPE_BYTES":
+      return ScalarType.SCALAR_TYPE_BYTES;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ScalarType.UNRECOGNIZED;
+  }
+}
+
+export function scalarTypeToJSON(object: ScalarType): string {
+  switch (object) {
+    case ScalarType.SCALAR_TYPE_UNSPECIFIED:
+      return "SCALAR_TYPE_UNSPECIFIED";
+    case ScalarType.SCALAR_TYPE_STRING:
+      return "SCALAR_TYPE_STRING";
+    case ScalarType.SCALAR_TYPE_BYTES:
+      return "SCALAR_TYPE_BYTES";
+    case ScalarType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
 }
 
 /**
@@ -115,6 +146,24 @@ export const InterfaceDescriptor: MessageFns<InterfaceDescriptor> = {
     return message;
   },
 
+  fromJSON(object: any): InterfaceDescriptor {
+    return {
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+    };
+  },
+
+  toJSON(message: InterfaceDescriptor): unknown {
+    const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<InterfaceDescriptor>, I>>(base?: I): InterfaceDescriptor {
     return InterfaceDescriptor.fromPartial(base ?? ({} as any));
   },
@@ -196,6 +245,32 @@ export const ScalarDescriptor: MessageFns<ScalarDescriptor> = {
     return message;
   },
 
+  fromJSON(object: any): ScalarDescriptor {
+    return {
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+      fieldType: globalThis.Array.isArray(object?.fieldType)
+        ? object.fieldType.map((e: any) => scalarTypeFromJSON(e))
+        : globalThis.Array.isArray(object?.field_type)
+        ? object.field_type.map((e: any) => scalarTypeFromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ScalarDescriptor): unknown {
+    const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    if (message.fieldType?.length) {
+      obj.fieldType = message.fieldType.map((e) => scalarTypeToJSON(e));
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<ScalarDescriptor>, I>>(base?: I): ScalarDescriptor {
     return ScalarDescriptor.fromPartial(base ?? ({} as any));
   },
@@ -211,7 +286,7 @@ export const ScalarDescriptor: MessageFns<ScalarDescriptor> = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -220,9 +295,15 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

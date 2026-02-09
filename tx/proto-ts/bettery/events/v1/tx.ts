@@ -6,19 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import {
-  type CallOptions,
-  type ChannelCredentials,
-  Client,
-  type ClientOptions,
-  type ClientUnaryCall,
-  type handleUnaryCall,
-  makeGenericClientConstructor,
-  type Metadata,
-  type ServiceError,
-  type UntypedServiceImplementation,
-} from "@grpc/grpc-js";
-import Long from "long";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -28,7 +15,7 @@ export interface MsgUpdateParams {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
   authority: string;
   /** NOTE: All parameters must be supplied. */
-  params?: Params | undefined;
+  params: Params | undefined;
 }
 
 /**
@@ -41,27 +28,27 @@ export interface MsgUpdateParamsResponse {
 /** MsgCreateEvent defines the MsgCreateEvent message. */
 export interface MsgCreateEvent {
   creator: string;
-  id: Long;
+  id: number;
   question: string;
   answers: string[];
-  startTime: Long;
-  endTime: Long;
+  startTime: number;
+  endTime: number;
   category: string;
 }
 
 /** MsgCreateEventResponse defines the MsgCreateEventResponse message. */
 export interface MsgCreateEventResponse {
-  id: Long;
+  id: number;
 }
 
 /** MsgCreatePartEvent defines the MsgCreatePartEvent message. */
 export interface MsgCreatePartEvent {
   creator: string;
-  id: Long;
-  eventId: Long;
+  id: number;
+  eventId: number;
   answers: string;
   amount: string;
-  answerIndex: Long;
+  answerIndex: number;
   token: string;
 }
 
@@ -72,9 +59,9 @@ export interface MsgCreatePartEventResponse {
 /** MsgValidateEvent defines the MsgValidateEvent message. */
 export interface MsgValidateEvent {
   creator: string;
-  id: Long;
-  eventId: Long;
-  answerIndex: Long;
+  id: number;
+  eventId: number;
+  answerIndex: number;
   answers: string;
   source: string;
 }
@@ -130,6 +117,24 @@ export const MsgUpdateParams: MessageFns<MsgUpdateParams> = {
     return message;
   },
 
+  fromJSON(object: any): MsgUpdateParams {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
+    };
+  },
+
+  toJSON(message: MsgUpdateParams): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.params !== undefined) {
+      obj.params = Params.toJSON(message.params);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgUpdateParams>, I>>(base?: I): MsgUpdateParams {
     return MsgUpdateParams.fromPartial(base ?? ({} as any));
   },
@@ -168,6 +173,15 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
     return message;
   },
 
+  fromJSON(_: any): MsgUpdateParamsResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateParamsResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgUpdateParamsResponse>, I>>(base?: I): MsgUpdateParamsResponse {
     return MsgUpdateParamsResponse.fromPartial(base ?? ({} as any));
   },
@@ -178,15 +192,7 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
 };
 
 function createBaseMsgCreateEvent(): MsgCreateEvent {
-  return {
-    creator: "",
-    id: Long.UZERO,
-    question: "",
-    answers: [],
-    startTime: Long.UZERO,
-    endTime: Long.UZERO,
-    category: "",
-  };
+  return { creator: "", id: 0, question: "", answers: [], startTime: 0, endTime: 0, category: "" };
 }
 
 export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
@@ -194,8 +200,8 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (!message.id.equals(Long.UZERO)) {
-      writer.uint32(16).uint64(message.id.toString());
+    if (message.id !== 0) {
+      writer.uint32(16).uint64(message.id);
     }
     if (message.question !== "") {
       writer.uint32(26).string(message.question);
@@ -203,11 +209,11 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     for (const v of message.answers) {
       writer.uint32(34).string(v!);
     }
-    if (!message.startTime.equals(Long.UZERO)) {
-      writer.uint32(40).uint64(message.startTime.toString());
+    if (message.startTime !== 0) {
+      writer.uint32(40).uint64(message.startTime);
     }
-    if (!message.endTime.equals(Long.UZERO)) {
-      writer.uint32(48).uint64(message.endTime.toString());
+    if (message.endTime !== 0) {
+      writer.uint32(48).uint64(message.endTime);
     }
     if (message.category !== "") {
       writer.uint32(58).string(message.category);
@@ -235,7 +241,7 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
             break;
           }
 
-          message.id = Long.fromString(reader.uint64().toString(), true);
+          message.id = longToNumber(reader.uint64());
           continue;
         }
         case 3: {
@@ -259,7 +265,7 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
             break;
           }
 
-          message.startTime = Long.fromString(reader.uint64().toString(), true);
+          message.startTime = longToNumber(reader.uint64());
           continue;
         }
         case 6: {
@@ -267,7 +273,7 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
             break;
           }
 
-          message.endTime = Long.fromString(reader.uint64().toString(), true);
+          message.endTime = longToNumber(reader.uint64());
           continue;
         }
         case 7: {
@@ -287,34 +293,76 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     return message;
   },
 
+  fromJSON(object: any): MsgCreateEvent {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      question: isSet(object.question) ? globalThis.String(object.question) : "",
+      answers: globalThis.Array.isArray(object?.answers) ? object.answers.map((e: any) => globalThis.String(e)) : [],
+      startTime: isSet(object.startTime)
+        ? globalThis.Number(object.startTime)
+        : isSet(object.start_time)
+        ? globalThis.Number(object.start_time)
+        : 0,
+      endTime: isSet(object.endTime)
+        ? globalThis.Number(object.endTime)
+        : isSet(object.end_time)
+        ? globalThis.Number(object.end_time)
+        : 0,
+      category: isSet(object.category) ? globalThis.String(object.category) : "",
+    };
+  },
+
+  toJSON(message: MsgCreateEvent): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.question !== "") {
+      obj.question = message.question;
+    }
+    if (message.answers?.length) {
+      obj.answers = message.answers;
+    }
+    if (message.startTime !== 0) {
+      obj.startTime = Math.round(message.startTime);
+    }
+    if (message.endTime !== 0) {
+      obj.endTime = Math.round(message.endTime);
+    }
+    if (message.category !== "") {
+      obj.category = message.category;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgCreateEvent>, I>>(base?: I): MsgCreateEvent {
     return MsgCreateEvent.fromPartial(base ?? ({} as any));
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateEvent>, I>>(object: I): MsgCreateEvent {
     const message = createBaseMsgCreateEvent();
     message.creator = object.creator ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.id = object.id ?? 0;
     message.question = object.question ?? "";
     message.answers = object.answers?.map((e) => e) || [];
-    message.startTime = (object.startTime !== undefined && object.startTime !== null)
-      ? Long.fromValue(object.startTime)
-      : Long.UZERO;
-    message.endTime = (object.endTime !== undefined && object.endTime !== null)
-      ? Long.fromValue(object.endTime)
-      : Long.UZERO;
+    message.startTime = object.startTime ?? 0;
+    message.endTime = object.endTime ?? 0;
     message.category = object.category ?? "";
     return message;
   },
 };
 
 function createBaseMsgCreateEventResponse(): MsgCreateEventResponse {
-  return { id: Long.UZERO };
+  return { id: 0 };
 }
 
 export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
   encode(message: MsgCreateEventResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (!message.id.equals(Long.UZERO)) {
-      writer.uint32(8).uint64(message.id.toString());
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
     }
     return writer;
   },
@@ -331,7 +379,7 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
             break;
           }
 
-          message.id = Long.fromString(reader.uint64().toString(), true);
+          message.id = longToNumber(reader.uint64());
           continue;
         }
       }
@@ -343,26 +391,30 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
     return message;
   },
 
+  fromJSON(object: any): MsgCreateEventResponse {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: MsgCreateEventResponse): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgCreateEventResponse>, I>>(base?: I): MsgCreateEventResponse {
     return MsgCreateEventResponse.fromPartial(base ?? ({} as any));
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateEventResponse>, I>>(object: I): MsgCreateEventResponse {
     const message = createBaseMsgCreateEventResponse();
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.id = object.id ?? 0;
     return message;
   },
 };
 
 function createBaseMsgCreatePartEvent(): MsgCreatePartEvent {
-  return {
-    creator: "",
-    id: Long.UZERO,
-    eventId: Long.UZERO,
-    answers: "",
-    amount: "",
-    answerIndex: Long.UZERO,
-    token: "",
-  };
+  return { creator: "", id: 0, eventId: 0, answers: "", amount: "", answerIndex: 0, token: "" };
 }
 
 export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
@@ -370,11 +422,11 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (!message.id.equals(Long.UZERO)) {
-      writer.uint32(16).uint64(message.id.toString());
+    if (message.id !== 0) {
+      writer.uint32(16).uint64(message.id);
     }
-    if (!message.eventId.equals(Long.UZERO)) {
-      writer.uint32(24).uint64(message.eventId.toString());
+    if (message.eventId !== 0) {
+      writer.uint32(24).uint64(message.eventId);
     }
     if (message.answers !== "") {
       writer.uint32(34).string(message.answers);
@@ -382,8 +434,8 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.amount !== "") {
       writer.uint32(42).string(message.amount);
     }
-    if (!message.answerIndex.equals(Long.UZERO)) {
-      writer.uint32(48).uint64(message.answerIndex.toString());
+    if (message.answerIndex !== 0) {
+      writer.uint32(48).uint64(message.answerIndex);
     }
     if (message.token !== "") {
       writer.uint32(58).string(message.token);
@@ -411,7 +463,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
             break;
           }
 
-          message.id = Long.fromString(reader.uint64().toString(), true);
+          message.id = longToNumber(reader.uint64());
           continue;
         }
         case 3: {
@@ -419,7 +471,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
             break;
           }
 
-          message.eventId = Long.fromString(reader.uint64().toString(), true);
+          message.eventId = longToNumber(reader.uint64());
           continue;
         }
         case 4: {
@@ -443,7 +495,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
             break;
           }
 
-          message.answerIndex = Long.fromString(reader.uint64().toString(), true);
+          message.answerIndex = longToNumber(reader.uint64());
           continue;
         }
         case 7: {
@@ -463,21 +515,63 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     return message;
   },
 
+  fromJSON(object: any): MsgCreatePartEvent {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      eventId: isSet(object.eventId)
+        ? globalThis.Number(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.Number(object.event_id)
+        : 0,
+      answers: isSet(object.answers) ? globalThis.String(object.answers) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      answerIndex: isSet(object.answerIndex)
+        ? globalThis.Number(object.answerIndex)
+        : isSet(object.answer_index)
+        ? globalThis.Number(object.answer_index)
+        : 0,
+      token: isSet(object.token) ? globalThis.String(object.token) : "",
+    };
+  },
+
+  toJSON(message: MsgCreatePartEvent): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.eventId !== 0) {
+      obj.eventId = Math.round(message.eventId);
+    }
+    if (message.answers !== "") {
+      obj.answers = message.answers;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.answerIndex !== 0) {
+      obj.answerIndex = Math.round(message.answerIndex);
+    }
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgCreatePartEvent>, I>>(base?: I): MsgCreatePartEvent {
     return MsgCreatePartEvent.fromPartial(base ?? ({} as any));
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreatePartEvent>, I>>(object: I): MsgCreatePartEvent {
     const message = createBaseMsgCreatePartEvent();
     message.creator = object.creator ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.eventId = (object.eventId !== undefined && object.eventId !== null)
-      ? Long.fromValue(object.eventId)
-      : Long.UZERO;
+    message.id = object.id ?? 0;
+    message.eventId = object.eventId ?? 0;
     message.answers = object.answers ?? "";
     message.amount = object.amount ?? "";
-    message.answerIndex = (object.answerIndex !== undefined && object.answerIndex !== null)
-      ? Long.fromValue(object.answerIndex)
-      : Long.UZERO;
+    message.answerIndex = object.answerIndex ?? 0;
     message.token = object.token ?? "";
     return message;
   },
@@ -508,6 +602,15 @@ export const MsgCreatePartEventResponse: MessageFns<MsgCreatePartEventResponse> 
     return message;
   },
 
+  fromJSON(_: any): MsgCreatePartEventResponse {
+    return {};
+  },
+
+  toJSON(_: MsgCreatePartEventResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgCreatePartEventResponse>, I>>(base?: I): MsgCreatePartEventResponse {
     return MsgCreatePartEventResponse.fromPartial(base ?? ({} as any));
   },
@@ -518,7 +621,7 @@ export const MsgCreatePartEventResponse: MessageFns<MsgCreatePartEventResponse> 
 };
 
 function createBaseMsgValidateEvent(): MsgValidateEvent {
-  return { creator: "", id: Long.UZERO, eventId: Long.UZERO, answerIndex: Long.UZERO, answers: "", source: "" };
+  return { creator: "", id: 0, eventId: 0, answerIndex: 0, answers: "", source: "" };
 }
 
 export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
@@ -526,14 +629,14 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (!message.id.equals(Long.UZERO)) {
-      writer.uint32(16).uint64(message.id.toString());
+    if (message.id !== 0) {
+      writer.uint32(16).uint64(message.id);
     }
-    if (!message.eventId.equals(Long.UZERO)) {
-      writer.uint32(24).uint64(message.eventId.toString());
+    if (message.eventId !== 0) {
+      writer.uint32(24).uint64(message.eventId);
     }
-    if (!message.answerIndex.equals(Long.UZERO)) {
-      writer.uint32(32).uint64(message.answerIndex.toString());
+    if (message.answerIndex !== 0) {
+      writer.uint32(32).uint64(message.answerIndex);
     }
     if (message.answers !== "") {
       writer.uint32(42).string(message.answers);
@@ -564,7 +667,7 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
             break;
           }
 
-          message.id = Long.fromString(reader.uint64().toString(), true);
+          message.id = longToNumber(reader.uint64());
           continue;
         }
         case 3: {
@@ -572,7 +675,7 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
             break;
           }
 
-          message.eventId = Long.fromString(reader.uint64().toString(), true);
+          message.eventId = longToNumber(reader.uint64());
           continue;
         }
         case 4: {
@@ -580,7 +683,7 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
             break;
           }
 
-          message.answerIndex = Long.fromString(reader.uint64().toString(), true);
+          message.answerIndex = longToNumber(reader.uint64());
           continue;
         }
         case 5: {
@@ -608,19 +711,57 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
     return message;
   },
 
+  fromJSON(object: any): MsgValidateEvent {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      eventId: isSet(object.eventId)
+        ? globalThis.Number(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.Number(object.event_id)
+        : 0,
+      answerIndex: isSet(object.answerIndex)
+        ? globalThis.Number(object.answerIndex)
+        : isSet(object.answer_index)
+        ? globalThis.Number(object.answer_index)
+        : 0,
+      answers: isSet(object.answers) ? globalThis.String(object.answers) : "",
+      source: isSet(object.source) ? globalThis.String(object.source) : "",
+    };
+  },
+
+  toJSON(message: MsgValidateEvent): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.eventId !== 0) {
+      obj.eventId = Math.round(message.eventId);
+    }
+    if (message.answerIndex !== 0) {
+      obj.answerIndex = Math.round(message.answerIndex);
+    }
+    if (message.answers !== "") {
+      obj.answers = message.answers;
+    }
+    if (message.source !== "") {
+      obj.source = message.source;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgValidateEvent>, I>>(base?: I): MsgValidateEvent {
     return MsgValidateEvent.fromPartial(base ?? ({} as any));
   },
   fromPartial<I extends Exact<DeepPartial<MsgValidateEvent>, I>>(object: I): MsgValidateEvent {
     const message = createBaseMsgValidateEvent();
     message.creator = object.creator ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.eventId = (object.eventId !== undefined && object.eventId !== null)
-      ? Long.fromValue(object.eventId)
-      : Long.UZERO;
-    message.answerIndex = (object.answerIndex !== undefined && object.answerIndex !== null)
-      ? Long.fromValue(object.answerIndex)
-      : Long.UZERO;
+    message.id = object.id ?? 0;
+    message.eventId = object.eventId ?? 0;
+    message.answerIndex = object.answerIndex ?? 0;
     message.answers = object.answers ?? "";
     message.source = object.source ?? "";
     return message;
@@ -652,6 +793,15 @@ export const MsgValidateEventResponse: MessageFns<MsgValidateEventResponse> = {
     return message;
   },
 
+  fromJSON(_: any): MsgValidateEventResponse {
+    return {};
+  },
+
+  toJSON(_: MsgValidateEventResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgValidateEventResponse>, I>>(base?: I): MsgValidateEventResponse {
     return MsgValidateEventResponse.fromPartial(base ?? ({} as any));
   },
@@ -662,151 +812,65 @@ export const MsgValidateEventResponse: MessageFns<MsgValidateEventResponse> = {
 };
 
 /** Msg defines the Msg service. */
-export type MsgService = typeof MsgService;
-export const MsgService = {
+export interface Msg {
   /**
    * UpdateParams defines a (governance) operation for updating the module
    * parameters. The authority defaults to the x/gov module account.
    */
-  updateParams: {
-    path: "/bettery.events.v1.Msg/UpdateParams",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgUpdateParams): Buffer => Buffer.from(MsgUpdateParams.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgUpdateParams => MsgUpdateParams.decode(value),
-    responseSerialize: (value: MsgUpdateParamsResponse): Buffer =>
-      Buffer.from(MsgUpdateParamsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgUpdateParamsResponse => MsgUpdateParamsResponse.decode(value),
-  },
+  UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
   /** CreateEvent defines the CreateEvent RPC. */
-  createEvent: {
-    path: "/bettery.events.v1.Msg/CreateEvent",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgCreateEvent): Buffer => Buffer.from(MsgCreateEvent.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgCreateEvent => MsgCreateEvent.decode(value),
-    responseSerialize: (value: MsgCreateEventResponse): Buffer =>
-      Buffer.from(MsgCreateEventResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgCreateEventResponse => MsgCreateEventResponse.decode(value),
-  },
+  CreateEvent(request: MsgCreateEvent): Promise<MsgCreateEventResponse>;
   /** CreatePartEvent defines the CreatePartEvent RPC. */
-  createPartEvent: {
-    path: "/bettery.events.v1.Msg/CreatePartEvent",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgCreatePartEvent): Buffer => Buffer.from(MsgCreatePartEvent.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgCreatePartEvent => MsgCreatePartEvent.decode(value),
-    responseSerialize: (value: MsgCreatePartEventResponse): Buffer =>
-      Buffer.from(MsgCreatePartEventResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgCreatePartEventResponse => MsgCreatePartEventResponse.decode(value),
-  },
+  CreatePartEvent(request: MsgCreatePartEvent): Promise<MsgCreatePartEventResponse>;
   /** ValidateEvent defines the ValidateEvent RPC. */
-  validateEvent: {
-    path: "/bettery.events.v1.Msg/ValidateEvent",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgValidateEvent): Buffer => Buffer.from(MsgValidateEvent.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgValidateEvent => MsgValidateEvent.decode(value),
-    responseSerialize: (value: MsgValidateEventResponse): Buffer =>
-      Buffer.from(MsgValidateEventResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgValidateEventResponse => MsgValidateEventResponse.decode(value),
-  },
-} as const;
-
-export interface MsgServer extends UntypedServiceImplementation {
-  /**
-   * UpdateParams defines a (governance) operation for updating the module
-   * parameters. The authority defaults to the x/gov module account.
-   */
-  updateParams: handleUnaryCall<MsgUpdateParams, MsgUpdateParamsResponse>;
-  /** CreateEvent defines the CreateEvent RPC. */
-  createEvent: handleUnaryCall<MsgCreateEvent, MsgCreateEventResponse>;
-  /** CreatePartEvent defines the CreatePartEvent RPC. */
-  createPartEvent: handleUnaryCall<MsgCreatePartEvent, MsgCreatePartEventResponse>;
-  /** ValidateEvent defines the ValidateEvent RPC. */
-  validateEvent: handleUnaryCall<MsgValidateEvent, MsgValidateEventResponse>;
+  ValidateEvent(request: MsgValidateEvent): Promise<MsgValidateEventResponse>;
 }
 
-export interface MsgClient extends Client {
-  /**
-   * UpdateParams defines a (governance) operation for updating the module
-   * parameters. The authority defaults to the x/gov module account.
-   */
-  updateParams(
-    request: MsgUpdateParams,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  updateParams(
-    request: MsgUpdateParams,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  updateParams(
-    request: MsgUpdateParams,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  /** CreateEvent defines the CreateEvent RPC. */
-  createEvent(
-    request: MsgCreateEvent,
-    callback: (error: ServiceError | null, response: MsgCreateEventResponse) => void,
-  ): ClientUnaryCall;
-  createEvent(
-    request: MsgCreateEvent,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgCreateEventResponse) => void,
-  ): ClientUnaryCall;
-  createEvent(
-    request: MsgCreateEvent,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgCreateEventResponse) => void,
-  ): ClientUnaryCall;
-  /** CreatePartEvent defines the CreatePartEvent RPC. */
-  createPartEvent(
-    request: MsgCreatePartEvent,
-    callback: (error: ServiceError | null, response: MsgCreatePartEventResponse) => void,
-  ): ClientUnaryCall;
-  createPartEvent(
-    request: MsgCreatePartEvent,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgCreatePartEventResponse) => void,
-  ): ClientUnaryCall;
-  createPartEvent(
-    request: MsgCreatePartEvent,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgCreatePartEventResponse) => void,
-  ): ClientUnaryCall;
-  /** ValidateEvent defines the ValidateEvent RPC. */
-  validateEvent(
-    request: MsgValidateEvent,
-    callback: (error: ServiceError | null, response: MsgValidateEventResponse) => void,
-  ): ClientUnaryCall;
-  validateEvent(
-    request: MsgValidateEvent,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgValidateEventResponse) => void,
-  ): ClientUnaryCall;
-  validateEvent(
-    request: MsgValidateEvent,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgValidateEventResponse) => void,
-  ): ClientUnaryCall;
+export const MsgServiceName = "bettery.events.v1.Msg";
+export class MsgClientImpl implements Msg {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || MsgServiceName;
+    this.rpc = rpc;
+    this.UpdateParams = this.UpdateParams.bind(this);
+    this.CreateEvent = this.CreateEvent.bind(this);
+    this.CreatePartEvent = this.CreatePartEvent.bind(this);
+    this.ValidateEvent = this.ValidateEvent.bind(this);
+  }
+  UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
+    const data = MsgUpdateParams.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateParams", data);
+    return promise.then((data) => MsgUpdateParamsResponse.decode(new BinaryReader(data)));
+  }
+
+  CreateEvent(request: MsgCreateEvent): Promise<MsgCreateEventResponse> {
+    const data = MsgCreateEvent.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateEvent", data);
+    return promise.then((data) => MsgCreateEventResponse.decode(new BinaryReader(data)));
+  }
+
+  CreatePartEvent(request: MsgCreatePartEvent): Promise<MsgCreatePartEventResponse> {
+    const data = MsgCreatePartEvent.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreatePartEvent", data);
+    return promise.then((data) => MsgCreatePartEventResponse.decode(new BinaryReader(data)));
+  }
+
+  ValidateEvent(request: MsgValidateEvent): Promise<MsgValidateEventResponse> {
+    const data = MsgValidateEvent.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ValidateEvent", data);
+    return promise.then((data) => MsgValidateEventResponse.decode(new BinaryReader(data)));
+  }
 }
 
-export const MsgClient = makeGenericClientConstructor(MsgService, "bettery.events.v1.Msg") as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): MsgClient;
-  service: typeof MsgService;
-  serviceName: string;
-};
+interface Rpc {
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -815,9 +879,26 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

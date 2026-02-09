@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import Long from "long";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -14,7 +13,7 @@ export const protobufPackage = "bettery.events.v1";
 /** GenesisState defines the events module's genesis state. */
 export interface GenesisState {
   /** params defines all the parameters of the module. */
-  params?: Params | undefined;
+  params: Params | undefined;
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -53,6 +52,18 @@ export const GenesisState: MessageFns<GenesisState> = {
     return message;
   },
 
+  fromJSON(object: any): GenesisState {
+    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
+  },
+
+  toJSON(message: GenesisState): unknown {
+    const obj: any = {};
+    if (message.params !== undefined) {
+      obj.params = Params.toJSON(message.params);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<GenesisState>, I>>(base?: I): GenesisState {
     return GenesisState.fromPartial(base ?? ({} as any));
   },
@@ -68,7 +79,7 @@ export const GenesisState: MessageFns<GenesisState> = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -77,9 +88,15 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

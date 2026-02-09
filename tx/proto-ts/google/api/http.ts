@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import Long from "long";
 
 export const protobufPackage = "google.api";
 
@@ -419,6 +418,28 @@ export const Http: MessageFns<Http> = {
     return message;
   },
 
+  fromJSON(object: any): Http {
+    return {
+      rules: globalThis.Array.isArray(object?.rules) ? object.rules.map((e: any) => HttpRule.fromJSON(e)) : [],
+      fullyDecodeReservedExpansion: isSet(object.fullyDecodeReservedExpansion)
+        ? globalThis.Boolean(object.fullyDecodeReservedExpansion)
+        : isSet(object.fully_decode_reserved_expansion)
+        ? globalThis.Boolean(object.fully_decode_reserved_expansion)
+        : false,
+    };
+  },
+
+  toJSON(message: Http): unknown {
+    const obj: any = {};
+    if (message.rules?.length) {
+      obj.rules = message.rules.map((e) => HttpRule.toJSON(e));
+    }
+    if (message.fullyDecodeReservedExpansion !== false) {
+      obj.fullyDecodeReservedExpansion = message.fullyDecodeReservedExpansion;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<Http>, I>>(base?: I): Http {
     return Http.fromPartial(base ?? ({} as any));
   },
@@ -576,6 +597,64 @@ export const HttpRule: MessageFns<HttpRule> = {
     return message;
   },
 
+  fromJSON(object: any): HttpRule {
+    return {
+      selector: isSet(object.selector) ? globalThis.String(object.selector) : "",
+      get: isSet(object.get) ? globalThis.String(object.get) : undefined,
+      put: isSet(object.put) ? globalThis.String(object.put) : undefined,
+      post: isSet(object.post) ? globalThis.String(object.post) : undefined,
+      delete: isSet(object.delete) ? globalThis.String(object.delete) : undefined,
+      patch: isSet(object.patch) ? globalThis.String(object.patch) : undefined,
+      custom: isSet(object.custom) ? CustomHttpPattern.fromJSON(object.custom) : undefined,
+      body: isSet(object.body) ? globalThis.String(object.body) : "",
+      responseBody: isSet(object.responseBody)
+        ? globalThis.String(object.responseBody)
+        : isSet(object.response_body)
+        ? globalThis.String(object.response_body)
+        : "",
+      additionalBindings: globalThis.Array.isArray(object?.additionalBindings)
+        ? object.additionalBindings.map((e: any) => HttpRule.fromJSON(e))
+        : globalThis.Array.isArray(object?.additional_bindings)
+        ? object.additional_bindings.map((e: any) => HttpRule.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: HttpRule): unknown {
+    const obj: any = {};
+    if (message.selector !== "") {
+      obj.selector = message.selector;
+    }
+    if (message.get !== undefined) {
+      obj.get = message.get;
+    }
+    if (message.put !== undefined) {
+      obj.put = message.put;
+    }
+    if (message.post !== undefined) {
+      obj.post = message.post;
+    }
+    if (message.delete !== undefined) {
+      obj.delete = message.delete;
+    }
+    if (message.patch !== undefined) {
+      obj.patch = message.patch;
+    }
+    if (message.custom !== undefined) {
+      obj.custom = CustomHttpPattern.toJSON(message.custom);
+    }
+    if (message.body !== "") {
+      obj.body = message.body;
+    }
+    if (message.responseBody !== "") {
+      obj.responseBody = message.responseBody;
+    }
+    if (message.additionalBindings?.length) {
+      obj.additionalBindings = message.additionalBindings.map((e) => HttpRule.toJSON(e));
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<HttpRule>, I>>(base?: I): HttpRule {
     return HttpRule.fromPartial(base ?? ({} as any));
   },
@@ -644,6 +723,24 @@ export const CustomHttpPattern: MessageFns<CustomHttpPattern> = {
     return message;
   },
 
+  fromJSON(object: any): CustomHttpPattern {
+    return {
+      kind: isSet(object.kind) ? globalThis.String(object.kind) : "",
+      path: isSet(object.path) ? globalThis.String(object.path) : "",
+    };
+  },
+
+  toJSON(message: CustomHttpPattern): unknown {
+    const obj: any = {};
+    if (message.kind !== "") {
+      obj.kind = message.kind;
+    }
+    if (message.path !== "") {
+      obj.path = message.path;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<CustomHttpPattern>, I>>(base?: I): CustomHttpPattern {
     return CustomHttpPattern.fromPartial(base ?? ({} as any));
   },
@@ -658,7 +755,7 @@ export const CustomHttpPattern: MessageFns<CustomHttpPattern> = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -667,9 +764,15 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

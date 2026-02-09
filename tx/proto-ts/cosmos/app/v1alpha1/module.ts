@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import Long from "long";
 
 export const protobufPackage = "cosmos.app.v1alpha1";
 
@@ -151,6 +150,40 @@ export const ModuleDescriptor: MessageFns<ModuleDescriptor> = {
     return message;
   },
 
+  fromJSON(object: any): ModuleDescriptor {
+    return {
+      goImport: isSet(object.goImport)
+        ? globalThis.String(object.goImport)
+        : isSet(object.go_import)
+        ? globalThis.String(object.go_import)
+        : "",
+      usePackage: globalThis.Array.isArray(object?.usePackage)
+        ? object.usePackage.map((e: any) => PackageReference.fromJSON(e))
+        : globalThis.Array.isArray(object?.use_package)
+        ? object.use_package.map((e: any) => PackageReference.fromJSON(e))
+        : [],
+      canMigrateFrom: globalThis.Array.isArray(object?.canMigrateFrom)
+        ? object.canMigrateFrom.map((e: any) => MigrateFromInfo.fromJSON(e))
+        : globalThis.Array.isArray(object?.can_migrate_from)
+        ? object.can_migrate_from.map((e: any) => MigrateFromInfo.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ModuleDescriptor): unknown {
+    const obj: any = {};
+    if (message.goImport !== "") {
+      obj.goImport = message.goImport;
+    }
+    if (message.usePackage?.length) {
+      obj.usePackage = message.usePackage.map((e) => PackageReference.toJSON(e));
+    }
+    if (message.canMigrateFrom?.length) {
+      obj.canMigrateFrom = message.canMigrateFrom.map((e) => MigrateFromInfo.toJSON(e));
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<ModuleDescriptor>, I>>(base?: I): ModuleDescriptor {
     return ModuleDescriptor.fromPartial(base ?? ({} as any));
   },
@@ -210,6 +243,24 @@ export const PackageReference: MessageFns<PackageReference> = {
     return message;
   },
 
+  fromJSON(object: any): PackageReference {
+    return {
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      revision: isSet(object.revision) ? globalThis.Number(object.revision) : 0,
+    };
+  },
+
+  toJSON(message: PackageReference): unknown {
+    const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.revision !== 0) {
+      obj.revision = Math.round(message.revision);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<PackageReference>, I>>(base?: I): PackageReference {
     return PackageReference.fromPartial(base ?? ({} as any));
   },
@@ -257,6 +308,18 @@ export const MigrateFromInfo: MessageFns<MigrateFromInfo> = {
     return message;
   },
 
+  fromJSON(object: any): MigrateFromInfo {
+    return { module: isSet(object.module) ? globalThis.String(object.module) : "" };
+  },
+
+  toJSON(message: MigrateFromInfo): unknown {
+    const obj: any = {};
+    if (message.module !== "") {
+      obj.module = message.module;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MigrateFromInfo>, I>>(base?: I): MigrateFromInfo {
     return MigrateFromInfo.fromPartial(base ?? ({} as any));
   },
@@ -270,7 +333,7 @@ export const MigrateFromInfo: MessageFns<MigrateFromInfo> = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -279,9 +342,15 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

@@ -6,19 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import {
-  type CallOptions,
-  type ChannelCredentials,
-  Client,
-  type ClientOptions,
-  type ClientUnaryCall,
-  type handleUnaryCall,
-  makeGenericClientConstructor,
-  type Metadata,
-  type ServiceError,
-  type UntypedServiceImplementation,
-} from "@grpc/grpc-js";
-import Long from "long";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.funds.v1";
@@ -28,7 +15,7 @@ export interface MsgUpdateParams {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
   authority: string;
   /** NOTE: All parameters must be supplied. */
-  params?: Params | undefined;
+  params: Params | undefined;
 }
 
 /**
@@ -52,7 +39,7 @@ export interface MintEvent {
   creator: string;
   amount: string;
   token: string;
-  time: Long;
+  time: number;
 }
 
 function createBaseMsgUpdateParams(): MsgUpdateParams {
@@ -102,6 +89,24 @@ export const MsgUpdateParams: MessageFns<MsgUpdateParams> = {
     return message;
   },
 
+  fromJSON(object: any): MsgUpdateParams {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
+    };
+  },
+
+  toJSON(message: MsgUpdateParams): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.params !== undefined) {
+      obj.params = Params.toJSON(message.params);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgUpdateParams>, I>>(base?: I): MsgUpdateParams {
     return MsgUpdateParams.fromPartial(base ?? ({} as any));
   },
@@ -138,6 +143,15 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
       reader.skip(tag & 7);
     }
     return message;
+  },
+
+  fromJSON(_: any): MsgUpdateParamsResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateParamsResponse): unknown {
+    const obj: any = {};
+    return obj;
   },
 
   create<I extends Exact<DeepPartial<MsgUpdateParamsResponse>, I>>(base?: I): MsgUpdateParamsResponse {
@@ -183,6 +197,18 @@ export const MsgMintToken: MessageFns<MsgMintToken> = {
       reader.skip(tag & 7);
     }
     return message;
+  },
+
+  fromJSON(object: any): MsgMintToken {
+    return { creator: isSet(object.creator) ? globalThis.String(object.creator) : "" };
+  },
+
+  toJSON(message: MsgMintToken): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    return obj;
   },
 
   create<I extends Exact<DeepPartial<MsgMintToken>, I>>(base?: I): MsgMintToken {
@@ -231,6 +257,18 @@ export const MsgMintTokenResponse: MessageFns<MsgMintTokenResponse> = {
     return message;
   },
 
+  fromJSON(object: any): MsgMintTokenResponse {
+    return { status: isSet(object.status) ? globalThis.String(object.status) : "" };
+  },
+
+  toJSON(message: MsgMintTokenResponse): unknown {
+    const obj: any = {};
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MsgMintTokenResponse>, I>>(base?: I): MsgMintTokenResponse {
     return MsgMintTokenResponse.fromPartial(base ?? ({} as any));
   },
@@ -242,7 +280,7 @@ export const MsgMintTokenResponse: MessageFns<MsgMintTokenResponse> = {
 };
 
 function createBaseMintEvent(): MintEvent {
-  return { creator: "", amount: "", token: "", time: Long.UZERO };
+  return { creator: "", amount: "", token: "", time: 0 };
 }
 
 export const MintEvent: MessageFns<MintEvent> = {
@@ -256,8 +294,8 @@ export const MintEvent: MessageFns<MintEvent> = {
     if (message.token !== "") {
       writer.uint32(26).string(message.token);
     }
-    if (!message.time.equals(Long.UZERO)) {
-      writer.uint32(32).uint64(message.time.toString());
+    if (message.time !== 0) {
+      writer.uint32(32).uint64(message.time);
     }
     return writer;
   },
@@ -298,7 +336,7 @@ export const MintEvent: MessageFns<MintEvent> = {
             break;
           }
 
-          message.time = Long.fromString(reader.uint64().toString(), true);
+          message.time = longToNumber(reader.uint64());
           continue;
         }
       }
@@ -310,6 +348,32 @@ export const MintEvent: MessageFns<MintEvent> = {
     return message;
   },
 
+  fromJSON(object: any): MintEvent {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      token: isSet(object.token) ? globalThis.String(object.token) : "",
+      time: isSet(object.time) ? globalThis.Number(object.time) : 0,
+    };
+  },
+
+  toJSON(message: MintEvent): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    if (message.time !== 0) {
+      obj.time = Math.round(message.time);
+    }
+    return obj;
+  },
+
   create<I extends Exact<DeepPartial<MintEvent>, I>>(base?: I): MintEvent {
     return MintEvent.fromPartial(base ?? ({} as any));
   },
@@ -318,99 +382,53 @@ export const MintEvent: MessageFns<MintEvent> = {
     message.creator = object.creator ?? "";
     message.amount = object.amount ?? "";
     message.token = object.token ?? "";
-    message.time = (object.time !== undefined && object.time !== null) ? Long.fromValue(object.time) : Long.UZERO;
+    message.time = object.time ?? 0;
     return message;
   },
 };
 
 /** Msg defines the Msg service. */
-export type MsgService = typeof MsgService;
-export const MsgService = {
+export interface Msg {
   /**
    * UpdateParams defines a (governance) operation for updating the module
    * parameters. The authority defaults to the x/gov module account.
    */
-  updateParams: {
-    path: "/bettery.funds.v1.Msg/UpdateParams",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgUpdateParams): Buffer => Buffer.from(MsgUpdateParams.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgUpdateParams => MsgUpdateParams.decode(value),
-    responseSerialize: (value: MsgUpdateParamsResponse): Buffer =>
-      Buffer.from(MsgUpdateParamsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgUpdateParamsResponse => MsgUpdateParamsResponse.decode(value),
-  },
+  UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
   /** MintToken defines the MintToken RPC. */
-  mintToken: {
-    path: "/bettery.funds.v1.Msg/MintToken",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: MsgMintToken): Buffer => Buffer.from(MsgMintToken.encode(value).finish()),
-    requestDeserialize: (value: Buffer): MsgMintToken => MsgMintToken.decode(value),
-    responseSerialize: (value: MsgMintTokenResponse): Buffer =>
-      Buffer.from(MsgMintTokenResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): MsgMintTokenResponse => MsgMintTokenResponse.decode(value),
-  },
-} as const;
-
-export interface MsgServer extends UntypedServiceImplementation {
-  /**
-   * UpdateParams defines a (governance) operation for updating the module
-   * parameters. The authority defaults to the x/gov module account.
-   */
-  updateParams: handleUnaryCall<MsgUpdateParams, MsgUpdateParamsResponse>;
-  /** MintToken defines the MintToken RPC. */
-  mintToken: handleUnaryCall<MsgMintToken, MsgMintTokenResponse>;
+  MintToken(request: MsgMintToken): Promise<MsgMintTokenResponse>;
 }
 
-export interface MsgClient extends Client {
-  /**
-   * UpdateParams defines a (governance) operation for updating the module
-   * parameters. The authority defaults to the x/gov module account.
-   */
-  updateParams(
-    request: MsgUpdateParams,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  updateParams(
-    request: MsgUpdateParams,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  updateParams(
-    request: MsgUpdateParams,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgUpdateParamsResponse) => void,
-  ): ClientUnaryCall;
-  /** MintToken defines the MintToken RPC. */
-  mintToken(
-    request: MsgMintToken,
-    callback: (error: ServiceError | null, response: MsgMintTokenResponse) => void,
-  ): ClientUnaryCall;
-  mintToken(
-    request: MsgMintToken,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: MsgMintTokenResponse) => void,
-  ): ClientUnaryCall;
-  mintToken(
-    request: MsgMintToken,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: MsgMintTokenResponse) => void,
-  ): ClientUnaryCall;
+export const MsgServiceName = "bettery.funds.v1.Msg";
+export class MsgClientImpl implements Msg {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || MsgServiceName;
+    this.rpc = rpc;
+    this.UpdateParams = this.UpdateParams.bind(this);
+    this.MintToken = this.MintToken.bind(this);
+  }
+  UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
+    const data = MsgUpdateParams.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateParams", data);
+    return promise.then((data) => MsgUpdateParamsResponse.decode(new BinaryReader(data)));
+  }
+
+  MintToken(request: MsgMintToken): Promise<MsgMintTokenResponse> {
+    const data = MsgMintToken.encode(request).finish();
+    const promise = this.rpc.request(this.service, "MintToken", data);
+    return promise.then((data) => MsgMintTokenResponse.decode(new BinaryReader(data)));
+  }
 }
 
-export const MsgClient = makeGenericClientConstructor(MsgService, "bettery.funds.v1.Msg") as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): MsgClient;
-  service: typeof MsgService;
-  serviceName: string;
-};
+interface Rpc {
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -419,9 +437,26 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
+  fromJSON(object: any): T;
+  toJSON(message: T): unknown;
   create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
   fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
