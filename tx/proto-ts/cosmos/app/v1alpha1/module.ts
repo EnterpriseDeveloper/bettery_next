@@ -151,10 +151,10 @@ export const ModuleDescriptor: MessageFns<ModuleDescriptor> = {
     return message;
   },
 
-  create(base?: DeepPartial<ModuleDescriptor>): ModuleDescriptor {
-    return ModuleDescriptor.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<ModuleDescriptor>, I>>(base?: I): ModuleDescriptor {
+    return ModuleDescriptor.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<ModuleDescriptor>): ModuleDescriptor {
+  fromPartial<I extends Exact<DeepPartial<ModuleDescriptor>, I>>(object: I): ModuleDescriptor {
     const message = createBaseModuleDescriptor();
     message.goImport = object.goImport ?? "";
     message.usePackage = object.usePackage?.map((e) => PackageReference.fromPartial(e)) || [];
@@ -210,10 +210,10 @@ export const PackageReference: MessageFns<PackageReference> = {
     return message;
   },
 
-  create(base?: DeepPartial<PackageReference>): PackageReference {
-    return PackageReference.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<PackageReference>, I>>(base?: I): PackageReference {
+    return PackageReference.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<PackageReference>): PackageReference {
+  fromPartial<I extends Exact<DeepPartial<PackageReference>, I>>(object: I): PackageReference {
     const message = createBasePackageReference();
     message.name = object.name ?? "";
     message.revision = object.revision ?? 0;
@@ -257,10 +257,10 @@ export const MigrateFromInfo: MessageFns<MigrateFromInfo> = {
     return message;
   },
 
-  create(base?: DeepPartial<MigrateFromInfo>): MigrateFromInfo {
-    return MigrateFromInfo.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MigrateFromInfo>, I>>(base?: I): MigrateFromInfo {
+    return MigrateFromInfo.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<MigrateFromInfo>): MigrateFromInfo {
+  fromPartial<I extends Exact<DeepPartial<MigrateFromInfo>, I>>(object: I): MigrateFromInfo {
     const message = createBaseMigrateFromInfo();
     message.module = object.module ?? "";
     return message;
@@ -275,9 +275,13 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
-  create(base?: DeepPartial<T>): T;
-  fromPartial(object: DeepPartial<T>): T;
+  create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
+  fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

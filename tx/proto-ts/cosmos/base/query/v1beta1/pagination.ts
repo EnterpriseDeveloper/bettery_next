@@ -151,10 +151,10 @@ export const PageRequest: MessageFns<PageRequest> = {
     return message;
   },
 
-  create(base?: DeepPartial<PageRequest>): PageRequest {
-    return PageRequest.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<PageRequest>, I>>(base?: I): PageRequest {
+    return PageRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<PageRequest>): PageRequest {
+  fromPartial<I extends Exact<DeepPartial<PageRequest>, I>>(object: I): PageRequest {
     const message = createBasePageRequest();
     message.key = object.key ?? new Uint8Array(0);
     message.offset = (object.offset !== undefined && object.offset !== null)
@@ -214,10 +214,10 @@ export const PageResponse: MessageFns<PageResponse> = {
     return message;
   },
 
-  create(base?: DeepPartial<PageResponse>): PageResponse {
-    return PageResponse.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<PageResponse>, I>>(base?: I): PageResponse {
+    return PageResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<PageResponse>): PageResponse {
+  fromPartial<I extends Exact<DeepPartial<PageResponse>, I>>(object: I): PageResponse {
     const message = createBasePageResponse();
     message.nextKey = object.nextKey ?? new Uint8Array(0);
     message.total = (object.total !== undefined && object.total !== null) ? Long.fromValue(object.total) : Long.UZERO;
@@ -233,9 +233,13 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
-  create(base?: DeepPartial<T>): T;
-  fromPartial(object: DeepPartial<T>): T;
+  create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
+  fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }

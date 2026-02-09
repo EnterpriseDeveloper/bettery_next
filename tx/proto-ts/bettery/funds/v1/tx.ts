@@ -102,10 +102,10 @@ export const MsgUpdateParams: MessageFns<MsgUpdateParams> = {
     return message;
   },
 
-  create(base?: DeepPartial<MsgUpdateParams>): MsgUpdateParams {
-    return MsgUpdateParams.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MsgUpdateParams>, I>>(base?: I): MsgUpdateParams {
+    return MsgUpdateParams.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<MsgUpdateParams>): MsgUpdateParams {
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateParams>, I>>(object: I): MsgUpdateParams {
     const message = createBaseMsgUpdateParams();
     message.authority = object.authority ?? "";
     message.params = (object.params !== undefined && object.params !== null)
@@ -140,10 +140,10 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
     return message;
   },
 
-  create(base?: DeepPartial<MsgUpdateParamsResponse>): MsgUpdateParamsResponse {
-    return MsgUpdateParamsResponse.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MsgUpdateParamsResponse>, I>>(base?: I): MsgUpdateParamsResponse {
+    return MsgUpdateParamsResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial(_: DeepPartial<MsgUpdateParamsResponse>): MsgUpdateParamsResponse {
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateParamsResponse>, I>>(_: I): MsgUpdateParamsResponse {
     const message = createBaseMsgUpdateParamsResponse();
     return message;
   },
@@ -185,10 +185,10 @@ export const MsgMintToken: MessageFns<MsgMintToken> = {
     return message;
   },
 
-  create(base?: DeepPartial<MsgMintToken>): MsgMintToken {
-    return MsgMintToken.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MsgMintToken>, I>>(base?: I): MsgMintToken {
+    return MsgMintToken.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<MsgMintToken>): MsgMintToken {
+  fromPartial<I extends Exact<DeepPartial<MsgMintToken>, I>>(object: I): MsgMintToken {
     const message = createBaseMsgMintToken();
     message.creator = object.creator ?? "";
     return message;
@@ -231,10 +231,10 @@ export const MsgMintTokenResponse: MessageFns<MsgMintTokenResponse> = {
     return message;
   },
 
-  create(base?: DeepPartial<MsgMintTokenResponse>): MsgMintTokenResponse {
-    return MsgMintTokenResponse.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MsgMintTokenResponse>, I>>(base?: I): MsgMintTokenResponse {
+    return MsgMintTokenResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<MsgMintTokenResponse>): MsgMintTokenResponse {
+  fromPartial<I extends Exact<DeepPartial<MsgMintTokenResponse>, I>>(object: I): MsgMintTokenResponse {
     const message = createBaseMsgMintTokenResponse();
     message.status = object.status ?? "";
     return message;
@@ -310,10 +310,10 @@ export const MintEvent: MessageFns<MintEvent> = {
     return message;
   },
 
-  create(base?: DeepPartial<MintEvent>): MintEvent {
-    return MintEvent.fromPartial(base ?? {});
+  create<I extends Exact<DeepPartial<MintEvent>, I>>(base?: I): MintEvent {
+    return MintEvent.fromPartial(base ?? ({} as any));
   },
-  fromPartial(object: DeepPartial<MintEvent>): MintEvent {
+  fromPartial<I extends Exact<DeepPartial<MintEvent>, I>>(object: I): MintEvent {
     const message = createBaseMintEvent();
     message.creator = object.creator ?? "";
     message.amount = object.amount ?? "";
@@ -415,9 +415,13 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;
   decode(input: BinaryReader | Uint8Array, length?: number): T;
-  create(base?: DeepPartial<T>): T;
-  fromPartial(object: DeepPartial<T>): T;
+  create<I extends Exact<DeepPartial<T>, I>>(base?: I): T;
+  fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
