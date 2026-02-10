@@ -28,6 +28,7 @@ export interface MsgUpdateParamsResponse {
 /** MsgMintToken defines the MsgMintToken message. */
 export interface MsgMintToken {
   creator: string;
+  receiver: string;
 }
 
 /** MsgMintTokenResponse defines the MsgMintTokenResponse message. */
@@ -37,6 +38,7 @@ export interface MsgMintTokenResponse {
 
 export interface MintEvent {
   creator: string;
+  receiver: string;
   amount: string;
   token: string;
   time: number;
@@ -164,13 +166,16 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
 };
 
 function createBaseMsgMintToken(): MsgMintToken {
-  return { creator: "" };
+  return { creator: "", receiver: "" };
 }
 
 export const MsgMintToken: MessageFns<MsgMintToken> = {
   encode(message: MsgMintToken, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
+    }
+    if (message.receiver !== "") {
+      writer.uint32(18).string(message.receiver);
     }
     return writer;
   },
@@ -190,6 +195,14 @@ export const MsgMintToken: MessageFns<MsgMintToken> = {
           message.creator = reader.string();
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.receiver = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -200,13 +213,19 @@ export const MsgMintToken: MessageFns<MsgMintToken> = {
   },
 
   fromJSON(object: any): MsgMintToken {
-    return { creator: isSet(object.creator) ? globalThis.String(object.creator) : "" };
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      receiver: isSet(object.receiver) ? globalThis.String(object.receiver) : "",
+    };
   },
 
   toJSON(message: MsgMintToken): unknown {
     const obj: any = {};
     if (message.creator !== "") {
       obj.creator = message.creator;
+    }
+    if (message.receiver !== "") {
+      obj.receiver = message.receiver;
     }
     return obj;
   },
@@ -217,6 +236,7 @@ export const MsgMintToken: MessageFns<MsgMintToken> = {
   fromPartial<I extends Exact<DeepPartial<MsgMintToken>, I>>(object: I): MsgMintToken {
     const message = createBaseMsgMintToken();
     message.creator = object.creator ?? "";
+    message.receiver = object.receiver ?? "";
     return message;
   },
 };
@@ -280,7 +300,7 @@ export const MsgMintTokenResponse: MessageFns<MsgMintTokenResponse> = {
 };
 
 function createBaseMintEvent(): MintEvent {
-  return { creator: "", amount: "", token: "", time: 0 };
+  return { creator: "", receiver: "", amount: "", token: "", time: 0 };
 }
 
 export const MintEvent: MessageFns<MintEvent> = {
@@ -288,14 +308,17 @@ export const MintEvent: MessageFns<MintEvent> = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
+    if (message.receiver !== "") {
+      writer.uint32(18).string(message.receiver);
+    }
     if (message.amount !== "") {
-      writer.uint32(18).string(message.amount);
+      writer.uint32(26).string(message.amount);
     }
     if (message.token !== "") {
-      writer.uint32(26).string(message.token);
+      writer.uint32(34).string(message.token);
     }
     if (message.time !== 0) {
-      writer.uint32(32).uint64(message.time);
+      writer.uint32(40).uint64(message.time);
     }
     return writer;
   },
@@ -320,7 +343,7 @@ export const MintEvent: MessageFns<MintEvent> = {
             break;
           }
 
-          message.amount = reader.string();
+          message.receiver = reader.string();
           continue;
         }
         case 3: {
@@ -328,11 +351,19 @@ export const MintEvent: MessageFns<MintEvent> = {
             break;
           }
 
-          message.token = reader.string();
+          message.amount = reader.string();
           continue;
         }
         case 4: {
-          if (tag !== 32) {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.token = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
             break;
           }
 
@@ -351,6 +382,7 @@ export const MintEvent: MessageFns<MintEvent> = {
   fromJSON(object: any): MintEvent {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      receiver: isSet(object.receiver) ? globalThis.String(object.receiver) : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       token: isSet(object.token) ? globalThis.String(object.token) : "",
       time: isSet(object.time) ? globalThis.Number(object.time) : 0,
@@ -361,6 +393,9 @@ export const MintEvent: MessageFns<MintEvent> = {
     const obj: any = {};
     if (message.creator !== "") {
       obj.creator = message.creator;
+    }
+    if (message.receiver !== "") {
+      obj.receiver = message.receiver;
     }
     if (message.amount !== "") {
       obj.amount = message.amount;
@@ -380,6 +415,7 @@ export const MintEvent: MessageFns<MintEvent> = {
   fromPartial<I extends Exact<DeepPartial<MintEvent>, I>>(object: I): MintEvent {
     const message = createBaseMintEvent();
     message.creator = object.creator ?? "";
+    message.receiver = object.receiver ?? "";
     message.amount = object.amount ?? "";
     message.token = object.token ?? "";
     message.time = object.time ?? 0;

@@ -5,11 +5,53 @@ import Image from "next/image";
 import { Button, PopoverGroup } from "@headlessui/react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import { mintToken } from "../tx/wallet";
+import { useEffect, useState } from "react";
+import { useWalletStore } from "../store/useWalletStore";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { address, balance, isConnected, connect } = useWalletStore();
+
+  const fetchBalance = async () => {
+    const balance = await fetch(`/api/balance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+    });
+    const balanceData = await balance.json();
+    console.log("Fetched balance:", balanceData.balance);
+    return balanceData;
+  };
+
+  useEffect(() => {
+    console.log("Wallet store state changed:");
+    const checkWallet = async () => {
+      await connect("bettery");
+      if (address) {
+        console.log("Connected address:", address);
+        const balanceData = await fetchBalance();
+        useWalletStore.getState().setBalance(balanceData.balance);
+      }
+    };
+    checkWallet();
+  }, [address, connect]);
+
+  const letsMintToken = async () => {
+    if (address) {
+      console.log("Connected address:", address);
+      try {
+        await fetch(`/api/mint`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address }),
+        });
+        const balanceData = await fetchBalance();
+        useWalletStore.getState().setBalance(balanceData.balance);
+      } catch (error) {
+        console.log("Error minting token:", error);
+      }
+    }
+  };
 
   return (
     <header className="bg-gray-900">
@@ -46,14 +88,31 @@ export default function Navbar() {
           <Link className="text-sm/6 font-semibold text-white" href="/create">
             Create
           </Link>
-          <Button
-            className="text-sm/6 font-semibold text-white"
-            onClick={() => {
-              mintToken();
-            }}
-          >
-            Connect Wallet
-          </Button>
+          {isConnected ? (
+            <div className="text-sm/6 font-semibold text-white">
+              <p>Address: {address}</p>
+              <p>Balance: {balance} BET</p>
+              {balance === "0" && (
+                <Button
+                  className="text-sm/6 font-semibold text-white"
+                  onClick={() => {
+                    letsMintToken();
+                  }}
+                >
+                  mint token
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Button
+              className="text-sm/6 font-semibold text-white"
+              onClick={() => {
+                letsMintToken();
+              }}
+            >
+              Connect Wallet
+            </Button>
+          )}
         </PopoverGroup>
       </nav>
       <Dialog
