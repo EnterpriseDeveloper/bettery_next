@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Events } from "./events";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -14,16 +15,24 @@ export const protobufPackage = "bettery.events.v1";
 export interface GenesisState {
   /** params defines all the parameters of the module. */
   params: Params | undefined;
+  eventsList: Events[];
+  eventsCount: number;
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined };
+  return { params: undefined, eventsList: [], eventsCount: 0 };
 }
 
 export const GenesisState: MessageFns<GenesisState> = {
   encode(message: GenesisState, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.params !== undefined) {
       Params.encode(message.params, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.eventsList) {
+      Events.encode(v!, writer.uint32(18).fork()).join();
+    }
+    if (message.eventsCount !== 0) {
+      writer.uint32(24).uint64(message.eventsCount);
     }
     return writer;
   },
@@ -43,6 +52,22 @@ export const GenesisState: MessageFns<GenesisState> = {
           message.params = Params.decode(reader, reader.uint32());
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.eventsList.push(Events.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.eventsCount = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -53,13 +78,31 @@ export const GenesisState: MessageFns<GenesisState> = {
   },
 
   fromJSON(object: any): GenesisState {
-    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
+    return {
+      params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
+      eventsList: globalThis.Array.isArray(object?.eventsList)
+        ? object.eventsList.map((e: any) => Events.fromJSON(e))
+        : globalThis.Array.isArray(object?.events_list)
+        ? object.events_list.map((e: any) => Events.fromJSON(e))
+        : [],
+      eventsCount: isSet(object.eventsCount)
+        ? globalThis.Number(object.eventsCount)
+        : isSet(object.events_count)
+        ? globalThis.Number(object.events_count)
+        : 0,
+    };
   },
 
   toJSON(message: GenesisState): unknown {
     const obj: any = {};
     if (message.params !== undefined) {
       obj.params = Params.toJSON(message.params);
+    }
+    if (message.eventsList?.length) {
+      obj.eventsList = message.eventsList.map((e) => Events.toJSON(e));
+    }
+    if (message.eventsCount !== 0) {
+      obj.eventsCount = Math.round(message.eventsCount);
     }
     return obj;
   },
@@ -72,6 +115,8 @@ export const GenesisState: MessageFns<GenesisState> = {
     message.params = (object.params !== undefined && object.params !== null)
       ? Params.fromPartial(object.params)
       : undefined;
+    message.eventsList = object.eventsList?.map((e) => Events.fromPartial(e)) || [];
+    message.eventsCount = object.eventsCount ?? 0;
     return message;
   },
 };
@@ -87,6 +132,17 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

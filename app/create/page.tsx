@@ -1,7 +1,6 @@
 "use client";
 import Navbar from "@/components/navbar";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { txCreateEvent } from "@/tx/events";
 import { useWalletStore } from "../../store/useWalletStore";
 
@@ -33,7 +32,6 @@ export default function Page() {
     });
     const txResp = await txCreateEvent(signer!, address!, {
       creator: address!,
-      id: uuidv4(), // Generate a unique ID for the event
       question,
       answers,
       end_time: epochEndDate,

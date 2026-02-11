@@ -6,7 +6,7 @@ import {
 } from "@cosmjs/stargate";
 import { MsgCreateEvent } from "./proto-ts/bettery/events/v1/tx";
 import { OfflineAminoSigner } from "@keplr-wallet/types";
-import { CreateEvent } from "@/types/events";
+import { TxCreateEvent } from "@/types/events";
 
 const registry = new Registry(defaultRegistryTypes);
 
@@ -17,7 +17,7 @@ const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_URL as string;
 export const txCreateEvent = async (
   signer: OfflineAminoSigner & OfflineDirectSigner,
   address: string,
-  event: CreateEvent,
+  event: TxCreateEvent,
 ) => {
   try {
     const client = await SigningStargateClient.connectWithSigner(
@@ -30,7 +30,6 @@ export const txCreateEvent = async (
       typeUrl: "/bettery.events.v1.MsgCreateEvent",
       value: MsgCreateEvent.fromPartial({
         creator: address,
-        id: event.id,
         question: event.question,
         answers: event.answers,
         endTime: event.end_time,

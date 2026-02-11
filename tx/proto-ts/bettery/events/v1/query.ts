@@ -6,6 +6,8 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { PageRequest, PageResponse } from "../../../cosmos/base/query/v1beta1/pagination";
+import { Events } from "./events";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -18,6 +20,27 @@ export interface QueryParamsRequest {
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
+}
+
+/** QueryGetEventsRequest defines the QueryGetEventsRequest message. */
+export interface QueryGetEventsRequest {
+  id: number;
+}
+
+/** QueryGetEventsResponse defines the QueryGetEventsResponse message. */
+export interface QueryGetEventsResponse {
+  events: Events | undefined;
+}
+
+/** QueryAllEventsRequest defines the QueryAllEventsRequest message. */
+export interface QueryAllEventsRequest {
+  pagination: PageRequest | undefined;
+}
+
+/** QueryAllEventsResponse defines the QueryAllEventsResponse message. */
+export interface QueryAllEventsResponse {
+  events: Events[];
+  pagination: PageResponse | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -123,10 +146,270 @@ export const QueryParamsResponse: MessageFns<QueryParamsResponse> = {
   },
 };
 
+function createBaseQueryGetEventsRequest(): QueryGetEventsRequest {
+  return { id: 0 };
+}
+
+export const QueryGetEventsRequest: MessageFns<QueryGetEventsRequest> = {
+  encode(message: QueryGetEventsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetEventsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetEventsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetEventsRequest {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: QueryGetEventsRequest): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetEventsRequest>, I>>(base?: I): QueryGetEventsRequest {
+    return QueryGetEventsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetEventsRequest>, I>>(object: I): QueryGetEventsRequest {
+    const message = createBaseQueryGetEventsRequest();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryGetEventsResponse(): QueryGetEventsResponse {
+  return { events: undefined };
+}
+
+export const QueryGetEventsResponse: MessageFns<QueryGetEventsResponse> = {
+  encode(message: QueryGetEventsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.events !== undefined) {
+      Events.encode(message.events, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetEventsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetEventsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events = Events.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetEventsResponse {
+    return { events: isSet(object.events) ? Events.fromJSON(object.events) : undefined };
+  },
+
+  toJSON(message: QueryGetEventsResponse): unknown {
+    const obj: any = {};
+    if (message.events !== undefined) {
+      obj.events = Events.toJSON(message.events);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetEventsResponse>, I>>(base?: I): QueryGetEventsResponse {
+    return QueryGetEventsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetEventsResponse>, I>>(object: I): QueryGetEventsResponse {
+    const message = createBaseQueryGetEventsResponse();
+    message.events = (object.events !== undefined && object.events !== null)
+      ? Events.fromPartial(object.events)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllEventsRequest(): QueryAllEventsRequest {
+  return { pagination: undefined };
+}
+
+export const QueryAllEventsRequest: MessageFns<QueryAllEventsRequest> = {
+  encode(message: QueryAllEventsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryAllEventsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllEventsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllEventsRequest {
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
+  },
+
+  toJSON(message: QueryAllEventsRequest): unknown {
+    const obj: any = {};
+    if (message.pagination !== undefined) {
+      obj.pagination = PageRequest.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryAllEventsRequest>, I>>(base?: I): QueryAllEventsRequest {
+    return QueryAllEventsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryAllEventsRequest>, I>>(object: I): QueryAllEventsRequest {
+    const message = createBaseQueryAllEventsRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllEventsResponse(): QueryAllEventsResponse {
+  return { events: [], pagination: undefined };
+}
+
+export const QueryAllEventsResponse: MessageFns<QueryAllEventsResponse> = {
+  encode(message: QueryAllEventsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.events) {
+      Events.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryAllEventsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllEventsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events.push(Events.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllEventsResponse {
+    return {
+      events: globalThis.Array.isArray(object?.events) ? object.events.map((e: any) => Events.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QueryAllEventsResponse): unknown {
+    const obj: any = {};
+    if (message.events?.length) {
+      obj.events = message.events.map((e) => Events.toJSON(e));
+    }
+    if (message.pagination !== undefined) {
+      obj.pagination = PageResponse.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryAllEventsResponse>, I>>(base?: I): QueryAllEventsResponse {
+    return QueryAllEventsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryAllEventsResponse>, I>>(object: I): QueryAllEventsResponse {
+    const message = createBaseQueryAllEventsResponse();
+    message.events = object.events?.map((e) => Events.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** ListEvents Queries a list of Events items. */
+  GetEvents(request: QueryGetEventsRequest): Promise<QueryGetEventsResponse>;
+  /** ListEvents defines the ListEvents RPC. */
+  ListEvents(request: QueryAllEventsRequest): Promise<QueryAllEventsResponse>;
 }
 
 export const QueryServiceName = "bettery.events.v1.Query";
@@ -137,11 +420,25 @@ export class QueryClientImpl implements Query {
     this.service = opts?.service || QueryServiceName;
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.GetEvents = this.GetEvents.bind(this);
+    this.ListEvents = this.ListEvents.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new BinaryReader(data)));
+  }
+
+  GetEvents(request: QueryGetEventsRequest): Promise<QueryGetEventsResponse> {
+    const data = QueryGetEventsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetEvents", data);
+    return promise.then((data) => QueryGetEventsResponse.decode(new BinaryReader(data)));
+  }
+
+  ListEvents(request: QueryAllEventsRequest): Promise<QueryAllEventsResponse> {
+    const data = QueryAllEventsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListEvents", data);
+    return promise.then((data) => QueryAllEventsResponse.decode(new BinaryReader(data)));
   }
 }
 
@@ -160,6 +457,17 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

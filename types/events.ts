@@ -1,6 +1,5 @@
-export interface CreateEvent {
+export interface TxCreateEvent {
   creator: string;
-  id: string;
   question: string;
   answers: string[];
   end_time: number;
