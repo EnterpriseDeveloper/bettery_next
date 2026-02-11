@@ -28,8 +28,8 @@ export async function GET(req: Request) {
         limit: limit,
         key: nextKey ? nextKey : new Uint8Array(0),
         offset: 0,
-        countTotal: false,
-        reverse: false,
+        countTotal: true,
+        reverse: true,
       },
     });
 
