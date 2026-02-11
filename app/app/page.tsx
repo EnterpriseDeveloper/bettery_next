@@ -67,7 +67,7 @@ export default function Page() {
 
             <div className="space-y-2">
               {ev.answers.map((ans: string, idx: number) => (
-                <label key={idx} className="flex items-center space-x-2">
+                <label key={idx + idx} className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name={`answer-${ev.id}`}
