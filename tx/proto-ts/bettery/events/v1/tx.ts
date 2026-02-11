@@ -28,17 +28,16 @@ export interface MsgUpdateParamsResponse {
 /** MsgCreateEvent defines the MsgCreateEvent message. */
 export interface MsgCreateEvent {
   creator: string;
-  id: number;
+  id: string;
   question: string;
   answers: string[];
-  startTime: number;
   endTime: number;
   category: string;
 }
 
 /** MsgCreateEventResponse defines the MsgCreateEventResponse message. */
 export interface MsgCreateEventResponse {
-  id: number;
+  id: string;
 }
 
 /** MsgCreatePartEvent defines the MsgCreatePartEvent message. */
@@ -192,7 +191,7 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
 };
 
 function createBaseMsgCreateEvent(): MsgCreateEvent {
-  return { creator: "", id: 0, question: "", answers: [], startTime: 0, endTime: 0, category: "" };
+  return { creator: "", id: "", question: "", answers: [], endTime: 0, category: "" };
 }
 
 export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
@@ -200,17 +199,14 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+    if (message.id !== "") {
+      writer.uint32(18).string(message.id);
     }
     if (message.question !== "") {
       writer.uint32(26).string(message.question);
     }
     for (const v of message.answers) {
       writer.uint32(34).string(v!);
-    }
-    if (message.startTime !== 0) {
-      writer.uint32(40).uint64(message.startTime);
     }
     if (message.endTime !== 0) {
       writer.uint32(48).uint64(message.endTime);
@@ -237,11 +233,11 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.id = longToNumber(reader.uint64());
+          message.id = reader.string();
           continue;
         }
         case 3: {
@@ -258,14 +254,6 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
           }
 
           message.answers.push(reader.string());
-          continue;
-        }
-        case 5: {
-          if (tag !== 40) {
-            break;
-          }
-
-          message.startTime = longToNumber(reader.uint64());
           continue;
         }
         case 6: {
@@ -296,14 +284,9 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
   fromJSON(object: any): MsgCreateEvent {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
       question: isSet(object.question) ? globalThis.String(object.question) : "",
       answers: globalThis.Array.isArray(object?.answers) ? object.answers.map((e: any) => globalThis.String(e)) : [],
-      startTime: isSet(object.startTime)
-        ? globalThis.Number(object.startTime)
-        : isSet(object.start_time)
-        ? globalThis.Number(object.start_time)
-        : 0,
       endTime: isSet(object.endTime)
         ? globalThis.Number(object.endTime)
         : isSet(object.end_time)
@@ -318,17 +301,14 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.id !== "") {
+      obj.id = message.id;
     }
     if (message.question !== "") {
       obj.question = message.question;
     }
     if (message.answers?.length) {
       obj.answers = message.answers;
-    }
-    if (message.startTime !== 0) {
-      obj.startTime = Math.round(message.startTime);
     }
     if (message.endTime !== 0) {
       obj.endTime = Math.round(message.endTime);
@@ -345,10 +325,9 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
   fromPartial<I extends Exact<DeepPartial<MsgCreateEvent>, I>>(object: I): MsgCreateEvent {
     const message = createBaseMsgCreateEvent();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = object.id ?? "";
     message.question = object.question ?? "";
     message.answers = object.answers?.map((e) => e) || [];
-    message.startTime = object.startTime ?? 0;
     message.endTime = object.endTime ?? 0;
     message.category = object.category ?? "";
     return message;
@@ -356,13 +335,13 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
 };
 
 function createBaseMsgCreateEventResponse(): MsgCreateEventResponse {
-  return { id: 0 };
+  return { id: "" };
 }
 
 export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
   encode(message: MsgCreateEventResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== 0) {
-      writer.uint32(8).uint64(message.id);
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
     }
     return writer;
   },
@@ -375,11 +354,11 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.id = longToNumber(reader.uint64());
+          message.id = reader.string();
           continue;
         }
       }
@@ -392,13 +371,13 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
   },
 
   fromJSON(object: any): MsgCreateEventResponse {
-    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+    return { id: isSet(object.id) ? globalThis.String(object.id) : "" };
   },
 
   toJSON(message: MsgCreateEventResponse): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.id !== "") {
+      obj.id = message.id;
     }
     return obj;
   },
@@ -408,7 +387,7 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateEventResponse>, I>>(object: I): MsgCreateEventResponse {
     const message = createBaseMsgCreateEventResponse();
-    message.id = object.id ?? 0;
+    message.id = object.id ?? "";
     return message;
   },
 };

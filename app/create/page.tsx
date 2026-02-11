@@ -1,11 +1,14 @@
 "use client";
 import Navbar from "@/components/navbar";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { txCreateEvent } from "@/tx/events";
+import { useWalletStore } from "../../store/useWalletStore";
 
 export default function Page() {
+  const { address, signer } = useWalletStore();
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState(["", ""]);
-  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [category, setCategory] = useState("Market");
 
@@ -19,17 +22,24 @@ export default function Page() {
     setAnswers(newAnswers);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const epochStartDate = new Date(startDate).getTime();
     const epochEndDate = new Date(endDate).getTime();
     console.log({
       question,
       answers,
-      epochStartDate,
       epochEndDate,
       category,
     });
+    const txResp = await txCreateEvent(signer!, address!, {
+      creator: address!,
+      id: uuidv4(), // Generate a unique ID for the event
+      question,
+      answers,
+      end_time: epochEndDate,
+      category,
+    });
+    console.log("Transaction response:", txResp);
   };
 
   return (
@@ -131,18 +141,6 @@ export default function Page() {
                 )}
               </div>
             ))}
-          </div>
-          <div>
-            <label className="block text-sm/6 font-medium text-white">
-              Start Date:
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-              required
-            />
           </div>
           <div>
             <label className="block text-sm/6 font-medium text-white">

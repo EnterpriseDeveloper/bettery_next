@@ -26,7 +26,7 @@ export default function Navbar() {
   useEffect(() => {
     console.log("Wallet store state changed:");
     const checkWallet = async () => {
-      await connect("bettery");
+      await connect();
       if (address) {
         console.log("Connected address:", address);
         const balanceData = await fetchBalance();
