@@ -31,7 +31,7 @@ export default function Page() {
     setSelected((s) => ({ ...s, [eventId]: answerIndex }));
   };
 
-  const handleSubmitAnswer = (eventId: number) => {
+  const handleSubmitAnswer = (eventId: number, amount: string) => {
     const answerIndex = selected[eventId];
     const ev = events.find((e) => e.id === eventId);
     if (ev && (answerIndex === 0 || answerIndex)) {
@@ -45,7 +45,7 @@ export default function Page() {
         address!,
         payload.eventId,
         payload.selectedAnswer,
-        "1000000",
+        amount,
       );
     } else {
       alert("Please select an answer first");

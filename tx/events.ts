@@ -66,7 +66,7 @@ export const txParticipateEvent = async (
     );
     const amountCoin: Coin = {
       denom: "ubet", // TODO: change to actual coin type
-      amount: amount, // string!
+      amount: (Number(amount) * 1000000).toString(), // string!
     };
     const msg = {
       typeUrl: "/bettery.events.v1.MsgCreatePartEvent",

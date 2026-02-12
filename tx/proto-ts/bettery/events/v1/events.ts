@@ -20,7 +20,7 @@ export interface Events {
   startTime: number;
   category: string;
   status: string;
-  totalPool: number;
+  participants: string[];
   winningAnswer: string;
   answerSource: string;
 }
@@ -36,7 +36,7 @@ function createBaseEvents(): Events {
     startTime: 0,
     category: "",
     status: "",
-    totalPool: 0,
+    participants: [],
     winningAnswer: "",
     answerSource: "",
   };
@@ -73,8 +73,8 @@ export const Events: MessageFns<Events> = {
     if (message.status !== "") {
       writer.uint32(74).string(message.status);
     }
-    if (message.totalPool !== 0) {
-      writer.uint32(80).uint64(message.totalPool);
+    for (const v of message.participants) {
+      writer.uint32(82).string(v!);
     }
     if (message.winningAnswer !== "") {
       writer.uint32(90).string(message.winningAnswer);
@@ -175,11 +175,11 @@ export const Events: MessageFns<Events> = {
           continue;
         }
         case 10: {
-          if (tag !== 80) {
+          if (tag !== 82) {
             break;
           }
 
-          message.totalPool = longToNumber(reader.uint64());
+          message.participants.push(reader.string());
           continue;
         }
         case 11: {
@@ -230,11 +230,9 @@ export const Events: MessageFns<Events> = {
         : 0,
       category: isSet(object.category) ? globalThis.String(object.category) : "",
       status: isSet(object.status) ? globalThis.String(object.status) : "",
-      totalPool: isSet(object.totalPool)
-        ? globalThis.Number(object.totalPool)
-        : isSet(object.total_pool)
-        ? globalThis.Number(object.total_pool)
-        : 0,
+      participants: globalThis.Array.isArray(object?.participants)
+        ? object.participants.map((e: any) => globalThis.String(e))
+        : [],
       winningAnswer: isSet(object.winningAnswer)
         ? globalThis.String(object.winningAnswer)
         : isSet(object.winning_answer)
@@ -277,8 +275,8 @@ export const Events: MessageFns<Events> = {
     if (message.status !== "") {
       obj.status = message.status;
     }
-    if (message.totalPool !== 0) {
-      obj.totalPool = Math.round(message.totalPool);
+    if (message.participants?.length) {
+      obj.participants = message.participants;
     }
     if (message.winningAnswer !== "") {
       obj.winningAnswer = message.winningAnswer;
@@ -303,7 +301,7 @@ export const Events: MessageFns<Events> = {
     message.startTime = object.startTime ?? 0;
     message.category = object.category ?? "";
     message.status = object.status ?? "";
-    message.totalPool = object.totalPool ?? 0;
+    message.participants = object.participants?.map((e) => e) || [];
     message.winningAnswer = object.winningAnswer ?? "";
     message.answerSource = object.answerSource ?? "";
     return message;
