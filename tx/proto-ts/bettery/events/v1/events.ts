@@ -15,6 +15,7 @@ export interface Events {
   creator: string;
   question: string;
   answers: string[];
+  answersPool: number[];
   endTime: number;
   startTime: number;
   category: string;
@@ -30,6 +31,7 @@ function createBaseEvents(): Events {
     creator: "",
     question: "",
     answers: [],
+    answersPool: [],
     endTime: 0,
     startTime: 0,
     category: "",
@@ -54,26 +56,31 @@ export const Events: MessageFns<Events> = {
     for (const v of message.answers) {
       writer.uint32(34).string(v!);
     }
+    writer.uint32(42).fork();
+    for (const v of message.answersPool) {
+      writer.uint64(v);
+    }
+    writer.join();
     if (message.endTime !== 0) {
-      writer.uint32(40).uint64(message.endTime);
+      writer.uint32(48).uint64(message.endTime);
     }
     if (message.startTime !== 0) {
-      writer.uint32(48).uint64(message.startTime);
+      writer.uint32(56).uint64(message.startTime);
     }
     if (message.category !== "") {
-      writer.uint32(58).string(message.category);
+      writer.uint32(66).string(message.category);
     }
     if (message.status !== "") {
-      writer.uint32(66).string(message.status);
+      writer.uint32(74).string(message.status);
     }
     if (message.totalPool !== 0) {
-      writer.uint32(72).uint64(message.totalPool);
+      writer.uint32(80).uint64(message.totalPool);
     }
     if (message.winningAnswer !== "") {
-      writer.uint32(82).string(message.winningAnswer);
+      writer.uint32(90).string(message.winningAnswer);
     }
     if (message.answerSource !== "") {
-      writer.uint32(90).string(message.answerSource);
+      writer.uint32(98).string(message.answerSource);
     }
     return writer;
   },
@@ -118,27 +125,37 @@ export const Events: MessageFns<Events> = {
           continue;
         }
         case 5: {
-          if (tag !== 40) {
-            break;
+          if (tag === 40) {
+            message.answersPool.push(longToNumber(reader.uint64()));
+
+            continue;
           }
 
-          message.endTime = longToNumber(reader.uint64());
-          continue;
+          if (tag === 42) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.answersPool.push(longToNumber(reader.uint64()));
+            }
+
+            continue;
+          }
+
+          break;
         }
         case 6: {
           if (tag !== 48) {
             break;
           }
 
-          message.startTime = longToNumber(reader.uint64());
+          message.endTime = longToNumber(reader.uint64());
           continue;
         }
         case 7: {
-          if (tag !== 58) {
+          if (tag !== 56) {
             break;
           }
 
-          message.category = reader.string();
+          message.startTime = longToNumber(reader.uint64());
           continue;
         }
         case 8: {
@@ -146,27 +163,35 @@ export const Events: MessageFns<Events> = {
             break;
           }
 
-          message.status = reader.string();
+          message.category = reader.string();
           continue;
         }
         case 9: {
-          if (tag !== 72) {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 10: {
+          if (tag !== 80) {
             break;
           }
 
           message.totalPool = longToNumber(reader.uint64());
           continue;
         }
-        case 10: {
-          if (tag !== 82) {
+        case 11: {
+          if (tag !== 90) {
             break;
           }
 
           message.winningAnswer = reader.string();
           continue;
         }
-        case 11: {
-          if (tag !== 90) {
+        case 12: {
+          if (tag !== 98) {
             break;
           }
 
@@ -188,6 +213,11 @@ export const Events: MessageFns<Events> = {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
       question: isSet(object.question) ? globalThis.String(object.question) : "",
       answers: globalThis.Array.isArray(object?.answers) ? object.answers.map((e: any) => globalThis.String(e)) : [],
+      answersPool: globalThis.Array.isArray(object?.answersPool)
+        ? object.answersPool.map((e: any) => globalThis.Number(e))
+        : globalThis.Array.isArray(object?.answers_pool)
+        ? object.answers_pool.map((e: any) => globalThis.Number(e))
+        : [],
       endTime: isSet(object.endTime)
         ? globalThis.Number(object.endTime)
         : isSet(object.end_time)
@@ -232,6 +262,9 @@ export const Events: MessageFns<Events> = {
     if (message.answers?.length) {
       obj.answers = message.answers;
     }
+    if (message.answersPool?.length) {
+      obj.answersPool = message.answersPool.map((e) => Math.round(e));
+    }
     if (message.endTime !== 0) {
       obj.endTime = Math.round(message.endTime);
     }
@@ -265,6 +298,7 @@ export const Events: MessageFns<Events> = {
     message.creator = object.creator ?? "";
     message.question = object.question ?? "";
     message.answers = object.answers?.map((e) => e) || [];
+    message.answersPool = object.answersPool?.map((e) => e) || [];
     message.endTime = object.endTime ?? 0;
     message.startTime = object.startTime ?? 0;
     message.category = object.category ?? "";

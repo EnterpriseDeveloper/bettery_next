@@ -8,6 +8,7 @@
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { Events } from "./events";
 import { Params } from "./params";
+import { Participant } from "./participant";
 
 export const protobufPackage = "bettery.events.v1";
 
@@ -17,10 +18,12 @@ export interface GenesisState {
   params: Params | undefined;
   eventsList: Events[];
   eventsCount: number;
+  participantList: Participant[];
+  participantCount: number;
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, eventsList: [], eventsCount: 0 };
+  return { params: undefined, eventsList: [], eventsCount: 0, participantList: [], participantCount: 0 };
 }
 
 export const GenesisState: MessageFns<GenesisState> = {
@@ -33,6 +36,12 @@ export const GenesisState: MessageFns<GenesisState> = {
     }
     if (message.eventsCount !== 0) {
       writer.uint32(24).uint64(message.eventsCount);
+    }
+    for (const v of message.participantList) {
+      Participant.encode(v!, writer.uint32(34).fork()).join();
+    }
+    if (message.participantCount !== 0) {
+      writer.uint32(40).uint64(message.participantCount);
     }
     return writer;
   },
@@ -68,6 +77,22 @@ export const GenesisState: MessageFns<GenesisState> = {
           message.eventsCount = longToNumber(reader.uint64());
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.participantList.push(Participant.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.participantCount = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -90,6 +115,16 @@ export const GenesisState: MessageFns<GenesisState> = {
         : isSet(object.events_count)
         ? globalThis.Number(object.events_count)
         : 0,
+      participantList: globalThis.Array.isArray(object?.participantList)
+        ? object.participantList.map((e: any) => Participant.fromJSON(e))
+        : globalThis.Array.isArray(object?.participant_list)
+        ? object.participant_list.map((e: any) => Participant.fromJSON(e))
+        : [],
+      participantCount: isSet(object.participantCount)
+        ? globalThis.Number(object.participantCount)
+        : isSet(object.participant_count)
+        ? globalThis.Number(object.participant_count)
+        : 0,
     };
   },
 
@@ -104,6 +139,12 @@ export const GenesisState: MessageFns<GenesisState> = {
     if (message.eventsCount !== 0) {
       obj.eventsCount = Math.round(message.eventsCount);
     }
+    if (message.participantList?.length) {
+      obj.participantList = message.participantList.map((e) => Participant.toJSON(e));
+    }
+    if (message.participantCount !== 0) {
+      obj.participantCount = Math.round(message.participantCount);
+    }
     return obj;
   },
 
@@ -117,6 +158,8 @@ export const GenesisState: MessageFns<GenesisState> = {
       : undefined;
     message.eventsList = object.eventsList?.map((e) => Events.fromPartial(e)) || [];
     message.eventsCount = object.eventsCount ?? 0;
+    message.participantList = object.participantList?.map((e) => Participant.fromPartial(e)) || [];
+    message.participantCount = object.participantCount ?? 0;
     return message;
   },
 };

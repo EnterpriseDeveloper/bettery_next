@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -44,9 +45,7 @@ export interface MsgCreatePartEvent {
   creator: string;
   eventId: number;
   answers: string;
-  amount: string;
-  answerIndex: number;
-  token: string;
+  amount: Coin | undefined;
 }
 
 /** MsgCreatePartEventResponse defines the MsgCreatePartEventResponse message. */
@@ -57,7 +56,6 @@ export interface MsgCreatePartEventResponse {
 export interface MsgValidateEvent {
   creator: string;
   eventId: number;
-  answerIndex: number;
   answers: string;
   source: string;
 }
@@ -374,7 +372,7 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
 };
 
 function createBaseMsgCreatePartEvent(): MsgCreatePartEvent {
-  return { creator: "", eventId: 0, answers: "", amount: "", answerIndex: 0, token: "" };
+  return { creator: "", eventId: 0, answers: "", amount: undefined };
 }
 
 export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
@@ -388,14 +386,8 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.answers !== "") {
       writer.uint32(26).string(message.answers);
     }
-    if (message.amount !== "") {
-      writer.uint32(34).string(message.amount);
-    }
-    if (message.answerIndex !== 0) {
-      writer.uint32(40).uint64(message.answerIndex);
-    }
-    if (message.token !== "") {
-      writer.uint32(50).string(message.token);
+    if (message.amount !== undefined) {
+      Coin.encode(message.amount, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -436,23 +428,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
             break;
           }
 
-          message.amount = reader.string();
-          continue;
-        }
-        case 5: {
-          if (tag !== 40) {
-            break;
-          }
-
-          message.answerIndex = longToNumber(reader.uint64());
-          continue;
-        }
-        case 6: {
-          if (tag !== 50) {
-            break;
-          }
-
-          message.token = reader.string();
+          message.amount = Coin.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -473,13 +449,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
         ? globalThis.Number(object.event_id)
         : 0,
       answers: isSet(object.answers) ? globalThis.String(object.answers) : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
-      answerIndex: isSet(object.answerIndex)
-        ? globalThis.Number(object.answerIndex)
-        : isSet(object.answer_index)
-        ? globalThis.Number(object.answer_index)
-        : 0,
-      token: isSet(object.token) ? globalThis.String(object.token) : "",
+      amount: isSet(object.amount) ? Coin.fromJSON(object.amount) : undefined,
     };
   },
 
@@ -494,14 +464,8 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.answers !== "") {
       obj.answers = message.answers;
     }
-    if (message.amount !== "") {
-      obj.amount = message.amount;
-    }
-    if (message.answerIndex !== 0) {
-      obj.answerIndex = Math.round(message.answerIndex);
-    }
-    if (message.token !== "") {
-      obj.token = message.token;
+    if (message.amount !== undefined) {
+      obj.amount = Coin.toJSON(message.amount);
     }
     return obj;
   },
@@ -514,9 +478,9 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     message.creator = object.creator ?? "";
     message.eventId = object.eventId ?? 0;
     message.answers = object.answers ?? "";
-    message.amount = object.amount ?? "";
-    message.answerIndex = object.answerIndex ?? 0;
-    message.token = object.token ?? "";
+    message.amount = (object.amount !== undefined && object.amount !== null)
+      ? Coin.fromPartial(object.amount)
+      : undefined;
     return message;
   },
 };
@@ -565,7 +529,7 @@ export const MsgCreatePartEventResponse: MessageFns<MsgCreatePartEventResponse> 
 };
 
 function createBaseMsgValidateEvent(): MsgValidateEvent {
-  return { creator: "", eventId: 0, answerIndex: 0, answers: "", source: "" };
+  return { creator: "", eventId: 0, answers: "", source: "" };
 }
 
 export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
@@ -576,14 +540,11 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
     if (message.eventId !== 0) {
       writer.uint32(16).uint64(message.eventId);
     }
-    if (message.answerIndex !== 0) {
-      writer.uint32(24).uint64(message.answerIndex);
-    }
     if (message.answers !== "") {
-      writer.uint32(34).string(message.answers);
+      writer.uint32(26).string(message.answers);
     }
     if (message.source !== "") {
-      writer.uint32(42).string(message.source);
+      writer.uint32(34).string(message.source);
     }
     return writer;
   },
@@ -612,23 +573,15 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
           continue;
         }
         case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.answerIndex = longToNumber(reader.uint64());
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
+          if (tag !== 26) {
             break;
           }
 
           message.answers = reader.string();
           continue;
         }
-        case 5: {
-          if (tag !== 42) {
+        case 4: {
+          if (tag !== 34) {
             break;
           }
 
@@ -652,11 +605,6 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
         : isSet(object.event_id)
         ? globalThis.Number(object.event_id)
         : 0,
-      answerIndex: isSet(object.answerIndex)
-        ? globalThis.Number(object.answerIndex)
-        : isSet(object.answer_index)
-        ? globalThis.Number(object.answer_index)
-        : 0,
       answers: isSet(object.answers) ? globalThis.String(object.answers) : "",
       source: isSet(object.source) ? globalThis.String(object.source) : "",
     };
@@ -669,9 +617,6 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
     }
     if (message.eventId !== 0) {
       obj.eventId = Math.round(message.eventId);
-    }
-    if (message.answerIndex !== 0) {
-      obj.answerIndex = Math.round(message.answerIndex);
     }
     if (message.answers !== "") {
       obj.answers = message.answers;
@@ -689,7 +634,6 @@ export const MsgValidateEvent: MessageFns<MsgValidateEvent> = {
     const message = createBaseMsgValidateEvent();
     message.creator = object.creator ?? "";
     message.eventId = object.eventId ?? 0;
-    message.answerIndex = object.answerIndex ?? 0;
     message.answers = object.answers ?? "";
     message.source = object.source ?? "";
     return message;

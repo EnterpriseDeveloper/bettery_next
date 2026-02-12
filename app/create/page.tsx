@@ -1,5 +1,5 @@
 "use client";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/block/navbar";
 import { useState } from "react";
 import { txCreateEvent } from "@/tx/events";
 import { useWalletStore } from "../../store/useWalletStore";

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/button";
-import { Card, CardContent } from "@/components/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Plus,
   TrendingUp,
@@ -19,6 +19,7 @@ import {
   Rocket,
   Target,
 } from "lucide-react";
+import Link from "next/link";
 
 // Prediction Market Card Component
 function PredictionCard({
@@ -239,21 +240,14 @@ export default function Home() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4">
-                <Button
-                  size="lg"
-                  className="bg-purple hover:bg-purple-hover text-white font-semibold px-8 glow-purple"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Event
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-border text-foreground hover:bg-card"
-                >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Explore Markets
-                </Button>
+                <Link href="/app">
+                  <Button
+                    size="lg"
+                    className="bg-purple hover:bg-purple-hover text-white font-semibold px-8 glow-purple"
+                  >
+                    APP
+                  </Button>
+                </Link>
               </div>
 
               {/* Feature tags */}
