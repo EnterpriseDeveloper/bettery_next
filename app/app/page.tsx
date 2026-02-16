@@ -11,6 +11,10 @@ export default function Page() {
   const fetchEvents = async (limit = 10, nextKey?: string) => {
     const params = new URLSearchParams();
     params.set("limit", String(limit));
+    console.log("Fetching events for address:", address);
+    if (address) {
+      params.set("creator", address);
+    }
     if (nextKey) params.set("nextKey", nextKey);
 
     const res = await fetch(`/api/events?${params.toString()}`);
@@ -39,7 +43,6 @@ export default function Page() {
         eventId,
         selectedAnswer: ev.answers[answerIndex],
       };
-      console.log("Picked answer:", payload);
       const txResp = txParticipateEvent(
         signer!,
         address!,
@@ -47,6 +50,7 @@ export default function Page() {
         payload.selectedAnswer,
         amount,
       );
+      console.log(txResp);
     } else {
       alert("Please select an answer first");
     }
@@ -54,7 +58,7 @@ export default function Page() {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [address]);
 
   return (
     <div className="p-4">

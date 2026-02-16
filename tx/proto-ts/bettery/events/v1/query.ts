@@ -10,6 +10,7 @@ import { PageRequest, PageResponse } from "../../../cosmos/base/query/v1beta1/pa
 import { Events } from "./events";
 import { Params } from "./params";
 import { Participant } from "./participant";
+import { Validator } from "./validator";
 
 export const protobufPackage = "bettery.events.v1";
 
@@ -63,6 +64,38 @@ export interface QueryAllParticipantRequest {
 export interface QueryAllParticipantResponse {
   participant: Participant[];
   pagination: PageResponse | undefined;
+}
+
+/** QueryGetValidatorRequest defines the QueryGetValidatorRequest message. */
+export interface QueryGetValidatorRequest {
+  id: number;
+}
+
+/** QueryGetValidatorResponse defines the QueryGetValidatorResponse message. */
+export interface QueryGetValidatorResponse {
+  validator: Validator | undefined;
+}
+
+/** QueryAllValidatorRequest defines the QueryAllValidatorRequest message. */
+export interface QueryAllValidatorRequest {
+  pagination: PageRequest | undefined;
+}
+
+/** QueryAllValidatorResponse defines the QueryAllValidatorResponse message. */
+export interface QueryAllValidatorResponse {
+  validator: Validator[];
+  pagination: PageResponse | undefined;
+}
+
+/** QueryParticipantByIdRequest defines the QueryParticipantByIdRequest message. */
+export interface QueryParticipantByIdRequest {
+  eventId: number;
+  creator: string;
+}
+
+/** QueryParticipantByIdResponse defines the QueryParticipantByIdResponse message. */
+export interface QueryParticipantByIdResponse {
+  participant: Participant | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -682,6 +715,404 @@ export const QueryAllParticipantResponse: MessageFns<QueryAllParticipantResponse
   },
 };
 
+function createBaseQueryGetValidatorRequest(): QueryGetValidatorRequest {
+  return { id: 0 };
+}
+
+export const QueryGetValidatorRequest: MessageFns<QueryGetValidatorRequest> = {
+  encode(message: QueryGetValidatorRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetValidatorRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetValidatorRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetValidatorRequest {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: QueryGetValidatorRequest): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetValidatorRequest>, I>>(base?: I): QueryGetValidatorRequest {
+    return QueryGetValidatorRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetValidatorRequest>, I>>(object: I): QueryGetValidatorRequest {
+    const message = createBaseQueryGetValidatorRequest();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryGetValidatorResponse(): QueryGetValidatorResponse {
+  return { validator: undefined };
+}
+
+export const QueryGetValidatorResponse: MessageFns<QueryGetValidatorResponse> = {
+  encode(message: QueryGetValidatorResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.validator !== undefined) {
+      Validator.encode(message.validator, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetValidatorResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetValidatorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.validator = Validator.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetValidatorResponse {
+    return { validator: isSet(object.validator) ? Validator.fromJSON(object.validator) : undefined };
+  },
+
+  toJSON(message: QueryGetValidatorResponse): unknown {
+    const obj: any = {};
+    if (message.validator !== undefined) {
+      obj.validator = Validator.toJSON(message.validator);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetValidatorResponse>, I>>(base?: I): QueryGetValidatorResponse {
+    return QueryGetValidatorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetValidatorResponse>, I>>(object: I): QueryGetValidatorResponse {
+    const message = createBaseQueryGetValidatorResponse();
+    message.validator = (object.validator !== undefined && object.validator !== null)
+      ? Validator.fromPartial(object.validator)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllValidatorRequest(): QueryAllValidatorRequest {
+  return { pagination: undefined };
+}
+
+export const QueryAllValidatorRequest: MessageFns<QueryAllValidatorRequest> = {
+  encode(message: QueryAllValidatorRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryAllValidatorRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllValidatorRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllValidatorRequest {
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
+  },
+
+  toJSON(message: QueryAllValidatorRequest): unknown {
+    const obj: any = {};
+    if (message.pagination !== undefined) {
+      obj.pagination = PageRequest.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryAllValidatorRequest>, I>>(base?: I): QueryAllValidatorRequest {
+    return QueryAllValidatorRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryAllValidatorRequest>, I>>(object: I): QueryAllValidatorRequest {
+    const message = createBaseQueryAllValidatorRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllValidatorResponse(): QueryAllValidatorResponse {
+  return { validator: [], pagination: undefined };
+}
+
+export const QueryAllValidatorResponse: MessageFns<QueryAllValidatorResponse> = {
+  encode(message: QueryAllValidatorResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.validator) {
+      Validator.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryAllValidatorResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllValidatorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.validator.push(Validator.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllValidatorResponse {
+    return {
+      validator: globalThis.Array.isArray(object?.validator)
+        ? object.validator.map((e: any) => Validator.fromJSON(e))
+        : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QueryAllValidatorResponse): unknown {
+    const obj: any = {};
+    if (message.validator?.length) {
+      obj.validator = message.validator.map((e) => Validator.toJSON(e));
+    }
+    if (message.pagination !== undefined) {
+      obj.pagination = PageResponse.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryAllValidatorResponse>, I>>(base?: I): QueryAllValidatorResponse {
+    return QueryAllValidatorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryAllValidatorResponse>, I>>(object: I): QueryAllValidatorResponse {
+    const message = createBaseQueryAllValidatorResponse();
+    message.validator = object.validator?.map((e) => Validator.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryParticipantByIdRequest(): QueryParticipantByIdRequest {
+  return { eventId: 0, creator: "" };
+}
+
+export const QueryParticipantByIdRequest: MessageFns<QueryParticipantByIdRequest> = {
+  encode(message: QueryParticipantByIdRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.eventId !== 0) {
+      writer.uint32(8).uint64(message.eventId);
+    }
+    if (message.creator !== "") {
+      writer.uint32(18).string(message.creator);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryParticipantByIdRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryParticipantByIdRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.eventId = longToNumber(reader.uint64());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryParticipantByIdRequest {
+    return {
+      eventId: isSet(object.eventId)
+        ? globalThis.Number(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.Number(object.event_id)
+        : 0,
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+    };
+  },
+
+  toJSON(message: QueryParticipantByIdRequest): unknown {
+    const obj: any = {};
+    if (message.eventId !== 0) {
+      obj.eventId = Math.round(message.eventId);
+    }
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryParticipantByIdRequest>, I>>(base?: I): QueryParticipantByIdRequest {
+    return QueryParticipantByIdRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryParticipantByIdRequest>, I>>(object: I): QueryParticipantByIdRequest {
+    const message = createBaseQueryParticipantByIdRequest();
+    message.eventId = object.eventId ?? 0;
+    message.creator = object.creator ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryParticipantByIdResponse(): QueryParticipantByIdResponse {
+  return { participant: undefined };
+}
+
+export const QueryParticipantByIdResponse: MessageFns<QueryParticipantByIdResponse> = {
+  encode(message: QueryParticipantByIdResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.participant !== undefined) {
+      Participant.encode(message.participant, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryParticipantByIdResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryParticipantByIdResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.participant = Participant.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryParticipantByIdResponse {
+    return { participant: isSet(object.participant) ? Participant.fromJSON(object.participant) : undefined };
+  },
+
+  toJSON(message: QueryParticipantByIdResponse): unknown {
+    const obj: any = {};
+    if (message.participant !== undefined) {
+      obj.participant = Participant.toJSON(message.participant);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryParticipantByIdResponse>, I>>(base?: I): QueryParticipantByIdResponse {
+    return QueryParticipantByIdResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryParticipantByIdResponse>, I>>(object: I): QueryParticipantByIdResponse {
+    const message = createBaseQueryParticipantByIdResponse();
+    message.participant = (object.participant !== undefined && object.participant !== null)
+      ? Participant.fromPartial(object.participant)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -694,6 +1125,12 @@ export interface Query {
   GetParticipant(request: QueryGetParticipantRequest): Promise<QueryGetParticipantResponse>;
   /** ListParticipant defines the ListParticipant RPC. */
   ListParticipant(request: QueryAllParticipantRequest): Promise<QueryAllParticipantResponse>;
+  /** ListValidator Queries a list of Validator items. */
+  GetValidator(request: QueryGetValidatorRequest): Promise<QueryGetValidatorResponse>;
+  /** ListValidator defines the ListValidator RPC. */
+  ListValidator(request: QueryAllValidatorRequest): Promise<QueryAllValidatorResponse>;
+  /** ParticipantById Queries a list of ParticipantById items. */
+  ParticipantById(request: QueryParticipantByIdRequest): Promise<QueryParticipantByIdResponse>;
 }
 
 export const QueryServiceName = "bettery.events.v1.Query";
@@ -708,6 +1145,9 @@ export class QueryClientImpl implements Query {
     this.ListEvents = this.ListEvents.bind(this);
     this.GetParticipant = this.GetParticipant.bind(this);
     this.ListParticipant = this.ListParticipant.bind(this);
+    this.GetValidator = this.GetValidator.bind(this);
+    this.ListValidator = this.ListValidator.bind(this);
+    this.ParticipantById = this.ParticipantById.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -737,6 +1177,24 @@ export class QueryClientImpl implements Query {
     const data = QueryAllParticipantRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "ListParticipant", data);
     return promise.then((data) => QueryAllParticipantResponse.decode(new BinaryReader(data)));
+  }
+
+  GetValidator(request: QueryGetValidatorRequest): Promise<QueryGetValidatorResponse> {
+    const data = QueryGetValidatorRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetValidator", data);
+    return promise.then((data) => QueryGetValidatorResponse.decode(new BinaryReader(data)));
+  }
+
+  ListValidator(request: QueryAllValidatorRequest): Promise<QueryAllValidatorResponse> {
+    const data = QueryAllValidatorRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListValidator", data);
+    return promise.then((data) => QueryAllValidatorResponse.decode(new BinaryReader(data)));
+  }
+
+  ParticipantById(request: QueryParticipantByIdRequest): Promise<QueryParticipantByIdResponse> {
+    const data = QueryParticipantByIdRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ParticipantById", data);
+    return promise.then((data) => QueryParticipantByIdResponse.decode(new BinaryReader(data)));
   }
 }
 

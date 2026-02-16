@@ -21,8 +21,6 @@ export interface Events {
   category: string;
   status: string;
   participants: string[];
-  winningAnswer: string;
-  answerSource: string;
 }
 
 function createBaseEvents(): Events {
@@ -37,8 +35,6 @@ function createBaseEvents(): Events {
     category: "",
     status: "",
     participants: [],
-    winningAnswer: "",
-    answerSource: "",
   };
 }
 
@@ -75,12 +71,6 @@ export const Events: MessageFns<Events> = {
     }
     for (const v of message.participants) {
       writer.uint32(82).string(v!);
-    }
-    if (message.winningAnswer !== "") {
-      writer.uint32(90).string(message.winningAnswer);
-    }
-    if (message.answerSource !== "") {
-      writer.uint32(98).string(message.answerSource);
     }
     return writer;
   },
@@ -182,22 +172,6 @@ export const Events: MessageFns<Events> = {
           message.participants.push(reader.string());
           continue;
         }
-        case 11: {
-          if (tag !== 90) {
-            break;
-          }
-
-          message.winningAnswer = reader.string();
-          continue;
-        }
-        case 12: {
-          if (tag !== 98) {
-            break;
-          }
-
-          message.answerSource = reader.string();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -233,16 +207,6 @@ export const Events: MessageFns<Events> = {
       participants: globalThis.Array.isArray(object?.participants)
         ? object.participants.map((e: any) => globalThis.String(e))
         : [],
-      winningAnswer: isSet(object.winningAnswer)
-        ? globalThis.String(object.winningAnswer)
-        : isSet(object.winning_answer)
-        ? globalThis.String(object.winning_answer)
-        : "",
-      answerSource: isSet(object.answerSource)
-        ? globalThis.String(object.answerSource)
-        : isSet(object.answer_source)
-        ? globalThis.String(object.answer_source)
-        : "",
     };
   },
 
@@ -278,12 +242,6 @@ export const Events: MessageFns<Events> = {
     if (message.participants?.length) {
       obj.participants = message.participants;
     }
-    if (message.winningAnswer !== "") {
-      obj.winningAnswer = message.winningAnswer;
-    }
-    if (message.answerSource !== "") {
-      obj.answerSource = message.answerSource;
-    }
     return obj;
   },
 
@@ -302,8 +260,6 @@ export const Events: MessageFns<Events> = {
     message.category = object.category ?? "";
     message.status = object.status ?? "";
     message.participants = object.participants?.map((e) => e) || [];
-    message.winningAnswer = object.winningAnswer ?? "";
-    message.answerSource = object.answerSource ?? "";
     return message;
   },
 };

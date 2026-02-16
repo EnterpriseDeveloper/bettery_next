@@ -9,6 +9,7 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { Events } from "./events";
 import { Params } from "./params";
 import { Participant } from "./participant";
+import { Validator } from "./validator";
 
 export const protobufPackage = "bettery.events.v1";
 
@@ -20,10 +21,20 @@ export interface GenesisState {
   eventsCount: number;
   participantList: Participant[];
   participantCount: number;
+  validatorList: Validator[];
+  validatorCount: number;
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, eventsList: [], eventsCount: 0, participantList: [], participantCount: 0 };
+  return {
+    params: undefined,
+    eventsList: [],
+    eventsCount: 0,
+    participantList: [],
+    participantCount: 0,
+    validatorList: [],
+    validatorCount: 0,
+  };
 }
 
 export const GenesisState: MessageFns<GenesisState> = {
@@ -42,6 +53,12 @@ export const GenesisState: MessageFns<GenesisState> = {
     }
     if (message.participantCount !== 0) {
       writer.uint32(40).uint64(message.participantCount);
+    }
+    for (const v of message.validatorList) {
+      Validator.encode(v!, writer.uint32(50).fork()).join();
+    }
+    if (message.validatorCount !== 0) {
+      writer.uint32(56).uint64(message.validatorCount);
     }
     return writer;
   },
@@ -93,6 +110,22 @@ export const GenesisState: MessageFns<GenesisState> = {
           message.participantCount = longToNumber(reader.uint64());
           continue;
         }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.validatorList.push(Validator.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.validatorCount = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -125,6 +158,16 @@ export const GenesisState: MessageFns<GenesisState> = {
         : isSet(object.participant_count)
         ? globalThis.Number(object.participant_count)
         : 0,
+      validatorList: globalThis.Array.isArray(object?.validatorList)
+        ? object.validatorList.map((e: any) => Validator.fromJSON(e))
+        : globalThis.Array.isArray(object?.validator_list)
+        ? object.validator_list.map((e: any) => Validator.fromJSON(e))
+        : [],
+      validatorCount: isSet(object.validatorCount)
+        ? globalThis.Number(object.validatorCount)
+        : isSet(object.validator_count)
+        ? globalThis.Number(object.validator_count)
+        : 0,
     };
   },
 
@@ -145,6 +188,12 @@ export const GenesisState: MessageFns<GenesisState> = {
     if (message.participantCount !== 0) {
       obj.participantCount = Math.round(message.participantCount);
     }
+    if (message.validatorList?.length) {
+      obj.validatorList = message.validatorList.map((e) => Validator.toJSON(e));
+    }
+    if (message.validatorCount !== 0) {
+      obj.validatorCount = Math.round(message.validatorCount);
+    }
     return obj;
   },
 
@@ -160,6 +209,8 @@ export const GenesisState: MessageFns<GenesisState> = {
     message.eventsCount = object.eventsCount ?? 0;
     message.participantList = object.participantList?.map((e) => Participant.fromPartial(e)) || [];
     message.participantCount = object.participantCount ?? 0;
+    message.validatorList = object.validatorList?.map((e) => Validator.fromPartial(e)) || [];
+    message.validatorCount = object.validatorCount ?? 0;
     return message;
   },
 };
