@@ -23,7 +23,7 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const epochEndDate = new Date(endDate).getTime();
+    const epochEndDate = Math.floor(new Date(endDate).getTime() / 1000);
     console.log({
       question,
       answers,
@@ -145,7 +145,7 @@ export default function Page() {
               End Date:
             </label>
             <input
-              type="date"
+              type="datetime-local"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
