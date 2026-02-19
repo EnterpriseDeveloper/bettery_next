@@ -34,6 +34,10 @@ export interface QueryGetEventsResponse {
   events: Events | undefined;
 }
 
+export interface QueryEventsForValidatorResponse {
+  events: Events[];
+}
+
 /** QueryAllEventsRequest defines the QueryAllEventsRequest message. */
 export interface QueryAllEventsRequest {
   pagination: PageRequest | undefined;
@@ -79,6 +83,10 @@ export interface QueryGetValidatorResponse {
 /** QueryAllValidatorRequest defines the QueryAllValidatorRequest message. */
 export interface QueryAllValidatorRequest {
   pagination: PageRequest | undefined;
+}
+
+/** QueryAllEventsForValidatorRequest defines the QueryAllEventsForValidatorRequest message. */
+export interface QueryAllEventsForValidatorRequest {
 }
 
 /** QueryAllValidatorResponse defines the QueryAllValidatorResponse message. */
@@ -315,6 +323,68 @@ export const QueryGetEventsResponse: MessageFns<QueryGetEventsResponse> = {
     message.events = (object.events !== undefined && object.events !== null)
       ? Events.fromPartial(object.events)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryEventsForValidatorResponse(): QueryEventsForValidatorResponse {
+  return { events: [] };
+}
+
+export const QueryEventsForValidatorResponse: MessageFns<QueryEventsForValidatorResponse> = {
+  encode(message: QueryEventsForValidatorResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.events) {
+      Events.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryEventsForValidatorResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryEventsForValidatorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events.push(Events.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryEventsForValidatorResponse {
+    return {
+      events: globalThis.Array.isArray(object?.events) ? object.events.map((e: any) => Events.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: QueryEventsForValidatorResponse): unknown {
+    const obj: any = {};
+    if (message.events?.length) {
+      obj.events = message.events.map((e) => Events.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryEventsForValidatorResponse>, I>>(base?: I): QueryEventsForValidatorResponse {
+    return QueryEventsForValidatorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryEventsForValidatorResponse>, I>>(
+    object: I,
+  ): QueryEventsForValidatorResponse {
+    const message = createBaseQueryEventsForValidatorResponse();
+    message.events = object.events?.map((e) => Events.fromPartial(e)) || [];
     return message;
   },
 };
@@ -893,6 +963,53 @@ export const QueryAllValidatorRequest: MessageFns<QueryAllValidatorRequest> = {
   },
 };
 
+function createBaseQueryAllEventsForValidatorRequest(): QueryAllEventsForValidatorRequest {
+  return {};
+}
+
+export const QueryAllEventsForValidatorRequest: MessageFns<QueryAllEventsForValidatorRequest> = {
+  encode(_: QueryAllEventsForValidatorRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryAllEventsForValidatorRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllEventsForValidatorRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryAllEventsForValidatorRequest {
+    return {};
+  },
+
+  toJSON(_: QueryAllEventsForValidatorRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryAllEventsForValidatorRequest>, I>>(
+    base?: I,
+  ): QueryAllEventsForValidatorRequest {
+    return QueryAllEventsForValidatorRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryAllEventsForValidatorRequest>, I>>(
+    _: I,
+  ): QueryAllEventsForValidatorRequest {
+    const message = createBaseQueryAllEventsForValidatorRequest();
+    return message;
+  },
+};
+
 function createBaseQueryAllValidatorResponse(): QueryAllValidatorResponse {
   return { validator: [], pagination: undefined };
 }
@@ -1129,6 +1246,8 @@ export interface Query {
   GetValidator(request: QueryGetValidatorRequest): Promise<QueryGetValidatorResponse>;
   /** ListValidator defines the ListValidator RPC. */
   ListValidator(request: QueryAllValidatorRequest): Promise<QueryAllValidatorResponse>;
+  /** ListEventsForValidator defines the ListValidator RPC. */
+  ListEventsForValidator(request: QueryAllEventsForValidatorRequest): Promise<QueryEventsForValidatorResponse>;
   /** ParticipantById Queries a list of ParticipantById items. */
   ParticipantById(request: QueryParticipantByIdRequest): Promise<QueryParticipantByIdResponse>;
 }
@@ -1147,6 +1266,7 @@ export class QueryClientImpl implements Query {
     this.ListParticipant = this.ListParticipant.bind(this);
     this.GetValidator = this.GetValidator.bind(this);
     this.ListValidator = this.ListValidator.bind(this);
+    this.ListEventsForValidator = this.ListEventsForValidator.bind(this);
     this.ParticipantById = this.ParticipantById.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
@@ -1189,6 +1309,12 @@ export class QueryClientImpl implements Query {
     const data = QueryAllValidatorRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "ListValidator", data);
     return promise.then((data) => QueryAllValidatorResponse.decode(new BinaryReader(data)));
+  }
+
+  ListEventsForValidator(request: QueryAllEventsForValidatorRequest): Promise<QueryEventsForValidatorResponse> {
+    const data = QueryAllEventsForValidatorRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListEventsForValidator", data);
+    return promise.then((data) => QueryEventsForValidatorResponse.decode(new BinaryReader(data)));
   }
 
   ParticipantById(request: QueryParticipantByIdRequest): Promise<QueryParticipantByIdResponse> {

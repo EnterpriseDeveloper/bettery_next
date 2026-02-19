@@ -17,10 +17,11 @@ export interface Validator {
   source: string;
   refunded: boolean;
   companyAmount: string;
+  createdAt: number;
 }
 
 function createBaseValidator(): Validator {
-  return { id: 0, eventId: 0, answer: "", source: "", refunded: false, companyAmount: "" };
+  return { id: 0, eventId: 0, answer: "", source: "", refunded: false, companyAmount: "", createdAt: 0 };
 }
 
 export const Validator: MessageFns<Validator> = {
@@ -42,6 +43,9 @@ export const Validator: MessageFns<Validator> = {
     }
     if (message.companyAmount !== "") {
       writer.uint32(50).string(message.companyAmount);
+    }
+    if (message.createdAt !== 0) {
+      writer.uint32(56).uint64(message.createdAt);
     }
     return writer;
   },
@@ -101,6 +105,14 @@ export const Validator: MessageFns<Validator> = {
           message.companyAmount = reader.string();
           continue;
         }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.createdAt = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -126,6 +138,11 @@ export const Validator: MessageFns<Validator> = {
         : isSet(object.company_amount)
         ? globalThis.String(object.company_amount)
         : "",
+      createdAt: isSet(object.createdAt)
+        ? globalThis.Number(object.createdAt)
+        : isSet(object.created_at)
+        ? globalThis.Number(object.created_at)
+        : 0,
     };
   },
 
@@ -149,6 +166,9 @@ export const Validator: MessageFns<Validator> = {
     if (message.companyAmount !== "") {
       obj.companyAmount = message.companyAmount;
     }
+    if (message.createdAt !== 0) {
+      obj.createdAt = Math.round(message.createdAt);
+    }
     return obj;
   },
 
@@ -163,6 +183,7 @@ export const Validator: MessageFns<Validator> = {
     message.source = object.source ?? "";
     message.refunded = object.refunded ?? false;
     message.companyAmount = object.companyAmount ?? "";
+    message.createdAt = object.createdAt ?? 0;
     return message;
   },
 };

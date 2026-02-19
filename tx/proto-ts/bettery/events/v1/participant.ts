@@ -18,10 +18,11 @@ export interface Participant {
   amount: number;
   token: string;
   result: number;
+  createdAt: number;
 }
 
 function createBaseParticipant(): Participant {
-  return { id: 0, creator: "", eventId: 0, answer: "", amount: 0, token: "", result: 0 };
+  return { id: 0, creator: "", eventId: 0, answer: "", amount: 0, token: "", result: 0, createdAt: 0 };
 }
 
 export const Participant: MessageFns<Participant> = {
@@ -46,6 +47,9 @@ export const Participant: MessageFns<Participant> = {
     }
     if (message.result !== 0) {
       writer.uint32(56).uint64(message.result);
+    }
+    if (message.createdAt !== 0) {
+      writer.uint32(64).uint64(message.createdAt);
     }
     return writer;
   },
@@ -113,6 +117,14 @@ export const Participant: MessageFns<Participant> = {
           message.result = longToNumber(reader.uint64());
           continue;
         }
+        case 8: {
+          if (tag !== 64) {
+            break;
+          }
+
+          message.createdAt = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -135,6 +147,11 @@ export const Participant: MessageFns<Participant> = {
       amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
       token: isSet(object.token) ? globalThis.String(object.token) : "",
       result: isSet(object.result) ? globalThis.Number(object.result) : 0,
+      createdAt: isSet(object.createdAt)
+        ? globalThis.Number(object.createdAt)
+        : isSet(object.created_at)
+        ? globalThis.Number(object.created_at)
+        : 0,
     };
   },
 
@@ -161,6 +178,9 @@ export const Participant: MessageFns<Participant> = {
     if (message.result !== 0) {
       obj.result = Math.round(message.result);
     }
+    if (message.createdAt !== 0) {
+      obj.createdAt = Math.round(message.createdAt);
+    }
     return obj;
   },
 
@@ -176,6 +196,7 @@ export const Participant: MessageFns<Participant> = {
     message.amount = object.amount ?? 0;
     message.token = object.token ?? "";
     message.result = object.result ?? 0;
+    message.createdAt = object.createdAt ?? 0;
     return message;
   },
 };
