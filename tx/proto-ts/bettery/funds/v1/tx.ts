@@ -44,6 +44,38 @@ export interface MintEvent {
   time: number;
 }
 
+/** MsgMintFromEvm defines the MsgMintFromEvm message. */
+export interface MsgMintFromEvm {
+  creator: string;
+  evmChainId: number;
+  evmBridge: string;
+  evmToken: string;
+  evmSender: string;
+  cosmosReceiver: string;
+  amount: string;
+  nonce: number;
+  txHash: string;
+  signatures: Uint8Array[];
+}
+
+/** MsgMintFromEvmResponse defines the MsgMintFromEvmResponse message. */
+export interface MsgMintFromEvmResponse {
+}
+
+/** MsgBurnToEvm defines the MsgBurnToEvm message. */
+export interface MsgBurnToEvm {
+  creator: string;
+  evmChainId: number;
+  evmBridge: string;
+  evmToken: string;
+  evmRecipient: string;
+  amount: string;
+}
+
+/** MsgBurnToEvmResponse defines the MsgBurnToEvmResponse message. */
+export interface MsgBurnToEvmResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -423,6 +455,489 @@ export const MintEvent: MessageFns<MintEvent> = {
   },
 };
 
+function createBaseMsgMintFromEvm(): MsgMintFromEvm {
+  return {
+    creator: "",
+    evmChainId: 0,
+    evmBridge: "",
+    evmToken: "",
+    evmSender: "",
+    cosmosReceiver: "",
+    amount: "",
+    nonce: 0,
+    txHash: "",
+    signatures: [],
+  };
+}
+
+export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
+  encode(message: MsgMintFromEvm, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.evmChainId !== 0) {
+      writer.uint32(16).uint64(message.evmChainId);
+    }
+    if (message.evmBridge !== "") {
+      writer.uint32(26).string(message.evmBridge);
+    }
+    if (message.evmToken !== "") {
+      writer.uint32(34).string(message.evmToken);
+    }
+    if (message.evmSender !== "") {
+      writer.uint32(42).string(message.evmSender);
+    }
+    if (message.cosmosReceiver !== "") {
+      writer.uint32(50).string(message.cosmosReceiver);
+    }
+    if (message.amount !== "") {
+      writer.uint32(58).string(message.amount);
+    }
+    if (message.nonce !== 0) {
+      writer.uint32(64).uint64(message.nonce);
+    }
+    if (message.txHash !== "") {
+      writer.uint32(74).string(message.txHash);
+    }
+    for (const v of message.signatures) {
+      writer.uint32(82).bytes(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgMintFromEvm {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgMintFromEvm();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.evmChainId = longToNumber(reader.uint64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.evmBridge = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.evmToken = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.evmSender = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.cosmosReceiver = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 64) {
+            break;
+          }
+
+          message.nonce = longToNumber(reader.uint64());
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.txHash = reader.string();
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.signatures.push(reader.bytes());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgMintFromEvm {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      evmChainId: isSet(object.evmChainId)
+        ? globalThis.Number(object.evmChainId)
+        : isSet(object.evm_chain_id)
+        ? globalThis.Number(object.evm_chain_id)
+        : 0,
+      evmBridge: isSet(object.evmBridge)
+        ? globalThis.String(object.evmBridge)
+        : isSet(object.evm_bridge)
+        ? globalThis.String(object.evm_bridge)
+        : "",
+      evmToken: isSet(object.evmToken)
+        ? globalThis.String(object.evmToken)
+        : isSet(object.evm_token)
+        ? globalThis.String(object.evm_token)
+        : "",
+      evmSender: isSet(object.evmSender)
+        ? globalThis.String(object.evmSender)
+        : isSet(object.evm_sender)
+        ? globalThis.String(object.evm_sender)
+        : "",
+      cosmosReceiver: isSet(object.cosmosReceiver)
+        ? globalThis.String(object.cosmosReceiver)
+        : isSet(object.cosmos_receiver)
+        ? globalThis.String(object.cosmos_receiver)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      nonce: isSet(object.nonce) ? globalThis.Number(object.nonce) : 0,
+      txHash: isSet(object.txHash)
+        ? globalThis.String(object.txHash)
+        : isSet(object.tx_hash)
+        ? globalThis.String(object.tx_hash)
+        : "",
+      signatures: globalThis.Array.isArray(object?.signatures)
+        ? object.signatures.map((e: any) => bytesFromBase64(e))
+        : [],
+    };
+  },
+
+  toJSON(message: MsgMintFromEvm): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.evmChainId !== 0) {
+      obj.evmChainId = Math.round(message.evmChainId);
+    }
+    if (message.evmBridge !== "") {
+      obj.evmBridge = message.evmBridge;
+    }
+    if (message.evmToken !== "") {
+      obj.evmToken = message.evmToken;
+    }
+    if (message.evmSender !== "") {
+      obj.evmSender = message.evmSender;
+    }
+    if (message.cosmosReceiver !== "") {
+      obj.cosmosReceiver = message.cosmosReceiver;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.nonce !== 0) {
+      obj.nonce = Math.round(message.nonce);
+    }
+    if (message.txHash !== "") {
+      obj.txHash = message.txHash;
+    }
+    if (message.signatures?.length) {
+      obj.signatures = message.signatures.map((e) => base64FromBytes(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgMintFromEvm>, I>>(base?: I): MsgMintFromEvm {
+    return MsgMintFromEvm.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgMintFromEvm>, I>>(object: I): MsgMintFromEvm {
+    const message = createBaseMsgMintFromEvm();
+    message.creator = object.creator ?? "";
+    message.evmChainId = object.evmChainId ?? 0;
+    message.evmBridge = object.evmBridge ?? "";
+    message.evmToken = object.evmToken ?? "";
+    message.evmSender = object.evmSender ?? "";
+    message.cosmosReceiver = object.cosmosReceiver ?? "";
+    message.amount = object.amount ?? "";
+    message.nonce = object.nonce ?? 0;
+    message.txHash = object.txHash ?? "";
+    message.signatures = object.signatures?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseMsgMintFromEvmResponse(): MsgMintFromEvmResponse {
+  return {};
+}
+
+export const MsgMintFromEvmResponse: MessageFns<MsgMintFromEvmResponse> = {
+  encode(_: MsgMintFromEvmResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgMintFromEvmResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgMintFromEvmResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgMintFromEvmResponse {
+    return {};
+  },
+
+  toJSON(_: MsgMintFromEvmResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgMintFromEvmResponse>, I>>(base?: I): MsgMintFromEvmResponse {
+    return MsgMintFromEvmResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgMintFromEvmResponse>, I>>(_: I): MsgMintFromEvmResponse {
+    const message = createBaseMsgMintFromEvmResponse();
+    return message;
+  },
+};
+
+function createBaseMsgBurnToEvm(): MsgBurnToEvm {
+  return { creator: "", evmChainId: 0, evmBridge: "", evmToken: "", evmRecipient: "", amount: "" };
+}
+
+export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
+  encode(message: MsgBurnToEvm, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.evmChainId !== 0) {
+      writer.uint32(16).uint64(message.evmChainId);
+    }
+    if (message.evmBridge !== "") {
+      writer.uint32(26).string(message.evmBridge);
+    }
+    if (message.evmToken !== "") {
+      writer.uint32(34).string(message.evmToken);
+    }
+    if (message.evmRecipient !== "") {
+      writer.uint32(42).string(message.evmRecipient);
+    }
+    if (message.amount !== "") {
+      writer.uint32(50).string(message.amount);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgBurnToEvm {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgBurnToEvm();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.evmChainId = longToNumber(reader.uint64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.evmBridge = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.evmToken = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.evmRecipient = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgBurnToEvm {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      evmChainId: isSet(object.evmChainId)
+        ? globalThis.Number(object.evmChainId)
+        : isSet(object.evm_chain_id)
+        ? globalThis.Number(object.evm_chain_id)
+        : 0,
+      evmBridge: isSet(object.evmBridge)
+        ? globalThis.String(object.evmBridge)
+        : isSet(object.evm_bridge)
+        ? globalThis.String(object.evm_bridge)
+        : "",
+      evmToken: isSet(object.evmToken)
+        ? globalThis.String(object.evmToken)
+        : isSet(object.evm_token)
+        ? globalThis.String(object.evm_token)
+        : "",
+      evmRecipient: isSet(object.evmRecipient)
+        ? globalThis.String(object.evmRecipient)
+        : isSet(object.evm_recipient)
+        ? globalThis.String(object.evm_recipient)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+    };
+  },
+
+  toJSON(message: MsgBurnToEvm): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.evmChainId !== 0) {
+      obj.evmChainId = Math.round(message.evmChainId);
+    }
+    if (message.evmBridge !== "") {
+      obj.evmBridge = message.evmBridge;
+    }
+    if (message.evmToken !== "") {
+      obj.evmToken = message.evmToken;
+    }
+    if (message.evmRecipient !== "") {
+      obj.evmRecipient = message.evmRecipient;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgBurnToEvm>, I>>(base?: I): MsgBurnToEvm {
+    return MsgBurnToEvm.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgBurnToEvm>, I>>(object: I): MsgBurnToEvm {
+    const message = createBaseMsgBurnToEvm();
+    message.creator = object.creator ?? "";
+    message.evmChainId = object.evmChainId ?? 0;
+    message.evmBridge = object.evmBridge ?? "";
+    message.evmToken = object.evmToken ?? "";
+    message.evmRecipient = object.evmRecipient ?? "";
+    message.amount = object.amount ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgBurnToEvmResponse(): MsgBurnToEvmResponse {
+  return {};
+}
+
+export const MsgBurnToEvmResponse: MessageFns<MsgBurnToEvmResponse> = {
+  encode(_: MsgBurnToEvmResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgBurnToEvmResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgBurnToEvmResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgBurnToEvmResponse {
+    return {};
+  },
+
+  toJSON(_: MsgBurnToEvmResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgBurnToEvmResponse>, I>>(base?: I): MsgBurnToEvmResponse {
+    return MsgBurnToEvmResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgBurnToEvmResponse>, I>>(_: I): MsgBurnToEvmResponse {
+    const message = createBaseMsgBurnToEvmResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -432,6 +947,10 @@ export interface Msg {
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
   /** MintToken defines the MintToken RPC. */
   MintToken(request: MsgMintToken): Promise<MsgMintTokenResponse>;
+  /** MintFromEvm defines the MintFromEvm RPC. */
+  MintFromEvm(request: MsgMintFromEvm): Promise<MsgMintFromEvmResponse>;
+  /** BurnToEvm defines the BurnToEvm RPC. */
+  BurnToEvm(request: MsgBurnToEvm): Promise<MsgBurnToEvmResponse>;
 }
 
 export const MsgServiceName = "bettery.funds.v1.Msg";
@@ -443,6 +962,8 @@ export class MsgClientImpl implements Msg {
     this.rpc = rpc;
     this.UpdateParams = this.UpdateParams.bind(this);
     this.MintToken = this.MintToken.bind(this);
+    this.MintFromEvm = this.MintFromEvm.bind(this);
+    this.BurnToEvm = this.BurnToEvm.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -455,10 +976,47 @@ export class MsgClientImpl implements Msg {
     const promise = this.rpc.request(this.service, "MintToken", data);
     return promise.then((data) => MsgMintTokenResponse.decode(new BinaryReader(data)));
   }
+
+  MintFromEvm(request: MsgMintFromEvm): Promise<MsgMintFromEvmResponse> {
+    const data = MsgMintFromEvm.encode(request).finish();
+    const promise = this.rpc.request(this.service, "MintFromEvm", data);
+    return promise.then((data) => MsgMintFromEvmResponse.decode(new BinaryReader(data)));
+  }
+
+  BurnToEvm(request: MsgBurnToEvm): Promise<MsgBurnToEvmResponse> {
+    const data = MsgBurnToEvm.encode(request).finish();
+    const promise = this.rpc.request(this.service, "BurnToEvm", data);
+    return promise.then((data) => MsgBurnToEvmResponse.decode(new BinaryReader(data)));
+  }
 }
 
 interface Rpc {
   request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
+}
+
+function bytesFromBase64(b64: string): Uint8Array {
+  if ((globalThis as any).Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  } else {
+    const bin = globalThis.atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; ++i) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  }
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  if ((globalThis as any).Buffer) {
+    return globalThis.Buffer.from(arr).toString("base64");
+  } else {
+    const bin: string[] = [];
+    arr.forEach((byte) => {
+      bin.push(globalThis.String.fromCharCode(byte));
+    });
+    return globalThis.btoa(bin.join(""));
+  }
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
