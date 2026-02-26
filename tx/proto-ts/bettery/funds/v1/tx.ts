@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.funds.v1";
@@ -69,7 +70,7 @@ export interface MsgBurnToEvm {
   evmBridge: string;
   evmToken: string;
   evmRecipient: string;
-  amount: string;
+  amount: Coin | undefined;
 }
 
 /** MsgBurnToEvmResponse defines the MsgBurnToEvmResponse message. */
@@ -740,7 +741,7 @@ export const MsgMintFromEvmResponse: MessageFns<MsgMintFromEvmResponse> = {
 };
 
 function createBaseMsgBurnToEvm(): MsgBurnToEvm {
-  return { creator: "", evmChainId: 0, evmBridge: "", evmToken: "", evmRecipient: "", amount: "" };
+  return { creator: "", evmChainId: 0, evmBridge: "", evmToken: "", evmRecipient: "", amount: undefined };
 }
 
 export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
@@ -760,8 +761,8 @@ export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
     if (message.evmRecipient !== "") {
       writer.uint32(42).string(message.evmRecipient);
     }
-    if (message.amount !== "") {
-      writer.uint32(50).string(message.amount);
+    if (message.amount !== undefined) {
+      Coin.encode(message.amount, writer.uint32(50).fork()).join();
     }
     return writer;
   },
@@ -818,7 +819,7 @@ export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
             break;
           }
 
-          message.amount = reader.string();
+          message.amount = Coin.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -853,7 +854,7 @@ export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
         : isSet(object.evm_recipient)
         ? globalThis.String(object.evm_recipient)
         : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      amount: isSet(object.amount) ? Coin.fromJSON(object.amount) : undefined,
     };
   },
 
@@ -874,8 +875,8 @@ export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
     if (message.evmRecipient !== "") {
       obj.evmRecipient = message.evmRecipient;
     }
-    if (message.amount !== "") {
-      obj.amount = message.amount;
+    if (message.amount !== undefined) {
+      obj.amount = Coin.toJSON(message.amount);
     }
     return obj;
   },
@@ -890,7 +891,9 @@ export const MsgBurnToEvm: MessageFns<MsgBurnToEvm> = {
     message.evmBridge = object.evmBridge ?? "";
     message.evmToken = object.evmToken ?? "";
     message.evmRecipient = object.evmRecipient ?? "";
-    message.amount = object.amount ?? "";
+    message.amount = (object.amount !== undefined && object.amount !== null)
+      ? Coin.fromPartial(object.amount)
+      : undefined;
     return message;
   },
 };

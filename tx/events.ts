@@ -65,7 +65,7 @@ export const txParticipateEvent = async (
       { registry, gasPrice: GasPrice.fromString("0ubet") },
     );
     const amountCoin: Coin = {
-      denom: "ubet", // TODO: change to actual coin type
+      denom: "ubet", // TODO: MOVE TO COSMOS SDK LOGIC
       amount: (Number(amount) * 1000000).toString(), // string!
     };
     const msg = {

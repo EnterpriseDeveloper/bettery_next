@@ -88,6 +88,9 @@ export default function Navbar() {
           <Link className="text-sm/6 font-semibold text-white" href="/create">
             Create
           </Link>
+          <Link className="text-sm/6 font-semibold text-white" href="/bridge">
+            Bridge
+          </Link>
           {isConnected ? (
             <div className="text-sm/6 font-semibold text-white">
               <p>Address: {address}</p>
