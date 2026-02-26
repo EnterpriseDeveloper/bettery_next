@@ -10,7 +10,6 @@ import {
 } from "./proto-ts/bettery/events/v1/tx";
 import { OfflineAminoSigner } from "@keplr-wallet/types";
 import { TxCreateEvent } from "@/types/events";
-import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 
 const registry = new Registry(defaultRegistryTypes);
 
@@ -64,17 +63,13 @@ export const txParticipateEvent = async (
       signer,
       { registry, gasPrice: GasPrice.fromString("0ubet") },
     );
-    const amountCoin: Coin = {
-      denom: "ubet", // TODO: MOVE TO COSMOS SDK LOGIC
-      amount: (Number(amount) * 1000000).toString(), // string!
-    };
     const msg = {
       typeUrl: "/bettery.events.v1.MsgCreatePartEvent",
       value: MsgCreatePartEvent.fromPartial({
         creator: address,
         eventId,
         answers: selectedAnswer,
-        amount: amountCoin,
+        amount: (Number(amount) * 1000000).toString(),
       }),
     };
 

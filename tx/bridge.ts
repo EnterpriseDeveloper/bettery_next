@@ -6,7 +6,6 @@ import {
 } from "@cosmjs/stargate";
 import { OfflineAminoSigner } from "@keplr-wallet/types";
 import { MsgBurnToEvm } from "./proto-ts/bettery/funds/v1/tx";
-import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 
 const registry = new Registry(defaultRegistryTypes);
 registry.register("/bettery.funds.v1.MsgBurnToEvm", MsgBurnToEvm);
@@ -25,10 +24,6 @@ export const txWithdrawal = async (
       signer,
       { registry, gasPrice: GasPrice.fromString("0ubet") },
     );
-    const amountCoin: Coin = {
-      denom: "ubet", // TODO: MOVE TO COSMOS SDK LOGIC
-      amount: (Number(amount) * 1000000).toString(), // string!
-    };
     const msg = {
       typeUrl: "/bettery.funds.v1.MsgBurnToEvm",
       value: MsgBurnToEvm.fromPartial({
@@ -37,7 +32,7 @@ export const txWithdrawal = async (
         evmBridge: "0xdf0d76a719484C74a4CEcD3BA614265d8A017F73", // TODO
         evmToken: receiver,
         evmRecipient: "0xCBC1Ca657D5C06Da86835bbE9901260f09Eb4c3B", // TODO
-        amount: amountCoin,
+        amount: (Number(amount) * 1000000).toString(),
       }),
     };
     const result = await client.signAndBroadcast(address, [msg], "auto");

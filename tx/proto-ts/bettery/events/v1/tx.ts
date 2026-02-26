@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import { Coin } from "../../../cosmos/base/v1beta1/coin";
 import { Params } from "./params";
 
 export const protobufPackage = "bettery.events.v1";
@@ -45,7 +44,7 @@ export interface MsgCreatePartEvent {
   creator: string;
   eventId: number;
   answers: string;
-  amount: Coin | undefined;
+  amount: string;
 }
 
 /** MsgCreatePartEventResponse defines the MsgCreatePartEventResponse message. */
@@ -372,7 +371,7 @@ export const MsgCreateEventResponse: MessageFns<MsgCreateEventResponse> = {
 };
 
 function createBaseMsgCreatePartEvent(): MsgCreatePartEvent {
-  return { creator: "", eventId: 0, answers: "", amount: undefined };
+  return { creator: "", eventId: 0, answers: "", amount: "" };
 }
 
 export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
@@ -386,8 +385,8 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.answers !== "") {
       writer.uint32(26).string(message.answers);
     }
-    if (message.amount !== undefined) {
-      Coin.encode(message.amount, writer.uint32(34).fork()).join();
+    if (message.amount !== "") {
+      writer.uint32(34).string(message.amount);
     }
     return writer;
   },
@@ -428,7 +427,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
             break;
           }
 
-          message.amount = Coin.decode(reader, reader.uint32());
+          message.amount = reader.string();
           continue;
         }
       }
@@ -449,7 +448,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
         ? globalThis.Number(object.event_id)
         : 0,
       answers: isSet(object.answers) ? globalThis.String(object.answers) : "",
-      amount: isSet(object.amount) ? Coin.fromJSON(object.amount) : undefined,
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
     };
   },
 
@@ -464,8 +463,8 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     if (message.answers !== "") {
       obj.answers = message.answers;
     }
-    if (message.amount !== undefined) {
-      obj.amount = Coin.toJSON(message.amount);
+    if (message.amount !== "") {
+      obj.amount = message.amount;
     }
     return obj;
   },
@@ -478,9 +477,7 @@ export const MsgCreatePartEvent: MessageFns<MsgCreatePartEvent> = {
     message.creator = object.creator ?? "";
     message.eventId = object.eventId ?? 0;
     message.answers = object.answers ?? "";
-    message.amount = (object.amount !== undefined && object.amount !== null)
-      ? Coin.fromPartial(object.amount)
-      : undefined;
+    message.amount = object.amount ?? "";
     return message;
   },
 };
