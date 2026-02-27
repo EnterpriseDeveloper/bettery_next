@@ -28,10 +28,10 @@ export const txWithdrawal = async (
       typeUrl: "/bettery.funds.v1.MsgBurnToEvm",
       value: MsgBurnToEvm.fromPartial({
         creator: address,
-        evmChainId: 80001, // TODO
-        evmBridge: "0xdf0d76a719484C74a4CEcD3BA614265d8A017F73", // TODO
-        evmToken: receiver,
-        evmRecipient: "0xCBC1Ca657D5C06Da86835bbE9901260f09Eb4c3B", // TODO
+        evmChainId: process.env.NEXT_PUBLIC_EVM_CHAIN_ID as unknown as number,
+        evmBridge: process.env.NEXT_PUBLIC_EVM_BRIDGE as string,
+        evmToken: process.env.NEXT_PUBLIC_EVM_TOKEN as string,
+        evmRecipient: receiver,
         amount: (Number(amount) * 1000000).toString(),
       }),
     };
