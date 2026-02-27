@@ -38,6 +38,7 @@ export const txCreateEvent = async (
         answers: event.answers,
         endTime: event.end_time,
         category: event.category,
+        roomId: "default", // TODO
       }),
     };
 

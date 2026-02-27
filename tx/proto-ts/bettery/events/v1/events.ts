@@ -21,6 +21,7 @@ export interface Events {
   category: string;
   status: string;
   participants: string[];
+  roomId: string;
 }
 
 function createBaseEvents(): Events {
@@ -35,6 +36,7 @@ function createBaseEvents(): Events {
     category: "",
     status: "",
     participants: [],
+    roomId: "",
   };
 }
 
@@ -71,6 +73,9 @@ export const Events: MessageFns<Events> = {
     }
     for (const v of message.participants) {
       writer.uint32(82).string(v!);
+    }
+    if (message.roomId !== "") {
+      writer.uint32(90).string(message.roomId);
     }
     return writer;
   },
@@ -172,6 +177,14 @@ export const Events: MessageFns<Events> = {
           message.participants.push(reader.string());
           continue;
         }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.roomId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -207,6 +220,11 @@ export const Events: MessageFns<Events> = {
       participants: globalThis.Array.isArray(object?.participants)
         ? object.participants.map((e: any) => globalThis.String(e))
         : [],
+      roomId: isSet(object.roomId)
+        ? globalThis.String(object.roomId)
+        : isSet(object.room_id)
+        ? globalThis.String(object.room_id)
+        : "",
     };
   },
 
@@ -242,6 +260,9 @@ export const Events: MessageFns<Events> = {
     if (message.participants?.length) {
       obj.participants = message.participants;
     }
+    if (message.roomId !== "") {
+      obj.roomId = message.roomId;
+    }
     return obj;
   },
 
@@ -260,6 +281,7 @@ export const Events: MessageFns<Events> = {
     message.category = object.category ?? "";
     message.status = object.status ?? "";
     message.participants = object.participants?.map((e) => e) || [];
+    message.roomId = object.roomId ?? "";
     return message;
   },
 };

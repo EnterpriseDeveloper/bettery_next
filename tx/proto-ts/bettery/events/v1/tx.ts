@@ -32,6 +32,7 @@ export interface MsgCreateEvent {
   answers: string[];
   endTime: number;
   category: string;
+  roomId: string;
 }
 
 /** MsgCreateEventResponse defines the MsgCreateEventResponse message. */
@@ -185,7 +186,7 @@ export const MsgUpdateParamsResponse: MessageFns<MsgUpdateParamsResponse> = {
 };
 
 function createBaseMsgCreateEvent(): MsgCreateEvent {
-  return { creator: "", question: "", answers: [], endTime: 0, category: "" };
+  return { creator: "", question: "", answers: [], endTime: 0, category: "", roomId: "" };
 }
 
 export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
@@ -204,6 +205,9 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     }
     if (message.category !== "") {
       writer.uint32(42).string(message.category);
+    }
+    if (message.roomId !== "") {
+      writer.uint32(50).string(message.roomId);
     }
     return writer;
   },
@@ -255,6 +259,14 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
           message.category = reader.string();
           continue;
         }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.roomId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -275,6 +287,11 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
         ? globalThis.Number(object.end_time)
         : 0,
       category: isSet(object.category) ? globalThis.String(object.category) : "",
+      roomId: isSet(object.roomId)
+        ? globalThis.String(object.roomId)
+        : isSet(object.room_id)
+        ? globalThis.String(object.room_id)
+        : "",
     };
   },
 
@@ -295,6 +312,9 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     if (message.category !== "") {
       obj.category = message.category;
     }
+    if (message.roomId !== "") {
+      obj.roomId = message.roomId;
+    }
     return obj;
   },
 
@@ -308,6 +328,7 @@ export const MsgCreateEvent: MessageFns<MsgCreateEvent> = {
     message.answers = object.answers?.map((e) => e) || [];
     message.endTime = object.endTime ?? 0;
     message.category = object.category ?? "";
+    message.roomId = object.roomId ?? "";
     return message;
   },
 };

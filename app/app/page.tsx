@@ -35,7 +35,7 @@ export default function Page() {
     setSelected((s) => ({ ...s, [eventId]: answerIndex }));
   };
 
-  const handleSubmitAnswer = (eventId: number, amount: string) => {
+  const handleSubmitAnswer = async (eventId: number, amount: string) => {
     const answerIndex = selected[eventId];
     const ev = events.find((e) => e.id === eventId);
     if (ev && (answerIndex === 0 || answerIndex)) {
@@ -43,7 +43,7 @@ export default function Page() {
         eventId,
         selectedAnswer: ev.answers[answerIndex],
       };
-      const txResp = txParticipateEvent(
+      const txResp = await txParticipateEvent(
         signer!,
         address!,
         payload.eventId,
