@@ -55,7 +55,6 @@ export interface MsgMintFromEvm {
   amount: string;
   nonce: number;
   txHash: string;
-  signatures: Uint8Array[];
 }
 
 /** MsgMintFromEvmResponse defines the MsgMintFromEvmResponse message. */
@@ -466,7 +465,6 @@ function createBaseMsgMintFromEvm(): MsgMintFromEvm {
     amount: "",
     nonce: 0,
     txHash: "",
-    signatures: [],
   };
 }
 
@@ -498,9 +496,6 @@ export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
     }
     if (message.txHash !== "") {
       writer.uint32(74).string(message.txHash);
-    }
-    for (const v of message.signatures) {
-      writer.uint32(82).bytes(v!);
     }
     return writer;
   },
@@ -584,14 +579,6 @@ export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
           message.txHash = reader.string();
           continue;
         }
-        case 10: {
-          if (tag !== 82) {
-            break;
-          }
-
-          message.signatures.push(reader.bytes());
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -636,9 +623,6 @@ export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
         : isSet(object.tx_hash)
         ? globalThis.String(object.tx_hash)
         : "",
-      signatures: globalThis.Array.isArray(object?.signatures)
-        ? object.signatures.map((e: any) => bytesFromBase64(e))
-        : [],
     };
   },
 
@@ -671,9 +655,6 @@ export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
     if (message.txHash !== "") {
       obj.txHash = message.txHash;
     }
-    if (message.signatures?.length) {
-      obj.signatures = message.signatures.map((e) => base64FromBytes(e));
-    }
     return obj;
   },
 
@@ -691,7 +672,6 @@ export const MsgMintFromEvm: MessageFns<MsgMintFromEvm> = {
     message.amount = object.amount ?? "";
     message.nonce = object.nonce ?? 0;
     message.txHash = object.txHash ?? "";
-    message.signatures = object.signatures?.map((e) => e) || [];
     return message;
   },
 };
@@ -992,31 +972,6 @@ export class MsgClientImpl implements Msg {
 
 interface Rpc {
   request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
-}
-
-function bytesFromBase64(b64: string): Uint8Array {
-  if ((globalThis as any).Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
-  } else {
-    const bin = globalThis.atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; ++i) {
-      arr[i] = bin.charCodeAt(i);
-    }
-    return arr;
-  }
-}
-
-function base64FromBytes(arr: Uint8Array): string {
-  if ((globalThis as any).Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
-  } else {
-    const bin: string[] = [];
-    arr.forEach((byte) => {
-      bin.push(globalThis.String.fromCharCode(byte));
-    });
-    return globalThis.btoa(bin.join(""));
-  }
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
