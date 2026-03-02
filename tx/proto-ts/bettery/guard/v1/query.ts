@@ -20,6 +20,15 @@ export interface QueryParamsResponse {
   params: Params | undefined;
 }
 
+/** QueryGetOwnerRequest defines the QueryGetOwnerRequest message. */
+export interface QueryGetOwnerRequest {
+}
+
+/** QueryGetOwnerResponse defines the QueryGetOwnerResponse message. */
+export interface QueryGetOwnerResponse {
+  owner: string;
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -123,10 +132,113 @@ export const QueryParamsResponse: MessageFns<QueryParamsResponse> = {
   },
 };
 
+function createBaseQueryGetOwnerRequest(): QueryGetOwnerRequest {
+  return {};
+}
+
+export const QueryGetOwnerRequest: MessageFns<QueryGetOwnerRequest> = {
+  encode(_: QueryGetOwnerRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetOwnerRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOwnerRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryGetOwnerRequest {
+    return {};
+  },
+
+  toJSON(_: QueryGetOwnerRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOwnerRequest>, I>>(base?: I): QueryGetOwnerRequest {
+    return QueryGetOwnerRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOwnerRequest>, I>>(_: I): QueryGetOwnerRequest {
+    const message = createBaseQueryGetOwnerRequest();
+    return message;
+  },
+};
+
+function createBaseQueryGetOwnerResponse(): QueryGetOwnerResponse {
+  return { owner: "" };
+}
+
+export const QueryGetOwnerResponse: MessageFns<QueryGetOwnerResponse> = {
+  encode(message: QueryGetOwnerResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.owner !== "") {
+      writer.uint32(10).string(message.owner);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetOwnerResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOwnerResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.owner = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetOwnerResponse {
+    return { owner: isSet(object.owner) ? globalThis.String(object.owner) : "" };
+  },
+
+  toJSON(message: QueryGetOwnerResponse): unknown {
+    const obj: any = {};
+    if (message.owner !== "") {
+      obj.owner = message.owner;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOwnerResponse>, I>>(base?: I): QueryGetOwnerResponse {
+    return QueryGetOwnerResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOwnerResponse>, I>>(object: I): QueryGetOwnerResponse {
+    const message = createBaseQueryGetOwnerResponse();
+    message.owner = object.owner ?? "";
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** GetOwner Queries a list of GetOwner items. */
+  GetOwner(request: QueryGetOwnerRequest): Promise<QueryGetOwnerResponse>;
 }
 
 export const QueryServiceName = "bettery.guard.v1.Query";
@@ -137,11 +249,18 @@ export class QueryClientImpl implements Query {
     this.service = opts?.service || QueryServiceName;
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.GetOwner = this.GetOwner.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new BinaryReader(data)));
+  }
+
+  GetOwner(request: QueryGetOwnerRequest): Promise<QueryGetOwnerResponse> {
+    const data = QueryGetOwnerRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOwner", data);
+    return promise.then((data) => QueryGetOwnerResponse.decode(new BinaryReader(data)));
   }
 }
 
