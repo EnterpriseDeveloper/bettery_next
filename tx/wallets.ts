@@ -1,4 +1,6 @@
-const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "bettery";
+const chainId = process.env.NEXT_PUBLIC_CHAIN_ID as string;
+const rpcAPI = process.env.NEXT_PUBLIC_RPC_URL as string;
+const restAPI = process.env.NEXT_PUBLIC_REST_URL as string;
 
 export const walletInit = async () => {
   if (!window.keplr) {
@@ -10,9 +12,9 @@ export const walletInit = async () => {
   } else {
     await window.keplr.experimentalSuggestChain({
       chainId,
-      chainName: "Bettery Local",
-      rpc: "http://localhost:26657",
-      rest: "http://localhost:1317",
+      chainName: chainId,
+      rpc: rpcAPI,
+      rest: restAPI,
 
       bip44: {
         coinType: 118,
