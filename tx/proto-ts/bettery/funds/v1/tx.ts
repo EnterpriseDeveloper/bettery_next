@@ -85,6 +85,16 @@ export interface MsgSetCompanyPercent {
 export interface MsgSetCompanyPercentResponse {
 }
 
+/** MsgSetCreatorPercent defines the MsgSetCreatorPercent message. */
+export interface MsgSetCreatorPercent {
+  creator: string;
+  percent: number;
+}
+
+/** MsgSetCreatorPercentResponse defines the MsgSetCreatorPercentResponse message. */
+export interface MsgSetCreatorPercentResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -1047,6 +1057,125 @@ export const MsgSetCompanyPercentResponse: MessageFns<MsgSetCompanyPercentRespon
   },
 };
 
+function createBaseMsgSetCreatorPercent(): MsgSetCreatorPercent {
+  return { creator: "", percent: 0 };
+}
+
+export const MsgSetCreatorPercent: MessageFns<MsgSetCreatorPercent> = {
+  encode(message: MsgSetCreatorPercent, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.percent !== 0) {
+      writer.uint32(16).uint64(message.percent);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgSetCreatorPercent {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetCreatorPercent();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.percent = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSetCreatorPercent {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      percent: isSet(object.percent) ? globalThis.Number(object.percent) : 0,
+    };
+  },
+
+  toJSON(message: MsgSetCreatorPercent): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.percent !== 0) {
+      obj.percent = Math.round(message.percent);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetCreatorPercent>, I>>(base?: I): MsgSetCreatorPercent {
+    return MsgSetCreatorPercent.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetCreatorPercent>, I>>(object: I): MsgSetCreatorPercent {
+    const message = createBaseMsgSetCreatorPercent();
+    message.creator = object.creator ?? "";
+    message.percent = object.percent ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgSetCreatorPercentResponse(): MsgSetCreatorPercentResponse {
+  return {};
+}
+
+export const MsgSetCreatorPercentResponse: MessageFns<MsgSetCreatorPercentResponse> = {
+  encode(_: MsgSetCreatorPercentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgSetCreatorPercentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetCreatorPercentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgSetCreatorPercentResponse {
+    return {};
+  },
+
+  toJSON(_: MsgSetCreatorPercentResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetCreatorPercentResponse>, I>>(base?: I): MsgSetCreatorPercentResponse {
+    return MsgSetCreatorPercentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetCreatorPercentResponse>, I>>(_: I): MsgSetCreatorPercentResponse {
+    const message = createBaseMsgSetCreatorPercentResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -1062,6 +1191,8 @@ export interface Msg {
   BurnToEvm(request: MsgBurnToEvm): Promise<MsgBurnToEvmResponse>;
   /** SetCompanyPercent defines the SetCompanyPercent RPC. */
   SetCompanyPercent(request: MsgSetCompanyPercent): Promise<MsgSetCompanyPercentResponse>;
+  /** SetCreatorPercent defines the SetCreatorPercent RPC. */
+  SetCreatorPercent(request: MsgSetCreatorPercent): Promise<MsgSetCreatorPercentResponse>;
 }
 
 export const MsgServiceName = "bettery.funds.v1.Msg";
@@ -1076,6 +1207,7 @@ export class MsgClientImpl implements Msg {
     this.MintFromEvm = this.MintFromEvm.bind(this);
     this.BurnToEvm = this.BurnToEvm.bind(this);
     this.SetCompanyPercent = this.SetCompanyPercent.bind(this);
+    this.SetCreatorPercent = this.SetCreatorPercent.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -1105,6 +1237,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgSetCompanyPercent.encode(request).finish();
     const promise = this.rpc.request(this.service, "SetCompanyPercent", data);
     return promise.then((data) => MsgSetCompanyPercentResponse.decode(new BinaryReader(data)));
+  }
+
+  SetCreatorPercent(request: MsgSetCreatorPercent): Promise<MsgSetCreatorPercentResponse> {
+    const data = MsgSetCreatorPercent.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SetCreatorPercent", data);
+    return promise.then((data) => MsgSetCreatorPercentResponse.decode(new BinaryReader(data)));
   }
 }
 

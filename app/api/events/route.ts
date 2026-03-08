@@ -1,68 +1,40 @@
-import { QueryClient } from "@cosmjs/stargate";
-import { Tendermint37Client } from "@cosmjs/tendermint-rpc";
-import { QueryClientImpl } from "../../../tx/proto-ts/bettery/events/v1/query";
-import { createProtobufRpcClient } from "@cosmjs/stargate";
 import { NextResponse } from "next/server";
-import { Events } from "@/types/events";
-
-const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+import { prisma } from "@/lib/db";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const limit = Number(searchParams.get("limit") ?? "10");
-  const creator = searchParams.get("creator");
-
-  const nextKeyParam = searchParams.get("nextKey");
-  const nextKey = nextKeyParam
-    ? Uint8Array.from(Buffer.from(nextKeyParam, "base64"))
-    : undefined;
-
   try {
-    const tmClient = await Tendermint37Client.connect(rpcUrl as string);
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get("category") ?? undefined;
+    const status = searchParams.get("status") ?? undefined;
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "10", 10)));
 
-    const queryClient = new QueryClient(tmClient);
-    const rpcClient = createProtobufRpcClient(queryClient);
+    const where: { category?: string; status?: string } = {};
+    if (category) where.category = category;
+    if (status) where.status = status;
 
-    const eventsQuery = new QueryClientImpl(rpcClient);
+    const skip = (page - 1) * limit;
 
-    const res = await eventsQuery.ListEvents({
-      pagination: {
-        limit: limit,
-        key: nextKey ? nextKey : new Uint8Array(0),
-        offset: 0,
-        countTotal: true,
-        reverse: true,
-      },
-    });
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: { bets: true, validators: true },
+      }),
+      prisma.event.count({ where }),
+    ]);
 
-    const events: Events[] = res.events as Events[];
-
-    if (creator) {
-      for (const element of events) {
-        const include = element.participants.includes(creator);
-        if (include) {
-          const partRes = await eventsQuery.ParticipantById({
-            eventId: element.id,
-            creator: creator,
-          });
-          if (partRes.participant) {
-            partRes.participant.amount = Number(
-              partRes.participant.amount / 1e6,
-            );
-            element.participant = partRes.participant;
-          }
-        }
-      }
-    }
-
-    return NextResponse.json({
-      events: events,
-      nextKey: res.pagination?.nextKey
-        ? Buffer.from(res.pagination.nextKey).toString("base64")
-        : null,
-    });
+    return new NextResponse(
+      JSON.stringify(
+        { events, total, page, limit, totalPages: Math.ceil(total / limit) },
+        (_, v) => (typeof v === "bigint" ? v.toString() : v)
+      ),
+      { headers: { "Content-Type": "application/json" } }
+    );
   } catch (e) {
-    console.log(e);
-    return NextResponse.json({ error: e }, { status: 500 });
+    console.error(e);
+    return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }

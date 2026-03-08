@@ -29,6 +29,15 @@ export interface QueryGetPercentResponse {
   percent: number;
 }
 
+/** QueryGetCreatorPercentRequest defines the QueryGetCreatorPercentRequest message. */
+export interface QueryGetCreatorPercentRequest {
+}
+
+/** QueryGetCreatorPercentResponse defines the QueryGetCreatorPercentResponse message. */
+export interface QueryGetCreatorPercentResponse {
+  percent: number;
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -233,12 +242,117 @@ export const QueryGetPercentResponse: MessageFns<QueryGetPercentResponse> = {
   },
 };
 
+function createBaseQueryGetCreatorPercentRequest(): QueryGetCreatorPercentRequest {
+  return {};
+}
+
+export const QueryGetCreatorPercentRequest: MessageFns<QueryGetCreatorPercentRequest> = {
+  encode(_: QueryGetCreatorPercentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetCreatorPercentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetCreatorPercentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryGetCreatorPercentRequest {
+    return {};
+  },
+
+  toJSON(_: QueryGetCreatorPercentRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetCreatorPercentRequest>, I>>(base?: I): QueryGetCreatorPercentRequest {
+    return QueryGetCreatorPercentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetCreatorPercentRequest>, I>>(_: I): QueryGetCreatorPercentRequest {
+    const message = createBaseQueryGetCreatorPercentRequest();
+    return message;
+  },
+};
+
+function createBaseQueryGetCreatorPercentResponse(): QueryGetCreatorPercentResponse {
+  return { percent: 0 };
+}
+
+export const QueryGetCreatorPercentResponse: MessageFns<QueryGetCreatorPercentResponse> = {
+  encode(message: QueryGetCreatorPercentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.percent !== 0) {
+      writer.uint32(8).uint64(message.percent);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryGetCreatorPercentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetCreatorPercentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.percent = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetCreatorPercentResponse {
+    return { percent: isSet(object.percent) ? globalThis.Number(object.percent) : 0 };
+  },
+
+  toJSON(message: QueryGetCreatorPercentResponse): unknown {
+    const obj: any = {};
+    if (message.percent !== 0) {
+      obj.percent = Math.round(message.percent);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetCreatorPercentResponse>, I>>(base?: I): QueryGetCreatorPercentResponse {
+    return QueryGetCreatorPercentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetCreatorPercentResponse>, I>>(
+    object: I,
+  ): QueryGetCreatorPercentResponse {
+    const message = createBaseQueryGetCreatorPercentResponse();
+    message.percent = object.percent ?? 0;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
   /** GetPercent Queries a list of GetPercent items. */
   GetPercent(request: QueryGetPercentRequest): Promise<QueryGetPercentResponse>;
+  /** GetCreatorPercent Queries a list of GetCreatorPercent items. */
+  GetCreatorPercent(request: QueryGetCreatorPercentRequest): Promise<QueryGetCreatorPercentResponse>;
 }
 
 export const QueryServiceName = "bettery.funds.v1.Query";
@@ -250,6 +364,7 @@ export class QueryClientImpl implements Query {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
     this.GetPercent = this.GetPercent.bind(this);
+    this.GetCreatorPercent = this.GetCreatorPercent.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -261,6 +376,12 @@ export class QueryClientImpl implements Query {
     const data = QueryGetPercentRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "GetPercent", data);
     return promise.then((data) => QueryGetPercentResponse.decode(new BinaryReader(data)));
+  }
+
+  GetCreatorPercent(request: QueryGetCreatorPercentRequest): Promise<QueryGetCreatorPercentResponse> {
+    const data = QueryGetCreatorPercentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetCreatorPercent", data);
+    return promise.then((data) => QueryGetCreatorPercentResponse.decode(new BinaryReader(data)));
   }
 }
 
