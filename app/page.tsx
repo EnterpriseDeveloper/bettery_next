@@ -284,9 +284,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trustless by Design */}
-      <section className="py-20 bg-[#070B14]">
-        <div className="max-w-6xl mx-auto px-4">
+      {/* Trustless by Design - video or image background */}
+      <section className="relative py-20 overflow-hidden min-h-[480px]">
+        {/* Background: MP4 video (parallax-style fixed when in view would need client JS) */}
+        <div className="pointer-events-none absolute inset-0 z-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-90"
+            poster="/slide.png"
+          >
+            <source src="/slide.mp4" type="video/mp4" />
+            {/* Optional: add WebM for smaller size where supported */}
+            {/* <source src="/slide.webm" type="video/webm" /> */}
+          </video>
+        </div>
+        {/* Content on top */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <h2
@@ -379,9 +395,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-[#070B14] border-t border-white/8">
-        <div className="max-w-3xl mx-auto px-4 text-center space-y-8">
+      {/* CTA - Predict the future */}
+      <section className="relative py-24 bg-[#070B14] border-t border-white/8 overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            backgroundImage: "url('/betme.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: 0.85,
+          }}
+        />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 text-center space-y-8">
           <h2
             className={styles.heading + " text-[36px] font-semibold text-white"}
           >
@@ -413,7 +439,7 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#9A6BFF] to-[#3CE6FF] flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className={styles.heading + " font-semibold"}>Bettery</span>
+            <span className={styles.heading + " font-semibold"}>BetMe</span>
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
             <Link href="#" className="hover:text-white transition-colors">
