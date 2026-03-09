@@ -61,24 +61,26 @@ export default function Page() {
   }, [address]);
 
   return (
-    <div className="p-4">
+    <div>
       <Navbar />
-      <h1 className="text-2xl font-semibold my-4">Events</h1>
+      <div className="container mx-auto p-4" style={{ marginTop: 40 }}>
+        <h1 className="text-2xl font-semibold my-4">Events</h1>
 
-      <div className="space-y-6">
-        {events.length === 0 && (
-          <p className="text-sm text-gray-500">No events found.</p>
-        )}
+        <div className="space-y-6">
+          {events.length === 0 && (
+            <p className="text-sm text-gray-500">No events found.</p>
+          )}
 
-        {events.map((ev) => (
-          <EventCard
-            key={ev.id}
-            ev={ev}
-            selected={selected}
-            handleSelect={handleSelect}
-            handleSubmitAnswer={handleSubmitAnswer}
-          />
-        ))}
+          {events.map((ev) => (
+            <EventCard
+              key={ev.id}
+              ev={ev}
+              selected={selected}
+              handleSelect={handleSelect}
+              handleSubmitAnswer={handleSubmitAnswer}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

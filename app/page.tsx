@@ -442,19 +442,19 @@ export default function Home() {
             <span className={styles.heading + " font-semibold"}>BetMe</span>
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
-            <Link href="#" className="hover:text-white transition-colors">
+            {/* <Link href="#" className="hover:text-white transition-colors">
               Docs
             </Link>
             <Link href="#" className="hover:text-white transition-colors">
               Community
-            </Link>
+            </Link> */}
             <Link
               href="#"
               className="hover:text-white transition-colors flex items-center gap-1"
             >
               <Github className="w-4 h-4" /> Github
             </Link>
-            <Link
+            {/* <Link
               href="#"
               className="hover:text-white transition-colors flex items-center gap-1"
             >
@@ -465,7 +465,7 @@ export default function Home() {
             </Link>
             <Link href="#" className="hover:text-white transition-colors">
               Terms
-            </Link>
+            </Link> */}
           </div>
         </div>
       </footer>

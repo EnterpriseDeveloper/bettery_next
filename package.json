@@ -12,8 +12,6 @@
     "@cosmjs/proto-signing": "^0.38.1",
     "@cosmjs/stargate": "^0.38.1",
     "@cosmjs/tendermint-rpc": "^0.38.1",
-    "@headlessui/react": "^2.2.9",
-    "@heroicons/react": "^2.2.0",
     "@next/env": "^16.1.6",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.0",
