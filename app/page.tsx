@@ -167,16 +167,16 @@ export default function Home() {
           priority
           className="absolute inset-0 object-cover opacity-80 pointer-events-none"
         />
-        <div className="max-w-6xl mx-auto px-4 relative">
+        <div className="max-w-7xl mx-auto px-4 relative">
           <Link
             href="/"
-            className="flex items-center gap-2 pt-4 md:pt-16 md:pb-16"
+            className="flex items-center gap-2 pt-4 md:pt-12 md:pb-16"
           >
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#9A6BFF] to-[#3CE6FF] flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className={styles.heading + " text-xl font-semibold"}>
-              Bettery
+              BetMe
             </span>
           </Link>
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -401,15 +401,6 @@ export default function Home() {
             >
               Launch App
               <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="#"
-              className={
-                styles.btnSecondary +
-                " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
-              }
-            >
-              Read Docs
             </Link>
           </div>
         </div>
