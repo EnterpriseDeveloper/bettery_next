@@ -1,0 +1,72 @@
+/* Bettery landing – brand styles (no dependency on old app theme) */
+
+.page {
+  --brand-bg: #070b14;
+  --brand-section: #0e1628;
+  --brand-purple: #9a6bff;
+  --brand-cyan: #3ce6ff;
+  --brand-glow-purple: #b58cff;
+  --brand-glow-cyan: #5af0ff;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Headings: Space Grotesk */
+.heading {
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
+}
+
+/* Body: Inter */
+.body {
+  font-family: var(--font-inter), var(--font-geist-sans), sans-serif;
+}
+
+/* Hero title gradient */
+.gradientText {
+  background: linear-gradient(135deg, #9a6bff 0%, #3ce6ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Primary CTA button */
+.btnPrimary {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #9a6bff 0%, #3ce6ff 100%);
+  color: #fff;
+  font-weight: 600;
+  transition: filter 0.2s;
+}
+.btnPrimary:hover {
+  filter: brightness(1.1);
+}
+
+/* Secondary (outline) button */
+.btnSecondary {
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Card: glass style */
+.card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Glow effects */
+.glowPurple {
+  box-shadow: 0 0 20px rgba(181, 140, 255, 0.4);
+}
+.glowCyan {
+  box-shadow: 0 0 20px rgba(90, 240, 255, 0.4);
+}
