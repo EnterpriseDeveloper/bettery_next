@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Plus,
   Wallet,
@@ -28,7 +29,11 @@ function PredictionCard({
 }) {
   return (
     <div className={styles.card + " p-6"}>
-      <h3 className={styles.heading + " text-white text-[20px] font-semibold mb-4"}>
+      <h3
+        className={
+          styles.heading + " text-white text-[20px] font-semibold mb-4"
+        }
+      >
         {question}
       </h3>
       <div className="space-y-3 mb-4">
@@ -78,10 +83,16 @@ function StepCard({
       <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[#9A6BFF]/20 flex items-center justify-center border border-white/5">
         <Icon className="w-6 h-6 text-[#9A6BFF]" />
       </div>
-      <h3 className={styles.heading + " text-white text-[20px] font-semibold mb-2"}>
+      <h3
+        className={
+          styles.heading + " text-white text-[20px] font-semibold mb-2"
+        }
+      >
         {title}
       </h3>
-      <p className={styles.body + " text-[16px] text-white/80"}>{description}</p>
+      <p className={styles.body + " text-[16px] text-white/80"}>
+        {description}
+      </p>
     </div>
   );
 }
@@ -101,10 +112,16 @@ function TrustCard({
         <Icon className="w-5 h-5 text-[#3CE6FF]" />
       </div>
       <div>
-        <h3 className={styles.heading + " text-white text-[20px] font-semibold mb-1"}>
+        <h3
+          className={
+            styles.heading + " text-white text-[20px] font-semibold mb-1"
+          }
+        >
           {title}
         </h3>
-        <p className={styles.body + " text-[16px] text-white/80"}>{description}</p>
+        <p className={styles.body + " text-[16px] text-white/80"}>
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -124,10 +141,16 @@ function ResolutionStep({
       <div className="w-10 h-10 mx-auto mb-4 rounded-full bg-[#9A6BFF]/20 border-2 border-[#9A6BFF] flex items-center justify-center text-[#9A6BFF] font-semibold text-sm">
         {step}
       </div>
-      <h3 className={styles.heading + " text-white text-[20px] font-semibold mb-2"}>
+      <h3
+        className={
+          styles.heading + " text-white text-[20px] font-semibold mb-2"
+        }
+      >
         {title}
       </h3>
-      <p className={styles.body + " text-[16px] text-white/80"}>{description}</p>
+      <p className={styles.body + " text-[16px] text-white/80"}>
+        {description}
+      </p>
     </div>
   );
 }
@@ -135,10 +158,20 @@ function ResolutionStep({
 export default function Home() {
   return (
     <div className={styles.page + " min-h-screen bg-[#070B14] text-white"}>
-      {/* Nav */}
-      <header className="border-b border-white/8 sticky top-0 z-50 bg-[#070B14]/90 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-[#070B14] pb-24 md:pb-32">
+        <Image
+          src="/hero.png"
+          alt=""
+          fill
+          priority
+          className="absolute inset-0 object-cover opacity-80 pointer-events-none"
+        />
+        <div className="max-w-6xl mx-auto px-4 relative">
+          <Link
+            href="/"
+            className="flex items-center gap-2 pt-4 md:pt-16 md:pb-16"
+          >
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#9A6BFF] to-[#3CE6FF] flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
@@ -146,50 +179,37 @@ export default function Home() {
               Bettery
             </span>
           </Link>
-          <nav className="flex items-center gap-8">
-            <Link href="#product" className={styles.body + " text-sm text-white/80 hover:text-white transition-colors"}>
-              Product
-            </Link>
-            <Link href="#how-it-works" className={styles.body + " text-sm text-white/80 hover:text-white transition-colors"}>
-              How it works
-            </Link>
-            <Link href="#" className={styles.body + " text-sm text-white/80 hover:text-white transition-colors"}>
-              Docs
-            </Link>
-            <Link href="#" className={styles.body + " text-sm text-white/80 hover:text-white transition-colors"}>
-              Community
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#070B14] pt-16 pb-24 md:pt-24 md:pb-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#9A6BFF]/10 via-transparent to-[#3CE6FF]/10 pointer-events-none" />
-        <div className="max-w-6xl mx-auto px-4 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <h1 className={styles.heading + " text-[40px] md:text-[56px] lg:text-[64px] font-bold leading-tight"}>
+              <h1
+                className={
+                  styles.heading +
+                  " text-[40px] md:text-[56px] lg:text-[64px] font-bold leading-tight"
+                }
+              >
                 Bet on reality.
                 <br />
                 <span className={styles.gradientText}>Not opinions.</span>
               </h1>
-              <p className={styles.body + " text-[16px] text-white/80 max-w-lg leading-relaxed"}>
-                Create prediction events. Stake real value. AI resolves the truth — blockchain enforces it.
+              <p
+                className={
+                  styles.body +
+                  " text-[16px] text-white/80 max-w-lg leading-relaxed"
+                }
+              >
+                Create prediction events. Stake real value. AI resolves the
+                truth — blockchain enforces it.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/app"
-                  className={styles.btnPrimary + " inline-flex items-center gap-2 px-8 py-3 text-[16px]"}
+                  className={
+                    styles.btnPrimary +
+                    " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
+                  }
                 >
                   Launch App
                   <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="#"
-                  className={styles.btnSecondary + " inline-flex items-center gap-2 px-8 py-3 text-[16px]"}
-                >
-                  Read Docs
                 </Link>
               </div>
               <div className="flex flex-wrap items-center gap-6 text-[16px] text-white/80">
@@ -223,11 +243,20 @@ export default function Home() {
       <section id="how-it-works" className="py-20 bg-[#0E1628]">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-14">
-            <h2 className={styles.heading + " text-[36px] font-semibold text-white mb-4"}>
+            <h2
+              className={
+                styles.heading + " text-[36px] font-semibold text-white mb-4"
+              }
+            >
               How It Works
             </h2>
-            <p className={styles.body + " text-[16px] text-white/80 max-w-2xl mx-auto"}>
-              From creating a prediction to getting paid — everything is automated and trustless.
+            <p
+              className={
+                styles.body + " text-[16px] text-white/80 max-w-2xl mx-auto"
+              }
+            >
+              From creating a prediction to getting paid — everything is
+              automated and trustless.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -260,11 +289,20 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <h2 className={styles.heading + " text-[36px] font-semibold text-white"}>
+              <h2
+                className={
+                  styles.heading + " text-[36px] font-semibold text-white"
+                }
+              >
                 Trustless by Design
               </h2>
-              <p className={styles.body + " text-[16px] text-white/80 leading-relaxed"}>
-                No intermediaries. No human bias. Just verifiable truth enforced by code.
+              <p
+                className={
+                  styles.body + " text-[16px] text-white/80 leading-relaxed"
+                }
+              >
+                No intermediaries. No human bias. Just verifiable truth enforced
+                by code.
               </p>
               <div className="space-y-6">
                 <TrustCard
@@ -300,11 +338,20 @@ export default function Home() {
       <section className="py-20 bg-[#0E1628]">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-14">
-            <h2 className={styles.heading + " text-[36px] font-semibold text-white mb-4"}>
+            <h2
+              className={
+                styles.heading + " text-[36px] font-semibold text-white mb-4"
+              }
+            >
               Resolution Process
             </h2>
-            <p className={styles.body + " text-[16px] text-white/80 max-w-2xl mx-auto"}>
-              Every prediction, every resolution, every payout — permanently recorded and verifiable on-chain.
+            <p
+              className={
+                styles.body + " text-[16px] text-white/80 max-w-2xl mx-auto"
+              }
+            >
+              Every prediction, every resolution, every payout — permanently
+              recorded and verifiable on-chain.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -335,22 +382,32 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24 bg-[#070B14] border-t border-white/8">
         <div className="max-w-3xl mx-auto px-4 text-center space-y-8">
-          <h2 className={styles.heading + " text-[36px] font-semibold text-white"}>
+          <h2
+            className={styles.heading + " text-[36px] font-semibold text-white"}
+          >
             Predict the future.
             <br />
-            <span className={styles.gradientText}>Get rewarded for being right.</span>
+            <span className={styles.gradientText}>
+              Get rewarded for being right.
+            </span>
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/app"
-              className={styles.btnPrimary + " inline-flex items-center gap-2 px-8 py-3 text-[16px]"}
+              className={
+                styles.btnPrimary +
+                " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
+              }
             >
               Launch App
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="#"
-              className={styles.btnSecondary + " inline-flex items-center gap-2 px-8 py-3 text-[16px]"}
+              className={
+                styles.btnSecondary +
+                " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
+              }
             >
               Read Docs
             </Link>
@@ -368,16 +425,30 @@ export default function Home() {
             <span className={styles.heading + " font-semibold"}>Bettery</span>
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
-            <Link href="#" className="hover:text-white transition-colors">Docs</Link>
-            <Link href="#" className="hover:text-white transition-colors">Community</Link>
-            <Link href="#" className="hover:text-white transition-colors flex items-center gap-1">
+            <Link href="#" className="hover:text-white transition-colors">
+              Docs
+            </Link>
+            <Link href="#" className="hover:text-white transition-colors">
+              Community
+            </Link>
+            <Link
+              href="#"
+              className="hover:text-white transition-colors flex items-center gap-1"
+            >
               <Github className="w-4 h-4" /> Github
             </Link>
-            <Link href="#" className="hover:text-white transition-colors flex items-center gap-1">
+            <Link
+              href="#"
+              className="hover:text-white transition-colors flex items-center gap-1"
+            >
               <Twitter className="w-4 h-4" /> Twitter
             </Link>
-            <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <Link href="#" className="hover:text-white transition-colors">
+              Terms
+            </Link>
           </div>
         </div>
       </footer>
