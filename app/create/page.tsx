@@ -1,9 +1,11 @@
 "use client";
+
 import Navbar from "@/components/block/navbar";
 import { useState } from "react";
 import { txCreateEvent } from "@/tx/events";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
+import { CalendarDays, CheckCircle2, Info, PlusCircle } from "lucide-react";
 
 export default function Page() {
   const { address, signer } = useWalletStore();
@@ -13,24 +15,25 @@ export default function Page() {
   const [category, setCategory] = useState("Market");
 
   const handleAddAnswer = () => {
-    setAnswers([...answers, ""]);
+    setAnswers((prev) => [...prev, ""]);
   };
 
   const handleAnswerChange = (index: number, value: string) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = value;
-    setAnswers(newAnswers);
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleRemoveAnswer = (index: number) => {
+    setAnswers((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const epochEndDate = Math.floor(new Date(endDate).getTime() / 1000);
-    console.log({
-      question,
-      answers,
-      epochEndDate,
-      category,
-    });
+
     const txResp = await txCreateEvent(signer!, address!, {
       creator: address!,
       question,
@@ -42,144 +45,169 @@ export default function Page() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#f8f6f6] text-slate-900 dark:bg-[#0a0b10] dark:text-slate-100">
       <Navbar />
-      <div className="container mx-auto p-4" style={{ marginTop: 40 }}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm/6 font-medium text-white">
-              Question:
-            </label>
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-              required
-            />
+
+      <main className="flex justify-center py-10 px-4">
+        <div className="flex w-full max-w-4xl flex-col gap-10">
+          {/* Page header */}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20">
+                Cosmos SDK
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#3CE6FF]/10 text-[#3CE6FF] dark:bg-[#3CE6FF]/20">
+                AI Verified
+              </span>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight lg:text-5xl">
+              Create{" "}
+              <span className="bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] bg-clip-text text-transparent">
+                New Event
+              </span>
+            </h1>
+            <p className="text-base text-slate-600 dark:text-slate-300">
+              Launch a custom decentralized prediction market with automated AI
+              resolution.
+            </p>
           </div>
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <label
-                className="block text-sm/6 font-medium text-white"
-                style={{ position: "relative", top: 15 }}
-              >
-                Answers:
+
+          {/* Form card */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-8 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-white/5"
+          >
+            {/* Question */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                Question
               </label>
-              <button
-                style={{ marginBottom: 10 }}
-                type="button"
-                onClick={handleAddAnswer}
-                className="group flex h-10 w-10 select-none items-center justify-center rounded-lg border border-zinc-100 bg-white leading-8 text-zinc-950 shadow-[0_-1px_0_0px_#d4d4d8_inset,0_0_0_1px_#f4f4f5_inset,0_0.5px_0_1.5px_#fff_inset] hover:bg-zinc-50 hover:via-zinc-900 hover:to-zinc-800 active:shadow-[-1px_0px_1px_0px_#e4e4e7_inset,1px_0px_1px_0px_#e4e4e7_inset,0px_0.125rem_1px_0px_#d4d4d8_inset]"
-                aria-label="Change language"
-              >
-                <span className="flex items-center group-active:[transform:translate3d(0,1px,0)]">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 15 15"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-zinc-950"
-                  >
-                    <path
-                      d="M8 2.75C8 2.47386 7.77614 2.25 7.5 2.25C7.22386 2.25 7 2.47386 7 2.75V7H2.75C2.47386 7 2.25 7.22386 2.25 7.5C2.25 7.77614 2.47386 8 2.75 8H7V12.25C7 12.5261 7.22386 12.75 7.5 12.75C7.77614 12.75 8 12.5261 8 12.25V8H12.25C12.5261 8 12.75 7.77614 12.75 7.5C12.75 7.22386 12.5261 7 12.25 7H8V2.75Z"
-                      fill="currentColor"
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </span>
-              </button>
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                required
+                placeholder="What will be the outcome of the next ETH upgrade?"
+                className="min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 p-4 text-lg text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+              />
+              <p className="text-xs italic text-slate-500 dark:text-slate-400">
+                Our AI will analyze this question for clarity and objective
+                resolvability.
+              </p>
             </div>
 
-            {answers.map((answer, index) => (
-              <div
-                key={index}
-                className="flex space-x-2"
-                style={{ marginBottom: 15 }}
-              >
-                <input
-                  type="text"
-                  value={answer}
-                  onChange={(e) => handleAnswerChange(index, e.target.value)}
-                  className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                  required
-                />
-                {answers.length > 2 && (
-                  <button
-                    onClick={() =>
-                      setAnswers(answers.filter((_, i) => i !== index))
-                    }
-                    className="group bg-red-500 relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md px-2 font-medium text-neutral-200 transition hover:scale-110"
+            {/* Category + End date */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  Category
+                </label>
+                <div className="relative">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
                   >
-                    <svg
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#000000"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 3l18 18" />
-                      <path d="M4 7h3m4 0h9" />
-                      <path d="M10 11l0 6" />
-                      <path d="M14 14l0 3" />
-                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l.077 -.923" />
-                      <path d="M18.384 14.373l.616 -7.373" />
-                      <path d="M9 5v-1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                    </svg>
-                    <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">
-                      <div className="relative h-full w-8 bg-white/20"></div>
-                    </div>
-                  </button>
-                )}
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
+                    ▾
+                  </span>
+                </div>
               </div>
-            ))}
-          </div>
-          <div>
-            <label className="block text-sm/6 font-medium text-white">
-              End Date:
-            </label>
-            <input
-              type="datetime-local"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-              required
-            />
-          </div>
-          <div>
-            <label className="blblock text-sm/6 font-medium text-whiteock">
-              Category:
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-            >
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="group bg-blue-500 relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md  px-6 font-medium text-neutral-200 transition hover:scale-110"
-          >
-            <span>Create event</span>
-            <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">
-              <div className="relative h-full w-8 bg-white/20"></div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  End date
+                </label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    required
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                  />
+                  <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                </div>
+              </div>
             </div>
-          </button>
-        </form>
-      </div>
+
+            {/* Answers */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  Possible answers
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddAnswer}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#3CE6FF] hover:underline"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  Add option
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {answers.map((answer, index) => (
+                  <div key={index} className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={answer}
+                      onChange={(e) =>
+                        handleAnswerChange(index, e.target.value)
+                      }
+                      required
+                      placeholder={`Option ${index + 1}`}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-[#3CE6FF] focus:ring-2 focus:ring-[#3CE6FF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                    />
+                    {answers.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAnswer(index)}
+                        className="ml-2 text-xs font-semibold text-slate-400 hover:text-red-400"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* AI info */}
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 dark:border-white/20 dark:bg-white/5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20">
+                  <Info className="h-4 w-4" />
+                </div>
+                <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                  <span className="font-bold text-slate-800 dark:text-slate-100">
+                    Advanced AI Resolution:
+                  </span>{" "}
+                  This market will use real-time data feeds and LLM verification
+                  to settle. A protocol fee of 0.5% will be applied to the total
+                  liquidity pool.
+                </div>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] p-4 text-lg font-bold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Create Prediction Market
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

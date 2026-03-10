@@ -2,13 +2,39 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
 
+type Theme = "light" | "dark";
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>("dark");
   const { address, balance, isConnected, connect } = useWalletStore();
+
+  // Initialize theme from localStorage or prefers-color-scheme
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("theme") as Theme | null;
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initial: Theme = stored ?? (prefersDark ? "dark" : "light");
+    setTheme(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+      document.documentElement.classList.toggle("dark", next === "dark");
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("theme", next);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const onEscape = (e: KeyboardEvent) => {
@@ -79,7 +105,20 @@ export default function Navbar() {
             />
           </Link>
         </div>
-        <div className="flex lg:hidden">
+        {/* Mobile menu toggle */}
+        <div className="flex items-center gap-3 lg:hidden">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </button>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
@@ -89,7 +128,7 @@ export default function Navbar() {
             <Menu aria-hidden className="size-6" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:gap-x-12">
+        <div className="hidden lg:flex lg:items-center lg:gap-x-8">
           <Link className="text-sm/6 font-semibold text-white" href="/app">
             Events
           </Link>
@@ -99,29 +138,33 @@ export default function Navbar() {
           <Link className="text-sm/6 font-semibold text-white" href="/bridge">
             Bridge
           </Link>
-          {isConnected ? (
-            <div className="text-sm/6 font-semibold text-white">
-              <p>Address: {address}</p>
-              <p>Balance: {balance} BET</p>
-              {balance === "0" && (
-                <button
-                  type="button"
-                  className="text-sm/6 font-semibold text-white"
-                  onClick={() => letsMintToken()}
-                >
-                  mint token
-                </button>
-              )}
-            </div>
-          ) : (
+          <div className="flex items-center gap-4">
+            {isConnected ? (
+              <div className="text-xs font-semibold text-white text-right">
+                <p className="truncate max-w-[180px]">Address: {address}</p>
+                <p>Balance: {balance} BET</p>
+              </div>
+            ) : null}
             <button
               type="button"
-              className="text-sm/6 font-semibold text-white"
+              className="rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition"
               onClick={() => letsMintToken()}
             >
-              Connect Wallet
+              {isConnected ? "Mint BET" : "Connect Wallet"}
             </button>
-          )}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 
