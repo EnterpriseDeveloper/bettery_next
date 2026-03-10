@@ -3,6 +3,7 @@ import Navbar from "@/components/block/navbar";
 import { useState } from "react";
 import { txCreateEvent } from "@/tx/events";
 import { useWalletStore } from "../../store/useWalletStore";
+import { categories } from "@/config/config";
 
 export default function Page() {
   const { address, signer } = useWalletStore();
@@ -161,9 +162,11 @@ export default function Page() {
               onChange={(e) => setCategory(e.target.value)}
               className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
             >
-              <option value="Market">Market</option>
-              <option value="Sport">Sport</option>
-              <option value="Politics">Politics</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
           <button
