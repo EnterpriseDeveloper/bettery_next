@@ -1,6 +1,7 @@
 "use client";
 
 import Navbar from "@/components/block/navbar";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { txCreateEvent } from "@/tx/events";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -8,11 +9,16 @@ import { categories } from "@/config/config";
 import { Info, PlusCircle } from "lucide-react";
 
 export default function Page() {
+  const router = useRouter();
   const { address, signer } = useWalletStore();
   const [question, setQuestion] = useState("");
+  const [questionError, setQuestionError] = useState("");
   const [answers, setAnswers] = useState(["", ""]);
+  const [answersError, setAnswersError] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [endDateError, setEndDateError] = useState("");
   const [category, setCategory] = useState("Market");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAddAnswer = () => {
     setAnswers((prev) => [...prev, ""]);
@@ -22,6 +28,19 @@ export default function Page() {
     setAnswers((prev) => {
       const next = [...prev];
       next[index] = value;
+
+      // Live validation for duplicates / empties
+      const normalized = next.map((a) => a.trim()).filter((a) => a !== "");
+      if (normalized.length < 2) {
+        setAnswersError("At least two answers are required");
+      } else {
+        const lower = normalized.map((a) => a.toLowerCase());
+        const unique = new Set(lower);
+        setAnswersError(
+          unique.size !== lower.length ? "Answers must be unique" : "",
+        );
+      }
+
       return next;
     });
   };
@@ -32,16 +51,64 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const epochEndDate = Math.floor(new Date(endDate).getTime() / 1000);
 
-    const txResp = await txCreateEvent(signer!, address!, {
-      creator: address!,
-      question,
-      answers,
-      end_time: epochEndDate,
-      category,
-    });
-    console.log("Transaction response:", txResp);
+    let hasError = false;
+
+    if (!question.trim()) {
+      setQuestionError("Question is required");
+      hasError = true;
+    }
+
+    if (!endDate) {
+      setEndDateError("End date is required");
+      hasError = true;
+    } else {
+      const endMs = new Date(endDate).getTime();
+      if (!Number.isFinite(endMs) || endMs <= Date.now()) {
+        setEndDateError("End date must be in the future");
+        hasError = true;
+      } else {
+        setEndDateError("");
+      }
+    }
+
+    const normalized = answers.map((a) => a.trim()).filter((a) => a !== "");
+    if (normalized.length < 2) {
+      setAnswersError("At least two answers are required");
+      hasError = true;
+    } else {
+      const lower = normalized.map((a) => a.toLowerCase());
+      const unique = new Set(lower);
+      if (unique.size !== lower.length) {
+        setAnswersError("Answers must be unique");
+        hasError = true;
+      } else {
+        setAnswersError("");
+      }
+    }
+
+    if (hasError) return;
+
+    try {
+      setSubmitting(true);
+      const epochEndDate = Math.floor(new Date(endDate).getTime() / 1000);
+
+      const txResp = await txCreateEvent(signer!, address!, {
+        creator: address!,
+        question,
+        answers,
+        end_time: epochEndDate,
+        category,
+      });
+      console.log("Transaction response:", txResp);
+
+      // If we get here without throwing, navigate to app page
+      router.push("/app");
+    } catch (err) {
+      console.error("Failed to create event", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -84,15 +151,22 @@ export default function Page() {
               </label>
               <textarea
                 value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                required
+                onChange={(e) => {
+                  setQuestion(e.target.value);
+                  if (questionError && e.target.value.trim()) {
+                    setQuestionError("");
+                  }
+                }}
                 placeholder="What will be the outcome of the next ETH upgrade?"
-                className="min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 p-4 text-lg text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                className={`min-h-[120px] rounded-xl p-4 text-lg outline-none transition ${
+                  questionError
+                    ? "border border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-red-500 dark:bg-black/60 dark:text-red-300"
+                    : "border border-slate-200 bg-slate-50 text-slate-900 focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                }`}
               />
-              <p className="text-xs italic text-slate-500 dark:text-slate-400">
-                Our AI will analyze this question for clarity and objective
-                resolvability.
-              </p>
+              {questionError && (
+                <p className="text-xs text-red-500">{questionError}</p>
+              )}
             </div>
 
             {/* Category + End date */}
@@ -127,12 +201,23 @@ export default function Page() {
                   <input
                     type="datetime-local"
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                      if (endDateError) {
+                        setEndDateError("");
+                      }
+                    }}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100 [color-scheme:light] dark:[color-scheme:dark]"
+                    className={`w-full rounded-xl p-3.5 text-sm outline-none transition [color-scheme:light] dark:[color-scheme:dark] ${
+                      endDateError
+                        ? "border border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-red-500 dark:bg-black/60 dark:text-red-300"
+                        : "border border-slate-200 bg-slate-50 text-slate-900 focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                    }`}
                   />
                 </div>
+                {endDateError && (
+                  <p className="text-xs text-red-500">{endDateError}</p>
+                )}
               </div>
             </div>
 
@@ -161,9 +246,12 @@ export default function Page() {
                       onChange={(e) =>
                         handleAnswerChange(index, e.target.value)
                       }
-                      required
                       placeholder={`Option ${index + 1}`}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-[#3CE6FF] focus:ring-2 focus:ring-[#3CE6FF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                      className={`w-full rounded-xl p-3.5 text-sm outline-none transition ${
+                        answersError
+                          ? "border border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-red-500 dark:bg-black/60 dark:text-red-300"
+                          : "border border-slate-200 bg-slate-50 text-slate-900 focus:border-[#3CE6FF] focus:ring-2 focus:ring-[#3CE6FF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                      }`}
                     />
                     {answers.length > 2 && (
                       <button
@@ -177,6 +265,9 @@ export default function Page() {
                   </div>
                 ))}
               </div>
+              {answersError && (
+                <p className="text-xs text-red-500">{answersError}</p>
+              )}
             </div>
 
             {/* AI info */}
@@ -200,9 +291,13 @@ export default function Page() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] p-4 text-lg font-bold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-0.5"
+                disabled={submitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] p-4 text-lg font-bold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
               >
-                Create Prediction Market
+                {submitting && (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
+                )}
+                <span>Create Prediction Market</span>
               </button>
             </div>
           </form>
