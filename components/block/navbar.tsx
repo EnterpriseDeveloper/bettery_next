@@ -10,30 +10,28 @@ type Theme = "light" | "dark";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<Theme>("dark");
-  const { address, balance, isConnected, connect } = useWalletStore();
-
-  // Initialize theme from localStorage or prefers-color-scheme
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") {
+      return "dark";
+    }
     const stored = window.localStorage.getItem("theme") as Theme | null;
     const prefersDark =
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial: Theme = stored ?? (prefersDark ? "dark" : "light");
-    setTheme(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
-  }, []);
+    return stored ?? (prefersDark ? "dark" : "light");
+  });
+  const { address, balance, isConnected, connect } = useWalletStore();
+
+  // Sync theme to document + localStorage whenever it changes
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("theme", theme);
+    }
+  }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => {
-      const next: Theme = prev === "dark" ? "light" : "dark";
-      document.documentElement.classList.toggle("dark", next === "dark");
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("theme", next);
-      }
-      return next;
-    });
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
   useEffect(() => {
@@ -94,14 +92,13 @@ export default function Navbar() {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Bettery</span>
+          <Link href="/app" className="flex items-center">
             <Image
-              width={32}
-              height={32}
-              alt=""
-              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-              className="h-8 w-auto"
+              src="/logo.png"
+              alt="BetMe logo"
+              width={200}
+              height={60}
+              priority
             />
           </Link>
         </div>

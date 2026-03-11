@@ -23,9 +23,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bettery — Bet on reality. Not opinions.",
+  title: "BetMe — Bet on reality. Not opinions.",
   description:
     "Create prediction events. Stake real value. AI resolves the truth — blockchain enforces it.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

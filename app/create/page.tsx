@@ -190,7 +190,7 @@ export default function Page() {
                     Advanced AI Resolution:
                   </span>{" "}
                   This market will use real-time data feeds and LLM verification
-                  to settle. A protocol fee of 0.5% will be applied to the total
+                  to settle. A protocol fee of 1% will be applied to the total
                   liquidity pool.
                 </div>
               </div>
