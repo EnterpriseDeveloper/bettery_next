@@ -2,15 +2,38 @@
 import { useWalletStore } from "../../store/useWalletStore";
 import { txWithdrawal } from "@/tx/bridge";
 import Navbar from "@/components/block/navbar";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { useChainId } from "wagmi";
+
 import { useState } from "react";
 
 export default function Page() {
   const [amount, setAmount] = useState("0");
-  const [receiver, setReceiver] = useState("");
   const { address, signer } = useWalletStore();
+  const { address: evmAddress, isConnected } = useAccount();
+  const chainId = useChainId();
 
-  const setWithdrawal = async (receiver: string, amount: string) => {
-    await txWithdrawal(signer!, address!, receiver, amount);
+  const setWithdrawal = async (amount: string) => {
+    if (!signer || !address) {
+      console.warn("COSMOS SDK wallet is not connected");
+      return;
+    }
+    if (!evmAddress || !isConnected) {
+      console.warn("EVM wallet is not connected");
+      return;
+    }
+    if (!chainId) {
+      console.warn("Chain ID is not set");
+      return;
+    }
+    console.log("Withdrawing", {
+      from: address,
+      evmAddress,
+      chainId,
+      amount,
+    });
+    // await txWithdrawal(signer, address, receiver, amount);
   };
   return (
     <div>
@@ -19,13 +42,7 @@ export default function Page() {
         <label className="block text-sm/6 font-medium text-white">
           Receiver:
         </label>
-        <input
-          type="string"
-          value={receiver}
-          onChange={(e) => setReceiver(e.target.value)}
-          className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-          required
-        />
+        <ConnectButton />
         <label className="block text-sm/6 font-medium text-white">
           Amount:
         </label>
@@ -38,7 +55,7 @@ export default function Page() {
         />
       </div>
       <button
-        onClick={() => setWithdrawal(receiver, amount)}
+        onClick={() => setWithdrawal(amount)}
         className="bg-blue-600 text-white px-3 py-1 rounded"
       >
         Withdrawal
