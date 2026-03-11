@@ -3,7 +3,7 @@
 import Navbar from "@/components/block/navbar";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { txCreateEvent } from "@/tx/events";
+import { txCreateEvent } from "@/blockchain/cosmos/events";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
 import { Info, PlusCircle } from "lucide-react";

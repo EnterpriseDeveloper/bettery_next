@@ -6,7 +6,7 @@ import {
   GasPrice,
   SigningStargateClient,
 } from "@cosmjs/stargate";
-import { MsgMintToken } from "../../../tx/proto-ts/bettery/funds/v1/tx";
+import { MsgMintToken } from "@/blockchain/cosmos/proto-ts/bettery/funds/v1/tx";
 
 const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 const memo = process.env.MEMO;

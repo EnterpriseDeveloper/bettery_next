@@ -1,6 +1,6 @@
 "use client";
 import { useWalletStore } from "../../store/useWalletStore";
-import { txWithdrawal } from "@/tx/bridge";
+import { txWithdrawal } from "@/blockchain/cosmos/bridge";
 import Navbar from "@/components/block/navbar";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
@@ -25,6 +25,11 @@ export default function Page() {
     }
     if (!chainId) {
       console.warn("Chain ID is not set");
+      return;
+    }
+    // TODO for prod only, remove this
+    if (chainId === 80002) {
+      console.log("User on Amoy");
       return;
     }
     console.log("Withdrawing", {

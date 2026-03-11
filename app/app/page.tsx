@@ -2,7 +2,7 @@
 
 import EventCard from "@/components/block/event";
 import Navbar from "@/components/block/navbar";
-import { txParticipateEvent } from "@/tx/events";
+import { txParticipateEvent } from "@/blockchain/cosmos/events";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";

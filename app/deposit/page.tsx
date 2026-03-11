@@ -23,6 +23,11 @@ export default function Page() {
       console.warn("Chain ID is not set");
       return;
     }
+    // TODO for prod only, remove this
+    if (chainId === 80002) {
+      console.log("User on Amoy");
+      return;
+    }
     console.log("Depositing", {
       from: address,
       evmAddress,
