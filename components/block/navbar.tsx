@@ -10,6 +10,7 @@ type Theme = "light" | "dark";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fundsOpen, setFundsOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") {
       return "dark";
@@ -126,15 +127,59 @@ export default function Navbar() {
           </button>
         </div>
         <div className="hidden lg:flex lg:items-center lg:gap-x-8">
-          <Link className="text-sm/6 font-semibold text-white" href="/app">
+          <Link
+            href="/app"
+            className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+          >
             Events
           </Link>
-          <Link className="text-sm/6 font-semibold text-white" href="/create">
+          <Link
+            href="/create"
+            className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+          >
             Create
           </Link>
-          <Link className="text-sm/6 font-semibold text-white" href="/bridge">
-            Bridge
-          </Link>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setFundsOpen((o) => !o)}
+              className="flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors"
+            >
+              Funds
+              <span
+                className={`text-xs transition-transform ${
+                  fundsOpen ? "rotate-180" : ""
+                }`}
+              >
+                ▾
+              </span>
+            </button>
+            {fundsOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  aria-hidden
+                  onClick={() => setFundsOpen(false)}
+                />
+                <div className="absolute right-0 z-20 mt-2 w-40 rounded-xl border border-white/10 bg-black/90 py-1 shadow-lg">
+                  <Link
+                    href="/deposit"
+                    className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    onClick={() => setFundsOpen(false)}
+                  >
+                    Deposit
+                  </Link>
+                  <Link
+                    href="/withdraw"
+                    className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    onClick={() => setFundsOpen(false)}
+                  >
+                    Withdraw
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             {isConnected ? (
               <div className="text-xs font-semibold text-white text-right">
@@ -180,18 +225,13 @@ export default function Navbar() {
             aria-label="Mobile menu"
           >
             <div className="flex items-center justify-between">
-              <Link
-                href="/"
-                className="-m-1.5 p-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="sr-only">Bettery</span>
+              <Link href="/app" className="flex items-center">
                 <Image
+                  src="/icon.png"
+                  alt="BetMe logo"
                   width={32}
                   height={32}
-                  alt=""
-                  src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                  className="h-8 w-auto"
+                  priority
                 />
               </Link>
               <button
@@ -209,23 +249,30 @@ export default function Navbar() {
                   <Link
                     href="/app"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     Events
                   </Link>
                   <Link
                     href="/create"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     Create
                   </Link>
                   <Link
-                    href="/bridge"
+                    href="/deposit"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    Bridge
+                    Deposit
+                  </Link>
+                  <Link
+                    href="/withdraw"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    Withdraw
                   </Link>
                 </div>
               </div>

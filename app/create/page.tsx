@@ -179,7 +179,7 @@ export default function Page() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100 cursor-pointer"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.name}>
@@ -208,7 +208,7 @@ export default function Page() {
                       }
                     }}
                     min={new Date().toISOString().slice(0, 16)}
-                    className={`w-full rounded-xl p-3.5 text-sm outline-none transition [color-scheme:light] dark:[color-scheme:dark] ${
+                    className={`w-full rounded-xl p-3.5 text-sm outline-none transition [color-scheme:light] dark:[color-scheme:dark] cursor-pointer ${
                       endDateError
                         ? "border border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-red-500 dark:bg-black/60 dark:text-red-300"
                         : "border border-slate-200 bg-slate-50 text-slate-900 focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
@@ -230,7 +230,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={handleAddAnswer}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#3CE6FF] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#3CE6FF] hover:underline cursor-pointer"
                 >
                   <PlusCircle className="h-3.5 w-3.5" />
                   Add option
@@ -257,7 +257,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => handleRemoveAnswer(index)}
-                        className="ml-2 text-xs font-semibold text-slate-400 hover:text-red-400"
+                        className="ml-2 text-xs font-semibold text-slate-400 hover:text-red-400 cursor-pointer"
                       >
                         Remove
                       </button>
@@ -292,7 +292,7 @@ export default function Page() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] p-4 text-lg font-bold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] p-4 text-lg font-bold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 cursor-pointer"
               >
                 {submitting && (
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />

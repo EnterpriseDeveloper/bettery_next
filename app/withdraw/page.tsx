@@ -1,10 +1,20 @@
+"use client";
+import { useWalletStore } from "../../store/useWalletStore";
+import { txWithdrawal } from "@/tx/bridge";
+import Navbar from "@/components/block/navbar";
 import { useState } from "react";
 
-export default function Bridge({ setWithdrawal }: any) {
+export default function Page() {
   const [amount, setAmount] = useState("0");
   const [receiver, setReceiver] = useState("");
+  const { address, signer } = useWalletStore();
+
+  const setWithdrawal = async (receiver: string, amount: string) => {
+    await txWithdrawal(signer!, address!, receiver, amount);
+  };
   return (
     <div>
+      <Navbar />
       <div>
         <label className="block text-sm/6 font-medium text-white">
           Receiver:
