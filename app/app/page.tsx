@@ -50,25 +50,34 @@ export default function Page() {
     };
   }, [tab, status, category, address]);
 
-  const handleSelect = (eventId: number, answerIndex: number) => {
+  const handleSelect = (eventId: number | string, answerIndex: number) => {
     setSelected((s) => ({ ...s, [eventId]: answerIndex }));
   };
 
-  const handleSubmitAnswer = async (eventId: number, amount: string) => {
-    const answerIndex = selected[eventId];
-    const ev = events.find((e) => e.id === eventId);
-    if (ev && (answerIndex === 0 || answerIndex)) {
-      const txResp = await txParticipateEvent(
-        signer!,
-        address!,
-        eventId,
-        ev.answers[answerIndex],
-        amount,
-      );
-      console.log(txResp);
-    } else {
-      alert("Please select an answer first");
+  const handleSubmitAnswer = async (
+    eventId: number | string,
+    amount: string,
+    answerIndex: number,
+  ) => {
+    const ev = events.find((e) => String(e.id) === String(eventId));
+    if (!ev || !amount || Number(amount) <= 0) {
+      if (answerIndex < 0) return;
+      alert("Please enter an amount");
+      return;
     }
+    const answer = ev.answers[answerIndex];
+    if (answer == null) {
+      alert("Please select an answer");
+      return;
+    }
+    const txResp = await txParticipateEvent(
+      signer!,
+      address!,
+      Number(eventId),
+      answer,
+      amount,
+    );
+    console.log(txResp);
   };
 
   const categoryLabel = category
@@ -79,7 +88,7 @@ export default function Page() {
     <div className="min-h-screen bg-[#f8f6f6] text-slate-900 dark:bg-[#0a0b10] dark:text-slate-100">
       <Navbar />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 lg:px-8">
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Tabs */}
         <div className="flex gap-8 border-b border-slate-200 dark:border-white/10">
           <button
@@ -204,6 +213,7 @@ export default function Page() {
             <EventCard
               key={ev.id}
               ev={ev}
+              currentAddress={address}
               selected={selected}
               handleSelect={handleSelect}
               handleSubmitAnswer={handleSubmitAnswer}
