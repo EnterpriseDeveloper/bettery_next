@@ -1,4 +1,4 @@
-import { walletInit } from "@/tx/wallets";
+import { walletInit } from "@/blockchain/cosmos/wallets";
 import { OfflineAminoSigner, OfflineDirectSigner } from "@keplr-wallet/types";
 import { create } from "zustand";
 
