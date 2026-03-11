@@ -16,7 +16,7 @@ export const txWithdrawal = async (
   signer: OfflineAminoSigner & OfflineDirectSigner,
   address: string,
   receiver: string,
-  amount: string,
+  amount: bigint,
 ) => {
   try {
     const client = await SigningStargateClient.connectWithSigner(
@@ -32,7 +32,7 @@ export const txWithdrawal = async (
         evmBridge: process.env.NEXT_PUBLIC_EVM_BRIDGE as string,
         evmToken: process.env.NEXT_PUBLIC_EVM_TOKEN as string,
         evmRecipient: receiver,
-        amount: (Number(amount) * 1000000).toString(),
+        amount: amount.toString(),
       }),
     };
     const result = await client.signAndBroadcast(address, [msg], "auto");

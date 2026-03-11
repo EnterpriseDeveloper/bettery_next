@@ -5,17 +5,18 @@ import Navbar from "@/components/block/navbar";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { useChainId } from "wagmi";
+import { parseUnits } from "viem";
 
 import { useState } from "react";
 
 export default function Page() {
   const [amount, setAmount] = useState("0");
-  const { address, signer } = useWalletStore();
+  const { address: cosmosAddress, signer } = useWalletStore();
   const { address: evmAddress, isConnected } = useAccount();
   const chainId = useChainId();
 
   const setWithdrawal = async (amount: string) => {
-    if (!signer || !address) {
+    if (!signer || !cosmosAddress) {
       console.warn("COSMOS SDK wallet is not connected");
       return;
     }
@@ -33,12 +34,13 @@ export default function Page() {
       return;
     }
     console.log("Withdrawing", {
-      from: address,
+      from: cosmosAddress,
       evmAddress,
       chainId,
       amount,
     });
-    // await txWithdrawal(signer, address, receiver, amount);
+    const amountBigInt = parseUnits(amount, 6);
+    await txWithdrawal(signer, cosmosAddress, evmAddress, amountBigInt);
   };
   return (
     <div>

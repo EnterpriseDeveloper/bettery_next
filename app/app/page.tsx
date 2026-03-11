@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
 import { ChevronDown, LayoutGrid } from "lucide-react";
+import { parseUnits } from "viem";
 
 type Tab = "all" | "my-bets";
 type StatusFilter = "ACTIVE" | "FINISHED" | "REJECTED";
@@ -70,12 +71,13 @@ export default function Page() {
       alert("Please select an answer");
       return;
     }
+    const amountBigInt = parseUnits(amount, 6);
     const txResp = await txParticipateEvent(
       signer!,
       address!,
       Number(eventId),
       answer,
-      amount,
+      amountBigInt,
     );
     console.log(txResp);
   };

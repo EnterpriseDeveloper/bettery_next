@@ -56,7 +56,7 @@ export const txParticipateEvent = async (
   address: string,
   eventId: number,
   selectedAnswer: string,
-  amount: string,
+  amount: bigint,
 ) => {
   try {
     const client = await SigningStargateClient.connectWithSigner(
@@ -70,7 +70,7 @@ export const txParticipateEvent = async (
         creator: address,
         eventId,
         answers: selectedAnswer,
-        amount: (Number(amount) * 1000000).toString(),
+        amount: amount.toString(),
       }),
     };
 
