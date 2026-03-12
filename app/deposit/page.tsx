@@ -4,9 +4,8 @@ import { useWalletStore } from "../../store/useWalletStore";
 import Navbar from "@/components/block/navbar";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useChainId, useWriteContract } from "wagmi";
-import { erc20Abi } from "viem";
+import { erc20Abi, parseEther, parseGwei } from "viem";
 import { useState } from "react";
-import { parseUnits } from "viem";
 import bridgeAbi from "@/blockchain/evm/BridgeABI.json";
 import {
   Network,
@@ -52,18 +51,25 @@ export default function Page() {
     }
     setSubmitting(true);
     try {
-      const amountWei = parseUnits(num, 6); // USDT 6 decimals
+      // TODO: !IMPORTANT FIX GAS LIMITS FOR PROD !
+      const amountWei = parseEther(num);
       await writeContractAsync({
         address: TOKEN_ADDRESS,
         abi: erc20Abi,
         functionName: "approve",
         args: [BRIDGE_ADDRESS, amountWei],
+        maxPriorityFeePerGas: parseGwei("30"),
+        maxFeePerGas: parseGwei("40"),
+        gas: 80000n,
       });
       await writeContractAsync({
         address: BRIDGE_ADDRESS,
         abi: bridgeAbi as never,
         functionName: "lock",
         args: [TOKEN_ADDRESS, amountWei, cosmosAddress],
+        maxPriorityFeePerGas: parseGwei("30"),
+        maxFeePerGas: parseGwei("40"),
+        gas: 250000n,
       });
     } finally {
       setSubmitting(false);
@@ -167,7 +173,7 @@ export default function Page() {
                 type="button"
                 onClick={handleDeposit}
                 disabled={submitting}
-                className="w-full py-5 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] text-white font-black text-lg uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-lg dark:text-[#0a0a0f] dark:neon-glow-purple disabled:opacity-60 disabled:pointer-events-none"
+                className="cursor-pointer w-full py-5 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] text-white font-black text-lg uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-lg dark:text-[#0a0a0f] dark:neon-glow-purple disabled:opacity-60 disabled:pointer-events-none"
               >
                 {submitting ? "Processing…" : "Deposit USDT"}
               </button>

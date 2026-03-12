@@ -14,10 +14,7 @@ export async function POST(request: Request) {
 
     console.log(balance);
 
-    return NextResponse.json(
-      { balance: (Number(balance.amount) / 1_000_000).toString() },
-      { status: 200 },
-    );
+    return NextResponse.json({ balance: balance.amount }, { status: 200 });
   } catch (error) {
     console.error("Error getting balance:", error);
     return NextResponse.json(
