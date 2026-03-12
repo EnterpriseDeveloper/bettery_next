@@ -41,10 +41,11 @@ export default function Page() {
       console.warn("Chain ID is not set");
       return;
     }
-    if (chainId === 80002) {
-      console.log("User on Amoy");
-      return;
-    }
+    // TODO
+    // if (chainId === 80002) {
+    //   console.log("User on Amoy");
+    //   return;
+    // }
     const num = amount.trim();
     if (!num || Number.isNaN(Number(num)) || Number(num) <= 0) {
       return;
@@ -67,11 +68,6 @@ export default function Page() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const setMax = () => {
-    // Optional: integrate useReadContract for ERC20 balanceOf and set that as amount
-    setAmount("");
   };
 
   return (
@@ -145,13 +141,6 @@ export default function Page() {
                     <span className="text-slate-900 dark:text-white font-bold">
                       USDT
                     </span>
-                    <button
-                      type="button"
-                      onClick={setMax}
-                      className="text-xs font-bold uppercase px-2 py-1 rounded bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#b026ff]/20 dark:text-[#b026ff] transition-colors hover:opacity-80"
-                    >
-                      Max
-                    </button>
                   </div>
                 </div>
               </div>
@@ -210,10 +199,6 @@ export default function Page() {
           </div>
         </div>
       </main>
-
-      <footer className="p-8 text-center text-slate-500 dark:text-slate-600 text-xs">
-        <p>© 2024 betMe Ecosystem. Futuristic decentralized betting interface.</p>
-      </footer>
     </div>
   );
 }

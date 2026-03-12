@@ -21,7 +21,7 @@ const WITHDRAWAL_FEE_USDT = 1;
 export default function Page() {
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { address: cosmosAddress, signer, balance } = useWalletStore();
+  const { address: cosmosAddress, signer } = useWalletStore();
   const { address: evmAddress, isConnected } = useAccount();
   const chainId = useChainId();
 
@@ -38,10 +38,11 @@ export default function Page() {
       console.warn("Chain ID is not set");
       return;
     }
-    if (chainId === 80002) {
-      console.log("User on Amoy");
-      return;
-    }
+    // TODO
+    // if (chainId === 80002) {
+    //   console.log("User on Amoy");
+    //   return;
+    // }
     const num = amount.trim();
     if (!num || Number.isNaN(Number(num)) || Number(num) <= 0) {
       return;
@@ -59,18 +60,9 @@ export default function Page() {
     }
   };
 
-  const setMax = () => {
-    // Optional: use Cosmos balance from store; ensure > fee
-    const bal = balance ? Number(balance) : 0;
-    if (bal > WITHDRAWAL_FEE_USDT) {
-      setAmount(String(bal - WITHDRAWAL_FEE_USDT));
-    } else {
-      setAmount("");
-    }
-  };
-
   const amountNum = amount.trim() ? Number(amount.trim()) : 0;
-  const receiveAmount = amountNum > WITHDRAWAL_FEE_USDT ? amountNum - WITHDRAWAL_FEE_USDT : 0;
+  const receiveAmount =
+    amountNum > WITHDRAWAL_FEE_USDT ? amountNum - WITHDRAWAL_FEE_USDT : 0;
   const isValidAmount = amountNum > WITHDRAWAL_FEE_USDT;
 
   return (
@@ -144,13 +136,6 @@ export default function Page() {
                     <span className="text-slate-900 dark:text-white font-bold">
                       USDT
                     </span>
-                    <button
-                      type="button"
-                      onClick={setMax}
-                      className="text-xs font-bold uppercase px-2 py-1 rounded bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#b026ff]/20 dark:text-[#b026ff] transition-colors hover:opacity-80"
-                    >
-                      Max
-                    </button>
                   </div>
                 </div>
               </div>
@@ -224,10 +209,6 @@ export default function Page() {
           </div>
         </div>
       </main>
-
-      <footer className="p-8 text-center text-slate-500 dark:text-slate-600 text-xs">
-        <p>© 2024 betMe Ecosystem. Futuristic decentralized betting interface.</p>
-      </footer>
     </div>
   );
 }

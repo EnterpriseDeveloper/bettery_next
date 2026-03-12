@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { formatUnits } from "viem";
 
 type EventCardProps = {
   ev: {
@@ -12,20 +13,22 @@ type EventCardProps = {
     endTime: string;
     category: string;
     status?: string;
-    bets?: { creator: string; answer: string; amount: string; token?: string }[];
+    bets?: {
+      creator: string;
+      answer: string;
+      amount: string;
+      token?: string;
+    }[];
   };
   currentAddress?: string | null;
   selected?: Record<string | number, number | null>;
   handleSelect?: (eventId: number | string, answerIndex: number) => void;
-  handleSubmitAnswer?: (eventId: number | string, amount: string, answerIndex: number) => void;
+  handleSubmitAnswer?: (
+    eventId: number | string,
+    amount: string,
+    answerIndex: number,
+  ) => void;
 };
-
-function formatPool(pool: bigint): string {
-  const n = Number(pool);
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n}`;
-}
 
 function endsInDays(endTimeStr: string): string {
   const endSec = Number(endTimeStr);
@@ -51,10 +54,11 @@ export default function EventCard({
   const percentages = ev.answers.map((_, i) =>
     totalPool > 0n
       ? Math.round(Number((pools[i] ?? 0n) * 100n) / Number(totalPool))
-      : 0
+      : 0,
   );
 
-  const userBet = currentAddress && ev.bets?.find((b) => b.creator === currentAddress);
+  const userBet =
+    currentAddress && ev.bets?.find((b) => b.creator === currentAddress);
   const hasBet = !!userBet;
 
   const eventId = String(ev.id);
@@ -90,7 +94,7 @@ export default function EventCard({
           </span>
         </div>
         <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          Total pool: {formatPool(totalPool)} USDT
+          Total pool: {formatUnits(BigInt(totalPool), 6)} USDT
         </div>
       </div>
 
@@ -142,9 +146,12 @@ export default function EventCard({
                 {userBet!.answer}
               </span>
               <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-slate-500 dark:text-slate-400">Locked</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Locked
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {userBet!.amount} {userBet!.token ?? "USDT"}
+                  {formatUnits(BigInt(userBet!.amount), 6)}{" "}
+                  {userBet!.token ?? "USDT"}
                 </span>
               </div>
             </div>
@@ -166,7 +173,11 @@ export default function EventCard({
                   type="button"
                   onClick={() => {
                     const idx = ev.answers.indexOf(userBet.answer);
-                    if (idx >= 0 && increaseAmount && Number(increaseAmount) > 0) {
+                    if (
+                      idx >= 0 &&
+                      increaseAmount &&
+                      Number(increaseAmount) > 0
+                    ) {
                       handleSubmitAnswer?.(ev.id, increaseAmount, idx);
                       setIncreaseAmount("");
                     }
