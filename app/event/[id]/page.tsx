@@ -108,12 +108,9 @@ export default function EventPage({ params }: EventPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="absolute inset-0 animated-gradient opacity-50" />
-      <div className="absolute inset-0 pixel-pattern" />
+      <Navbar />
 
       <div className="relative container mx-auto px-4 py-8">
-        <Navbar />
-
         <Link href="/app">
           <Button
             variant="ghost"

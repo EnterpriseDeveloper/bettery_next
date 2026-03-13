@@ -22,6 +22,29 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
 
 type PendingZeroBet = { eventId: number | string; answerIndex: number };
 
+async function fetchEventsList(
+  tab: Tab,
+  status: StatusFilter | "",
+  category: string,
+  address: string | null | undefined,
+): Promise<any[]> {
+  const params = new URLSearchParams();
+  params.set("limit", "50");
+  if (status) params.set("status", status);
+  if (category) params.set("category", category);
+
+  const res = await fetch(`/api/events?${params.toString()}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  let list = data.events ?? [];
+  if (tab === "my-bets" && address) {
+    list = list.filter((ev: any) =>
+      ev.bets?.some((b: any) => b.creator === address),
+    );
+  }
+  return list;
+}
+
 export default function Page() {
   const { address, signer } = useWalletStore();
   const [tab, setTab] = useState<Tab>("all");
@@ -37,23 +60,9 @@ export default function Page() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const params = new URLSearchParams();
-      params.set("limit", "50");
-      if (status) params.set("status", status);
-      if (category) params.set("category", category);
-
-      const res = await fetch(`/api/events?${params.toString()}`);
-      if (!res.ok || cancelled) return;
-      const data = await res.json();
-      let list = data.events ?? [];
-      if (tab === "my-bets" && address) {
-        list = list.filter((ev: any) =>
-          ev.bets?.some((b: any) => b.creator === address),
-        );
-      }
+    fetchEventsList(tab, status, category, address).then((list) => {
       if (!cancelled) setEvents(list);
-    })();
+    });
     return () => {
       cancelled = true;
     };
@@ -81,14 +90,15 @@ export default function Page() {
       return;
     }
     const amountBigInt = parseUnits(amount, 6);
-    const txResp = await txParticipateEvent(
+    await txParticipateEvent(
       signer!,
       address!,
       Number(eventId),
       answer,
       amountBigInt,
     );
-    console.log(txResp);
+    const list = await fetchEventsList(tab, status, category, address);
+    setEvents(list);
   };
 
   const handleProceedWithZero = async () => {

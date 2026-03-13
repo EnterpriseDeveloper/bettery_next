@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type EventCardProps = {
@@ -41,12 +41,12 @@ function endsInDays(endTimeStr: string): string {
 export default function EventCard({
   ev,
   currentAddress,
-  selected = {},
   handleSelect,
   handleSubmitAnswer,
 }: EventCardProps) {
   const [amount, setAmount] = useState("");
   const [increaseAmount, setIncreaseAmount] = useState("");
+  const [walletError, setWalletError] = useState("");
 
   const pools = (ev.answersPool ?? []).map((p) => BigInt(p));
   const totalPool = pools.reduce((s, p) => s + p, 0n);
@@ -59,6 +59,10 @@ export default function EventCard({
   const userBet =
     currentAddress && ev.bets?.find((b) => b.creator === currentAddress);
   const hasBet = !!userBet;
+
+  useEffect(() => {
+    if (currentAddress) setWalletError("");
+  }, [currentAddress]);
 
   const eventId = String(ev.id);
   const endsLabel = endsInDays(ev.endTime ?? "0");
@@ -159,17 +163,25 @@ export default function EventCard({
             {userBet && (
               <>
                 <input
-                  type="number"
-                  min="0"
-                  step="any"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="Add amount (USDT)"
                   value={increaseAmount}
-                  onChange={(e) => setIncreaseAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(",", ".");
+                    const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                    if (match || value === "") setIncreaseAmount(value);
+                  }}
                   className="w-40 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
                 />
                 <button
                   type="button"
                   onClick={() => {
+                    if (!currentAddress) {
+                      setWalletError("Connect to the wallet");
+                      return;
+                    }
+                    setWalletError("");
                     const idx = ev.answers.indexOf(userBet.answer);
                     if (
                       idx >= 0 &&
@@ -185,6 +197,11 @@ export default function EventCard({
                   Increase stake
                 </button>
               </>
+            )}
+            {walletError && (
+              <div className="text-center w-full rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+                {walletError}
+              </div>
             )}
             <Link
               href={`/event/${eventId}`}
@@ -203,11 +220,14 @@ export default function EventCard({
             </label>
             <div className="relative">
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="0"
-                step="any"
+                onChange={(e) => {
+                  const value = e.target.value.replace(",", ".");
+                  const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                  if (match || value === "") setAmount(value);
+                }}
                 placeholder="0"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-4 pr-14 text-slate-900 outline-none transition focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-black/40 dark:text-slate-100"
               />
@@ -223,6 +243,11 @@ export default function EventCard({
                 key={idx}
                 type="button"
                 onClick={() => {
+                  if (!currentAddress) {
+                    setWalletError("Connect to the wallet");
+                    return;
+                  }
+                  setWalletError("");
                   handleSelect?.(ev.id, idx);
                   handleSubmitAnswer?.(ev.id, amount, idx);
                 }}
@@ -236,6 +261,11 @@ export default function EventCard({
               </button>
             ))}
           </div>
+          {walletError && (
+            <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+              {walletError}
+            </div>
+          )}
           <div className="mt-3">
             <Link
               href={`/event/${eventId}`}

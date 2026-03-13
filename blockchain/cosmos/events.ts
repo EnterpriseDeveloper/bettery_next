@@ -58,6 +58,9 @@ export const txParticipateEvent = async (
   selectedAnswer: string,
   amount: bigint,
 ) => {
+  if (!signer || !address) {
+    throw new Error("Wallet not connected. Connect your Keplr wallet first.");
+  }
   try {
     const client = await SigningStargateClient.connectWithSigner(
       rpcEndpoint,
