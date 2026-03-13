@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatUnits } from "viem";
 
 type EventCardProps = {
   ev: {
@@ -94,7 +93,7 @@ export default function EventCard({
           </span>
         </div>
         <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          Total pool: {formatUnits(BigInt(totalPool), 6)} USDT
+          Total pool: {totalPool} USDT
         </div>
       </div>
 
@@ -150,8 +149,7 @@ export default function EventCard({
                   Locked
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {formatUnits(BigInt(userBet!.amount), 6)}{" "}
-                  {userBet!.token ?? "USDT"}
+                  {userBet!.amount} {userBet!.token ?? "USDT"}
                 </span>
               </div>
             </div>

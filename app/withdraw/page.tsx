@@ -5,6 +5,7 @@ import { txWithdrawal } from "@/blockchain/cosmos/bridge";
 import Navbar from "@/components/block/navbar";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useChainId } from "wagmi";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { parseUnits } from "viem";
 import {
@@ -20,18 +21,22 @@ const WITHDRAWAL_FEE_USDT = 1;
 
 export default function Page() {
   const [amount, setAmount] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [walletError, setWalletError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { address: cosmosAddress, signer } = useWalletStore();
   const { address: evmAddress, isConnected } = useAccount();
   const chainId = useChainId();
+  const router = useRouter();
 
   const handleWithdraw = async () => {
+    setWalletError("");
     if (!signer || !cosmosAddress) {
-      console.warn("COSMOS SDK wallet is not connected");
+      setWalletError("Connect your Cosmos wallet before withdrawing.");
       return;
     }
     if (!evmAddress || !isConnected) {
-      console.warn("EVM wallet is not connected");
+      setWalletError("Connect your EVM wallet with the button above.");
       return;
     }
     if (!chainId) {
@@ -44,9 +49,24 @@ export default function Page() {
     //   return;
     // }
     const num = amount.trim();
-    if (!num || Number.isNaN(Number(num)) || Number(num) <= 0) {
+    if (!num) {
+      setAmountError("Please enter an amount.");
       return;
     }
+    const numeric = Number(num);
+    if (Number.isNaN(numeric)) {
+      setAmountError("Amount must be a valid number.");
+      return;
+    }
+    if (numeric <= 0) {
+      setAmountError("Amount must be greater than 0.");
+      return;
+    }
+    if (numeric <= 1) {
+      setAmountError("Minimum withdrawal is 1 USDT.");
+      return;
+    }
+    setAmountError("");
     const amountNum = Number(num);
     if (amountNum <= WITHDRAWAL_FEE_USDT) {
       return;
@@ -55,6 +75,7 @@ export default function Page() {
     try {
       const amountBigInt = parseUnits(num, 6); // USDT 6 decimals
       await txWithdrawal(signer, cosmosAddress, evmAddress, amountBigInt);
+      router.push("/app");
     } finally {
       setSubmitting(false);
     }
@@ -125,11 +146,19 @@ export default function Page() {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
                     inputMode="decimal"
                     placeholder="0.00"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(",", ".");
+                      const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                      if (!match && value !== "") return;
+                      setAmount(value);
+                      if (amountError && value) {
+                        setAmountError("");
+                      }
+                    }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-5 pr-28 text-2xl font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9A6BFF]/20 focus:border-[#9A6BFF]/50 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-slate-600 dark:focus:ring-[#b026ff]/50 dark:focus:border-[#b026ff]/50 transition-all"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -138,6 +167,11 @@ export default function Page() {
                     </span>
                   </div>
                 </div>
+                {amountError && (
+                  <p className="px-1 text-xs text-red-500 mt-1">
+                    {amountError}
+                  </p>
+                )}
               </div>
 
               <div className="p-4 rounded-xl flex gap-3 border border-amber-500/30 bg-amber-500/10 dark:border-amber-400/20 dark:bg-amber-500/10">
@@ -171,12 +205,17 @@ export default function Page() {
                   EVM wallet (receiver)
                 </p>
                 <ConnectButton />
+                {walletError && (
+                  <p className="px-1 text-xs text-red-500 mt-1">
+                    {walletError}
+                  </p>
+                )}
               </div>
 
               <button
                 type="button"
                 onClick={handleWithdraw}
-                disabled={submitting || !isValidAmount}
+                disabled={submitting}
                 className="w-full py-5 rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] text-white font-black text-lg uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-lg dark:text-[#0a0a0f] dark:neon-glow-purple disabled:opacity-60 disabled:pointer-events-none"
               >
                 {submitting ? "Processing…" : "Withdraw USDT"}

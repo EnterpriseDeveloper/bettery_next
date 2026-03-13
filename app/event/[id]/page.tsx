@@ -14,7 +14,6 @@ import {
   Hash,
 } from "lucide-react";
 import Navbar from "@/components/block/navbar";
-import { formatUnits } from "viem";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -171,8 +170,7 @@ export default function EventPage({ params }: EventPageProps) {
                               {answer}
                             </span>
                             <span className="text-muted-foreground">
-                              {percentage.toFixed(1)}% ({formatUnits(pool, 6)}{" "}
-                              USDT)
+                              {percentage.toFixed(1)}% ({pool} USDT)
                             </span>
                           </div>
                           <div className="relative h-2 bg-muted rounded-full overflow-hidden">
@@ -247,7 +245,7 @@ export default function EventPage({ params }: EventPageProps) {
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-foreground font-semibold">
-                            {formatUnits(BigInt(bet.amount), 6)} {bet.token}
+                            {bet.amount} {bet.token}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {bet.status}
@@ -275,7 +273,7 @@ export default function EventPage({ params }: EventPageProps) {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Total Pool</span>
                   <span className="text-foreground font-bold text-lg">
-                    {formatUnits(totalPool, 6)} USDT
+                    {totalPool} USDT
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

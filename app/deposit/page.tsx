@@ -15,9 +15,12 @@ import {
   ShieldCheck,
   AlertTriangle,
 } from "lucide-react";
+import router from "next/router";
 
 export default function Page() {
   const [amount, setAmount] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [walletError, setWalletError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { address: cosmosAddress, signer } = useWalletStore();
   const { address: evmAddress, isConnected } = useAccount();
@@ -28,12 +31,13 @@ export default function Page() {
   const BRIDGE_ADDRESS = process.env.NEXT_PUBLIC_EVM_BRIDGE as `0x${string}`;
 
   const handleDeposit = async () => {
+    setWalletError("");
     if (!signer || !cosmosAddress) {
-      console.warn("COSMOS SDK wallet is not connected");
+      setWalletError("Connect your Cosmos wallet before depositing.");
       return;
     }
     if (!evmAddress || !isConnected) {
-      console.warn("EVM wallet is not connected");
+      setWalletError("Connect your EVM wallet with the button above.");
       return;
     }
     if (!chainId) {
@@ -46,9 +50,15 @@ export default function Page() {
     //   return;
     // }
     const num = amount.trim();
-    if (!num || Number.isNaN(Number(num)) || Number(num) <= 0) {
+    if (!num) {
+      setAmountError("Please enter an amount.");
       return;
     }
+    if (Number.isNaN(Number(num)) || Number(num) <= 0) {
+      setAmountError("Amount must be greater than 0.");
+      return;
+    }
+    setAmountError("");
     setSubmitting(true);
     try {
       // TODO: !IMPORTANT FIX GAS LIMITS FOR PROD !
@@ -71,6 +81,7 @@ export default function Page() {
         maxFeePerGas: parseGwei("40"),
         gas: 250000n,
       });
+      router.push("/app");
     } finally {
       setSubmitting(false);
     }
@@ -136,11 +147,20 @@ export default function Page() {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
                     inputMode="decimal"
                     placeholder="0.00"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(",", ".");
+                      // Allow empty, digits, optional dot, max 2 decimals
+                      const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                      if (!match && value !== "") return;
+                      setAmount(value);
+                      if (amountError && value) {
+                        setAmountError("");
+                      }
+                    }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-5 pr-28 text-2xl font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9A6BFF]/20 focus:border-[#9A6BFF]/50 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-slate-600 dark:focus:ring-[#b026ff]/50 dark:focus:border-[#b026ff]/50 transition-all"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -149,6 +169,11 @@ export default function Page() {
                     </span>
                   </div>
                 </div>
+                {amountError && (
+                  <p className="px-1 text-xs text-red-500 mt-1">
+                    {amountError}
+                  </p>
+                )}
               </div>
 
               <div className="p-4 rounded-xl flex gap-3 border border-[#3CE6FF]/20 bg-[#3CE6FF]/10 dark:border-[#00d4ff]/30 dark:bg-[#00d4ff]/10">
@@ -164,9 +189,14 @@ export default function Page() {
 
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-slate-500 dark:text-slate-400 px-1">
-                  EVM wallet
+                  EVM sender address
                 </p>
                 <ConnectButton />
+                {walletError && (
+                  <p className="px-1 text-xs text-red-500 mt-1">
+                    {walletError}
+                  </p>
+                )}
               </div>
 
               <button
