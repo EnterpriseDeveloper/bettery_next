@@ -12,8 +12,6 @@ export async function POST(request: Request) {
 
     const balance = await client.getBalance(address, "ubet");
 
-    console.log(balance);
-
     return NextResponse.json({ balance: balance.amount }, { status: 200 });
   } catch (error) {
     console.error("Error getting balance:", error);

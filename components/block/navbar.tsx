@@ -45,29 +45,31 @@ export default function Navbar() {
     }
   }, [mobileMenuOpen]);
 
-  const fetchBalance = async () => {
+  const fetchBalance = async (addr: string) => {
     const balance = await fetch(`/api/balance`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address }),
+      body: JSON.stringify({ address: addr }),
     });
     const balanceData = await balance.json();
     console.log("Fetched balance:", balanceData.balance);
     return balanceData;
   };
 
-  useEffect(() => {
-    console.log("Wallet store state changed:");
-    const checkWallet = async () => {
+  const connectWallet = async () => {
+    try {
       await connect();
-      if (address) {
-        console.log("Connected address:", address);
-        const balanceData = await fetchBalance();
+      const currentAddress = useWalletStore.getState().address;
+      if (currentAddress) {
+        console.log("Connected address:", currentAddress);
+        await letsMintToken();
+        const balanceData = await fetchBalance(currentAddress);
         useWalletStore.getState().setBalance(balanceData.balance);
       }
-    };
-    checkWallet();
-  }, [address, connect]);
+    } catch (error) {
+      console.log("Error connecting wallet:", error);
+    }
+  };
 
   const letsMintToken = async () => {
     if (address) {
@@ -78,11 +80,18 @@ export default function Navbar() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ address }),
         });
-        const balanceData = await fetchBalance();
+        const balanceData = await fetchBalance(address);
         useWalletStore.getState().setBalance(balanceData.balance);
       } catch (error) {
         console.log("Error minting token:", error);
       }
+    }
+  };
+
+  const handlePrimaryButtonClick = async () => {
+    if (!isConnected || !address) {
+      await connectWallet();
+      return;
     }
   };
 
@@ -139,47 +148,49 @@ export default function Navbar() {
           >
             Create
           </Link>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setFundsOpen((o) => !o)}
-              className="flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors"
-            >
-              Funds
-              <span
-                className={`text-xs transition-transform ${
-                  fundsOpen ? "rotate-180" : ""
-                }`}
+          {isConnected && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setFundsOpen((o) => !o)}
+                className="flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors"
               >
-                ▾
-              </span>
-            </button>
-            {fundsOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  aria-hidden
-                  onClick={() => setFundsOpen(false)}
-                />
-                <div className="absolute right-0 z-20 mt-2 w-40 rounded-xl border border-white/10 bg-black/90 py-1 shadow-lg">
-                  <Link
-                    href="/deposit"
-                    className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                Funds
+                <span
+                  className={`text-xs transition-transform ${
+                    fundsOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  ▾
+                </span>
+              </button>
+              {fundsOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    aria-hidden
                     onClick={() => setFundsOpen(false)}
-                  >
-                    Deposit
-                  </Link>
-                  <Link
-                    href="/withdraw"
-                    className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                    onClick={() => setFundsOpen(false)}
-                  >
-                    Withdraw
-                  </Link>
-                </div>
-              </>
-            )}
-          </div>
+                  />
+                  <div className="absolute right-0 z-20 mt-2 w-40 rounded-xl border border-white/10 bg-black/90 py-1 shadow-lg">
+                    <Link
+                      href="/deposit"
+                      className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      onClick={() => setFundsOpen(false)}
+                    >
+                      Deposit
+                    </Link>
+                    <Link
+                      href="/withdraw"
+                      className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      onClick={() => setFundsOpen(false)}
+                    >
+                      Withdraw
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-4">
             {isConnected ? (
               <div className="text-xs font-semibold text-white text-right">
@@ -187,13 +198,15 @@ export default function Navbar() {
                 <p>Balance: {balance} BET</p>
               </div>
             ) : null}
-            <button
-              type="button"
-              className="rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition"
-              onClick={() => letsMintToken()}
-            >
-              {isConnected ? "Mint BET" : "Connect Wallet"}
-            </button>
+            {!isConnected ? (
+              <button
+                type="button"
+                className="rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition"
+                onClick={handlePrimaryButtonClick}
+              >
+                Connect Wallet
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={toggleTheme}
