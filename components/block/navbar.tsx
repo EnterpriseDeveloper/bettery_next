@@ -5,31 +5,22 @@ import Image from "next/image";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
-import KeplrModal from "./keplrModal";
-
-type Theme = "light" | "dark";
+import KeplrModal from "@/components/modals/keplrModal";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [fundsOpen, setFundsOpen] = useState(false);
   const [showKeplrModal, setShowKeplrModal] = useState(false);
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") {
-      return "dark";
-    }
-    const stored = window.localStorage.getItem("theme") as Theme | null;
-    const prefersDark =
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return stored ?? (prefersDark ? "dark" : "light");
-  });
+  const [theme, setTheme] = useLocalStorage("theme", "dark");
   const { address, balance, isConnected, connect } = useWalletStore();
 
   // Sync theme to document + localStorage whenever it changes
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("theme", theme);
+    const htmlSelector = document.querySelector("html");
+    if (htmlSelector) {
+      htmlSelector.classList.remove("light", "dark");
+      htmlSelector.classList.add(theme);
     }
   }, [theme]);
 
@@ -213,7 +204,7 @@ export default function Navbar() {
             {!isConnected ? (
               <button
                 type="button"
-                className="rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition"
+                className="cursor-pointer rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition"
                 onClick={handlePrimaryButtonClick}
               >
                 Connect Wallet
@@ -222,7 +213,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+              className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -315,7 +306,7 @@ export default function Navbar() {
                         setMobileMenuOpen(false);
                         handlePrimaryButtonClick();
                       }}
-                      className="-mx-3 block w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-white bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] hover:brightness-110 transition"
+                      className="cursor-pointer -mx-3 block w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-white bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] hover:brightness-110 transition"
                     >
                       Connect Wallet
                     </button>

@@ -19,6 +19,7 @@ export default function Page() {
   const [endDateError, setEndDateError] = useState("");
   const [category, setCategory] = useState("Market");
   const [submitting, setSubmitting] = useState(false);
+  const [walletError, setWalletError] = useState("");
 
   const handleAddAnswer = () => {
     setAnswers((prev) => [...prev, ""]);
@@ -51,6 +52,12 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!signer || !address) {
+      setWalletError("Connect your Keplr wallet before creating a market.");
+      return;
+    }
+    setWalletError("");
 
     let hasError = false;
 
@@ -282,7 +289,8 @@ export default function Page() {
                   </span>{" "}
                   This market will use real-time data feeds and LLM verification
                   to settle. A protocol fee of 1% will be applied to the total
-                  liquidity pool.
+                  liquidity pool. The event creator will earn 1% of the total
+                  pool.
                 </div>
               </div>
             </div>
@@ -299,6 +307,11 @@ export default function Page() {
                 )}
                 <span>Create Prediction Market</span>
               </button>
+              {walletError && (
+                <p className="mt-2 text-xs text-red-500 text-center">
+                  {walletError}
+                </p>
+              )}
             </div>
           </form>
         </div>

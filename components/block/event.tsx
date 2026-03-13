@@ -226,8 +226,7 @@ export default function EventCard({
                   handleSelect?.(ev.id, idx);
                   handleSubmitAnswer?.(ev.id, amount, idx);
                 }}
-                disabled={!amount || Number(amount) <= 0}
-                className={`rounded-xl px-4 py-3 text-sm font-bold text-white transition disabled:opacity-50 ${
+                className={`cursor-pointer rounded-xl px-4 py-3 text-sm font-bold text-white transition disabled:opacity-50 ${
                   idx % 2 === 0
                     ? "bg-[#3CE6FF] hover:opacity-90"
                     : "bg-[#9A6BFF] hover:opacity-90"

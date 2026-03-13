@@ -8,6 +8,8 @@ import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
 import { ChevronDown, LayoutGrid } from "lucide-react";
 import { parseUnits } from "viem";
+import Link from "next/link";
+import BetModal from "@/components/modals/betModal";
 
 type Tab = "all" | "my-bets";
 type StatusFilter = "ACTIVE" | "FINISHED" | "REJECTED";
@@ -18,6 +20,8 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "REJECTED", label: "Rejected" },
 ];
 
+type PendingZeroBet = { eventId: number | string; answerIndex: number };
+
 export default function Page() {
   const { address, signer } = useWalletStore();
   const [tab, setTab] = useState<Tab>("all");
@@ -26,6 +30,10 @@ export default function Page() {
   const [events, setEvents] = useState<any[]>([]);
   const [selected, setSelected] = useState<Record<number, number | null>>({});
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [zeroAmountModal, setZeroAmountModal] = useState<{
+    open: boolean;
+    pending: PendingZeroBet | null;
+  }>({ open: false, pending: null });
 
   useEffect(() => {
     let cancelled = false;
@@ -61,14 +69,15 @@ export default function Page() {
     answerIndex: number,
   ) => {
     const ev = events.find((e) => String(e.id) === String(eventId));
-    if (!ev || !amount || Number(amount) <= 0) {
-      if (answerIndex < 0) return;
-      alert("Please enter an amount");
-      return;
-    }
+    if (!ev) return;
+    if (answerIndex < 0) return;
     const answer = ev.answers[answerIndex];
     if (answer == null) {
       alert("Please select an answer");
+      return;
+    }
+    if (!amount || Number(amount) <= 0) {
+      setZeroAmountModal({ open: true, pending: { eventId, answerIndex } });
       return;
     }
     const amountBigInt = parseUnits(amount, 6);
@@ -82,6 +91,29 @@ export default function Page() {
     console.log(txResp);
   };
 
+  const handleProceedWithZero = async () => {
+    const { pending } = zeroAmountModal;
+    if (!pending || !signer || !address) {
+      setZeroAmountModal({ open: false, pending: null });
+      return;
+    }
+    const ev = events.find((e) => String(e.id) === String(pending.eventId));
+    const answer = ev?.answers[pending.answerIndex];
+    if (!ev || answer == null) {
+      setZeroAmountModal({ open: false, pending: null });
+      return;
+    }
+    setZeroAmountModal({ open: false, pending: null });
+    const txResp = await txParticipateEvent(
+      signer,
+      address,
+      Number(pending.eventId),
+      answer,
+      0n,
+    );
+    console.log(txResp);
+  };
+
   const categoryLabel = category
     ? (categories.find((c) => c.name === category)?.name ?? "All Categories")
     : "All Categories";
@@ -90,15 +122,21 @@ export default function Page() {
     <div className="min-h-screen bg-[#f8f6f6] text-slate-900 dark:bg-[#0a0b10] dark:text-slate-100">
       <Navbar />
 
+      <BetModal
+        open={zeroAmountModal.open}
+        onClose={() => setZeroAmountModal({ open: false, pending: null })}
+        onProceed={handleProceedWithZero}
+      />
+
       <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Tabs */}
         <div className="flex gap-8 border-b border-slate-200 dark:border-white/10">
           <button
             type="button"
             onClick={() => setTab("all")}
-            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               tab === "all"
-                ? "text-white border-b-2 border-[#9A6BFF] dark:text-white dark:border-[#9A6BFF]"
+                ? "text-[#9A6BFF] border-b-2 border-[#9A6BFF] dark:border-[#9A6BFF]"
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
             }`}
           >
@@ -107,9 +145,9 @@ export default function Page() {
           <button
             type="button"
             onClick={() => setTab("my-bets")}
-            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               tab === "my-bets"
-                ? "text-white border-b-2 border-[#9A6BFF] dark:text-white dark:border-[#9A6BFF]"
+                ? "text-[#9A6BFF] border-b-2 border-[#9A6BFF] dark:border-[#9A6BFF]"
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
             }`}
           >
@@ -133,7 +171,7 @@ export default function Page() {
                 key={opt.value}
                 type="button"
                 onClick={() => setStatus(opt.value)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors cursor-pointer ${
                   status === opt.value
                     ? "bg-[#9A6BFF] text-white"
                     : "bg-slate-200/80 text-slate-600 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/15"
@@ -150,7 +188,7 @@ export default function Page() {
           <button
             type="button"
             onClick={() => setCategoryOpen((o) => !o)}
-            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+            className="cursor-pointer flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
           >
             <LayoutGrid className="h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
             <span className="flex-1">{categoryLabel}</span>
@@ -174,7 +212,7 @@ export default function Page() {
                     setCategory("");
                     setCategoryOpen(false);
                   }}
-                  className={`w-full px-4 py-2.5 text-left text-sm ${
+                  className={`w-full px-4 py-2.5 text-left text-sm cursor-pointer ${
                     !category
                       ? "bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20"
                       : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
@@ -190,7 +228,7 @@ export default function Page() {
                       setCategory(c.name);
                       setCategoryOpen(false);
                     }}
-                    className={`w-full px-4 py-2.5 text-left text-sm ${
+                    className={`w-full px-4 py-2.5 text-left text-sm cursor-pointer ${
                       category === c.name
                         ? "bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20"
                         : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
@@ -207,9 +245,24 @@ export default function Page() {
         {/* Events list */}
         <div className="mt-10 space-y-6">
           {events.length === 0 && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No events found.
-            </p>
+            <div
+              className="flex flex-col items-center justify-center"
+              style={{ paddingTop: "100px" }}
+            >
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                No events yet? Create your new event and earn{" "}
+                <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
+                  1% of the total event pool
+                </span>
+                .
+              </p>
+              <Link
+                href="/create"
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition"
+              >
+                Create New Event
+              </Link>
+            </div>
           )}
           {events.map((ev) => (
             <EventCard
