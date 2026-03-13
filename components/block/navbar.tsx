@@ -8,9 +8,12 @@ import { useWalletStore } from "../../store/useWalletStore";
 
 type Theme = "light" | "dark";
 
+const KEPLR_URL = "https://www.keplr.app/download";
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [fundsOpen, setFundsOpen] = useState(false);
+  const [showKeplrModal, setShowKeplrModal] = useState(false);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") {
       return "dark";
@@ -37,13 +40,16 @@ export default function Navbar() {
 
   useEffect(() => {
     const onEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileMenuOpen(false);
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        setShowKeplrModal(false);
+      }
     };
-    if (mobileMenuOpen) {
+    if (mobileMenuOpen || showKeplrModal) {
       document.addEventListener("keydown", onEscape);
       return () => document.removeEventListener("keydown", onEscape);
     }
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, showKeplrModal]);
 
   const fetchBalance = async (addr: string) => {
     const balance = await fetch(`/api/balance`, {
@@ -90,6 +96,13 @@ export default function Navbar() {
 
   const handlePrimaryButtonClick = async () => {
     if (!isConnected || !address) {
+      if (
+        typeof window !== "undefined" &&
+        !(window as unknown as { keplr?: unknown }).keplr
+      ) {
+        setShowKeplrModal(true);
+        return;
+      }
       await connectWallet();
       return;
     }
@@ -223,6 +236,58 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Keplr not installed modal */}
+      {showKeplrModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60"
+            aria-hidden
+            onClick={() => setShowKeplrModal(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="keplr-modal-title"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-gray-900 p-6 shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id="keplr-modal-title"
+                  className="text-lg font-bold text-white"
+                >
+                  Keplr wallet required
+                </h2>
+                <p className="mt-2 text-sm text-gray-400">
+                  This app uses the Keplr wallet to connect to the Cosmos
+                  ecosystem. Please install the Keplr browser extension to use
+                  the wallet features (connect, deposit, withdraw, create
+                  events).
+                </p>
+                <div className="mt-4 flex justify-center">
+                  <a
+                    href={KEPLR_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded-full bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 transition"
+                  >
+                    Install Keplr
+                  </a>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowKeplrModal(false)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile menu - Tailwind only */}
       {mobileMenuOpen && (
         <div className="lg:hidden">
@@ -273,20 +338,36 @@ export default function Navbar() {
                   >
                     Create
                   </Link>
-                  <Link
-                    href="/deposit"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                  >
-                    Deposit
-                  </Link>
-                  <Link
-                    href="/withdraw"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                  >
-                    Withdraw
-                  </Link>
+                  {isConnected && (
+                    <>
+                      <Link
+                        href="/deposit"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        Deposit
+                      </Link>
+                      <Link
+                        href="/withdraw"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="-mx-3 block rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        Withdraw
+                      </Link>
+                    </>
+                  )}
+                  {!isConnected && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handlePrimaryButtonClick();
+                      }}
+                      className="-mx-3 block w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-white bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] hover:brightness-110 transition"
+                    >
+                      Connect Wallet
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
