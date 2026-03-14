@@ -7,10 +7,12 @@ import { txCreateEvent } from "@/blockchain/cosmos/events";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
 import { Info, PlusCircle } from "lucide-react";
+import { useConfigStore } from "@/store/useConfigStore";
 
 export default function Page() {
   const router = useRouter();
   const { address, signer } = useWalletStore();
+  const { creatorPercent, companyPercent } = useConfigStore();
   const [question, setQuestion] = useState("");
   const [questionError, setQuestionError] = useState("");
   const [answers, setAnswers] = useState(["", ""]);
@@ -293,9 +295,9 @@ export default function Page() {
                     Advanced AI Resolution:
                   </span>{" "}
                   This market will use real-time data feeds and LLM verification
-                  to settle. A protocol fee of 1% will be applied to the total
-                  liquidity pool. The event creator will earn 1% of the total
-                  pool.
+                  to settle. A protocol fee of {companyPercent}% will be applied
+                  to the total liquidity pool. The event creator will earn{" "}
+                  {creatorPercent}% of the total pool.
                 </div>
               </div>
             </div>

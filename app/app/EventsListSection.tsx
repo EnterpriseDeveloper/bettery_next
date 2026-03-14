@@ -3,6 +3,7 @@
 import Link from "next/link";
 import EventCard from "@/components/block/event";
 import type { Tab } from "./types";
+import { useConfigStore } from "@/store/useConfigStore";
 
 type Props = {
   tab: Tab;
@@ -23,26 +24,6 @@ type Props = {
 const createEventLinkClass =
   "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition";
 
-const emptyStateCopy = (
-  <>
-    No events yet? Create your new event and earn{" "}
-    <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
-      1% of the total event pool
-    </span>
-    .
-  </>
-);
-
-const noMoreCopy = (
-  <>
-    No more events found? Create your new event and earn{" "}
-    <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
-      1% of the total event pool
-    </span>
-    .
-  </>
-);
-
 export function EventsListSection({
   tab,
   address,
@@ -54,6 +35,7 @@ export function EventsListSection({
   onSelect,
   onSubmitAnswer,
 }: Props) {
+  const { creatorPercent } = useConfigStore();
   const showList = tab !== "my-bets" || address;
 
   return (
@@ -73,7 +55,11 @@ export function EventsListSection({
               style={{ paddingTop: "100px" }}
             >
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                {emptyStateCopy}
+                No events yet? Create your new event and earn{" "}
+                <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
+                  {creatorPercent}% of the total event pool
+                </span>
+                .
               </p>
               <Link href="/create" className={createEventLinkClass}>
                 Create New Event
@@ -99,7 +85,11 @@ export function EventsListSection({
               style={{ paddingTop: "100px" }}
             >
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                {noMoreCopy}
+                No more events found? Create your new event and earn{" "}
+                <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
+                  {creatorPercent}% of the total event pool
+                </span>
+                .
               </p>
               <Link href="/create" className={createEventLinkClass}>
                 Create New Event
