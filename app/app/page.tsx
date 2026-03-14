@@ -138,7 +138,7 @@ export default function Page() {
         onProceed={handleProceedWithZero}
       />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Tabs */}
         <div className="flex gap-8 border-b border-slate-200 dark:border-white/10">
           <button
@@ -274,16 +274,19 @@ export default function Page() {
               </Link>
             </div>
           )}
-          {events.map((ev) => (
-            <EventCard
-              key={ev.id}
-              ev={ev}
-              currentAddress={address}
-              selected={selected}
-              handleSelect={handleSelect}
-              handleSubmitAnswer={handleSubmitAnswer}
-            />
-          ))}
+          <div className="flex flex-wrap gap-6">
+            {events.map((ev) => (
+              <div key={ev.id} className="w-[388px] flex-shrink-0">
+                <EventCard
+                  ev={ev}
+                  currentAddress={address}
+                  selected={selected}
+                  handleSelect={handleSelect}
+                  handleSubmitAnswer={handleSubmitAnswer}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </div>

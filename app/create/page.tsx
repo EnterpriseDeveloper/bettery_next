@@ -22,6 +22,11 @@ export default function Page() {
   const [walletError, setWalletError] = useState("");
 
   const handleAddAnswer = () => {
+    if (answers.length >= 4) {
+      setAnswersError("You can only add up to 4 answers");
+      return;
+    }
+    setAnswersError("");
     setAnswers((prev) => [...prev, ""]);
   };
 
