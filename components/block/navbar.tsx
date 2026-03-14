@@ -156,7 +156,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setFundsOpen((o) => !o)}
-                className="flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors"
+                className="cursor-pointer flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors"
               >
                 Funds
                 <span
