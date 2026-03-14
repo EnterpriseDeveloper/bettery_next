@@ -337,19 +337,13 @@ export default function Page() {
               </div>
             ))}
           </div>
-          {loadingMore && (
-            <div className="mt-4 flex justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
-              Loading more events...
-            </div>
-          )}
-          <div className="h-10 w-full" aria-hidden />
-          {noMoreEvents && !loadingMore && (
+          {noMoreEvents && (
             <div
               className="flex flex-col items-center justify-center"
-              style={{ paddingBottom: "50px" }}
+              style={{ paddingTop: "100px" }}
             >
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                No events found for yourself? Create your new event and earn{" "}
+                No more events found? Create your new event and earn{" "}
                 <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
                   1% of the total event pool
                 </span>
@@ -361,6 +355,12 @@ export default function Page() {
               >
                 Create New Event
               </Link>
+            </div>
+          )}
+          <div ref={loadMoreRef} className="h-10 w-full" aria-hidden />
+          {loadingMore && (
+            <div className="mt-4 flex justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
+              Loading more…
             </div>
           )}
         </div>
