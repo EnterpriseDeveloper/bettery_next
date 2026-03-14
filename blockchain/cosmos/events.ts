@@ -14,7 +14,6 @@ import { TxCreateEvent } from "@/types/events";
 const registry = new Registry(defaultRegistryTypes);
 
 registry.register("/bettery.events.v1.MsgCreateEvent", MsgCreateEvent);
-registry.register("/bettery.events.v1.MsgCreatePartEvent", MsgCreatePartEvent);
 
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_URL as string;
 
@@ -47,41 +46,6 @@ export const txCreateEvent = async (
     return result;
   } catch (error) {
     console.error("Error creating event");
-    console.log(error);
-  }
-};
-
-export const txParticipateEvent = async (
-  signer: OfflineAminoSigner & OfflineDirectSigner,
-  address: string,
-  eventId: number,
-  selectedAnswer: string,
-  amount: bigint,
-) => {
-  if (!signer || !address) {
-    throw new Error("Wallet not connected. Connect your Keplr wallet first.");
-  }
-  try {
-    const client = await SigningStargateClient.connectWithSigner(
-      rpcEndpoint,
-      signer,
-      { registry, gasPrice: GasPrice.fromString("0ubet") },
-    );
-    const msg = {
-      typeUrl: "/bettery.events.v1.MsgCreatePartEvent",
-      value: MsgCreatePartEvent.fromPartial({
-        creator: address,
-        eventId,
-        answers: selectedAnswer,
-        amount: amount.toString(),
-      }),
-    };
-
-    const result = await client.signAndBroadcast(address, [msg], "auto");
-    console.log(result);
-    return result;
-  } catch (error) {
-    console.error("Error participating in event");
     console.log(error);
   }
 };

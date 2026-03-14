@@ -30,6 +30,7 @@ export default function Page() {
     handleSubmitAnswer,
     handleProceedWithZero,
     closeZeroAmountModal,
+    handleIncreaseAnswer,
   } = useEventsList();
 
   const categoryLabel = category
@@ -72,6 +73,7 @@ export default function Page() {
           noMoreEvents={noMoreEvents}
           onSelect={handleSelect}
           onSubmitAnswer={handleSubmitAnswer}
+          onIncreaseAnswer={handleIncreaseAnswer}
         />
       </main>
     </div>

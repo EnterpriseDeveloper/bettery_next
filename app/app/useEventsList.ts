@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
-import { txParticipateEvent } from "@/blockchain/cosmos/events";
+import {
+  txIncreasePart,
+  txParticipateEvent,
+} from "@/blockchain/cosmos/participate";
 import { parseUnits } from "viem";
 import type { Tab, StatusFilter, PendingZeroBet } from "./types";
 import { fetchEventsList } from "./fetchEvents";
@@ -31,7 +34,7 @@ export function useEventsList() {
     setTotalPages(0);
     setNoMoreEvents(false);
     let cancelled = false;
-    fetchEventsList(tab, status, category, address, 1).then((result) => {
+    fetchEventsList(tab, status, category, address).then((result) => {
       if (!cancelled) {
         setEvents(result.events);
         setCurrentPage(result.page);
@@ -74,23 +77,18 @@ export function useEventsList() {
     return () => observer.disconnect();
   }, [loadMore]);
 
-  const handleSelect = useCallback((eventId: number | string, answerIndex: number) => {
-    setSelected((s) => ({ ...s, [eventId]: answerIndex }));
-  }, []);
+  const handleSelect = useCallback(
+    (eventId: number | string, answerIndex: number) => {
+      setSelected((s) => ({ ...s, [eventId]: answerIndex }));
+    },
+    [],
+  );
 
   const handleSubmitAnswer = useCallback(
-    async (
-      eventId: number | string,
-      amount: string,
-      answerIndex: number,
-    ) => {
+    async (eventId: number | string, amount: string, answerIndex: number) => {
       const ev = events.find((e) => String(e.id) === String(eventId));
       if (!ev || answerIndex < 0) return;
       const answer = ev.answers[answerIndex];
-      if (answer == null) {
-        alert("Please select an answer");
-        return;
-      }
       if (!amount || Number(amount) <= 0) {
         setZeroAmountModal({ open: true, pending: { eventId, answerIndex } });
         return;
@@ -104,13 +102,33 @@ export function useEventsList() {
         answer,
         amountBigInt,
       );
-      const data = await fetchEventsList(tab, status, category, address, 1);
+      const data = await fetchEventsList(tab, status, category, address);
       setEvents(data.events);
       setCurrentPage(data.page);
       setTotalPages(data.totalPages);
       setNoMoreEvents(data.totalPages > 0 && data.page >= data.totalPages);
     },
     [events, tab, status, category, address, signer],
+  );
+
+  const handleIncreaseAnswer = useCallback(
+    async (eventId: number | string, amount: string, partId: number) => {
+      if (!signer || !address) return;
+      const amountBigInt = parseUnits(amount, 6);
+      await txIncreasePart(
+        signer,
+        address,
+        partId,
+        Number(eventId),
+        amountBigInt,
+      );
+      const data = await fetchEventsList(tab, status, category, address);
+      setEvents(data.events);
+      setCurrentPage(data.page);
+      setTotalPages(data.totalPages);
+      setNoMoreEvents(data.totalPages > 0 && data.page >= data.totalPages);
+    },
+    [tab, status, category, address, signer],
   );
 
   const handleProceedWithZero = useCallback(async () => {
@@ -133,7 +151,7 @@ export function useEventsList() {
       answer,
       0n,
     );
-    const data = await fetchEventsList(tab, status, category, address, 1);
+    const data = await fetchEventsList(tab, status, category, address);
     setEvents(data.events);
     setCurrentPage(data.page);
     setTotalPages(data.totalPages);
@@ -163,5 +181,6 @@ export function useEventsList() {
     handleSubmitAnswer,
     handleProceedWithZero,
     closeZeroAmountModal,
+    handleIncreaseAnswer,
   };
 }

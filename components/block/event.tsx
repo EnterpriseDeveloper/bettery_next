@@ -13,6 +13,7 @@ type EventCardProps = {
     category: string;
     status?: string;
     bets?: {
+      id: number;
       creator: string;
       answer: string;
       amount: string;
@@ -26,6 +27,11 @@ type EventCardProps = {
     eventId: number | string,
     amount: string,
     answerIndex: number,
+  ) => void;
+  handleIncreaseAnswer?: (
+    eventId: number | string,
+    amount: string,
+    partId: number,
   ) => void;
 };
 
@@ -43,6 +49,7 @@ export default function EventCard({
   currentAddress,
   handleSelect,
   handleSubmitAnswer,
+  handleIncreaseAnswer,
 }: EventCardProps) {
   const [amount, setAmount] = useState("");
   const [increaseAmount, setIncreaseAmount] = useState("");
@@ -57,7 +64,7 @@ export default function EventCard({
   );
 
   const userBet =
-    currentAddress && ev.bets?.find((b) => b.creator === currentAddress);
+    currentAddress && ev.bets?.filter((b) => b.creator === currentAddress);
   const hasBet = !!userBet;
 
   useEffect(() => {
@@ -66,6 +73,18 @@ export default function EventCard({
 
   const eventId = String(ev.id);
   const endsLabel = endsInDays(ev.endTime ?? "0");
+
+  function formatAmountUsdt(
+    userBet: {
+      id: number;
+      creator: string;
+      answer: string;
+      amount: string;
+      token?: string;
+    }[],
+  ): import("react").ReactNode {
+    return userBet.reduce((acc, bet) => acc + Number(bet.amount), 0) / 100;
+  }
 
   return (
     <article
@@ -146,14 +165,14 @@ export default function EventCard({
             </p>
             <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-lg font-bold text-[#9A6BFF]">
-                {userBet!.answer}
+                {userBet![0].answer}
               </span>
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   Locked
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {Number(userBet!.amount) / 100} {userBet!.token ?? "USDT"}
+                  {formatAmountUsdt(userBet)} {userBet![0].token ?? "USDT"}
                 </span>
               </div>
             </div>
@@ -182,13 +201,17 @@ export default function EventCard({
                       return;
                     }
                     setWalletError("");
-                    const idx = ev.answers.indexOf(userBet.answer);
-                    if (
-                      idx >= 0 &&
-                      increaseAmount &&
-                      Number(increaseAmount) > 0
-                    ) {
-                      handleSubmitAnswer?.(ev.id, increaseAmount, idx);
+                    if (!increaseAmount || Number(increaseAmount) <= 0) {
+                      setWalletError("Enter an amount greater than 0");
+                      return;
+                    }
+                    const idx = ev.answers.indexOf(userBet[0].answer);
+                    if (idx >= 0) {
+                      handleIncreaseAnswer?.(
+                        eventId,
+                        increaseAmount,
+                        Number(userBet[0].id),
+                      );
                       setIncreaseAmount("");
                     }
                   }}
@@ -199,16 +222,16 @@ export default function EventCard({
               </>
             )}
             {walletError && (
-              <div className="text-center w-full rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
-                {walletError}
-              </div>
+              <p className="text-xs text-red-500">{walletError}</p>
             )}
-            <Link
-              href={`/event/${eventId}`}
-              className="rounded-xl border-2 border-[#9A6BFF] bg-transparent px-5 py-2.5 text-sm font-bold text-[#9A6BFF] transition hover:bg-[#9A6BFF]/10 dark:text-white dark:border-white/30 dark:hover:bg-white/10"
-            >
-              Show details
-            </Link>
+            <div>
+              <Link
+                href={`/event/${eventId}`}
+                className="rounded-xl border-2 border-[#9A6BFF] bg-transparent px-5 py-2.5 text-sm font-bold text-[#9A6BFF] transition hover:bg-[#9A6BFF]/10 dark:text-white dark:border-white/30 dark:hover:bg-white/10"
+              >
+                Show details
+              </Link>
+            </div>
           </div>
         </>
       ) : (
@@ -262,9 +285,9 @@ export default function EventCard({
             ))}
           </div>
           {walletError && (
-            <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+            <p className="pt-2 text-center text-xs text-red-500">
               {walletError}
-            </div>
+            </p>
           )}
           <div className="mt-3">
             <Link

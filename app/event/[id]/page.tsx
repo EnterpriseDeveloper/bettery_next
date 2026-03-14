@@ -18,7 +18,10 @@ import { parseUnits } from "viem";
 import Navbar from "@/components/block/navbar";
 import BetModal from "@/components/modals/betModal";
 import { useWalletStore } from "@/store/useWalletStore";
-import { txParticipateEvent } from "@/blockchain/cosmos/events";
+import {
+  txIncreasePart,
+  txParticipateEvent,
+} from "@/blockchain/cosmos/participate";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -59,12 +62,21 @@ function formatDate(timestamp: bigint | string): string {
   });
 }
 
+function formatAmountUsdt(value: EventFromApi["bets"]): string {
+  const n = value.reduce((acc, bet) => acc + Number(bet.amount), 0);
+  const scaled = n / 100;
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(scaled);
+}
+
 function formatUsdt(value: bigint | string): string {
   const n = typeof value === "string" ? Number(value) : Number(value);
   const scaled = n / 100;
   return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(scaled);
 }
 
@@ -151,12 +163,33 @@ export default function EventPage({ params }: EventPageProps) {
     [signer, address, refetchEvent],
   );
 
+  const handleIncreaseAnswer = useCallback(
+    async (eventId: string, amount: string, partId: number) => {
+      setWalletError("");
+      if (!signer || !address) {
+        setWalletError("Connect your wallet to increase your bet.");
+        return;
+      }
+      try {
+        const amountBigInt = parseUnits(amount, 6);
+        await txIncreasePart(
+          signer,
+          address,
+          partId,
+          Number(eventId),
+          amountBigInt,
+        );
+        await refetchEvent(eventId);
+        setIncreaseAmount("");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [signer, address, refetchEvent],
+  );
+
   const handleProceedWithZero = useCallback(
-    async (
-      eventId: string,
-      answers: string[],
-      pendingAnswerIndex: number,
-    ) => {
+    async (eventId: string, answers: string[], pendingAnswerIndex: number) => {
       if (!signer || !address) {
         setZeroAmountModal({ open: false, pending: null });
         return;
@@ -170,11 +203,11 @@ export default function EventPage({ params }: EventPageProps) {
       setSubmitting(true);
       try {
         await txParticipateEvent(signer, address, Number(eventId), answer, 0n);
-await refetchEvent(eventId);
-    } finally {
-      setSubmitting(false);
-    }
-  },
+        await refetchEvent(eventId);
+      } finally {
+        setSubmitting(false);
+      }
+    },
     [signer, address, refetchEvent],
   );
 
@@ -208,9 +241,13 @@ await refetchEvent(eventId);
       : "bg-slate-100 dark:bg-white/10 border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400";
 
   const isUserBet = (answer: string) =>
-    address && event.bets.some((b) => b.creator === address && b.answer === answer);
+    address &&
+    event.bets.some((b) => b.creator === address && b.answer === answer);
 
-  const userBet = address ? event.bets.find((b) => b.creator === address) : null;
+  const userBet = address
+    ? event.bets.filter((b) => b.creator === address)
+    : null;
+
   const isActive = event.status.toUpperCase() === "ACTIVE";
 
   return (
@@ -220,14 +257,14 @@ await refetchEvent(eventId);
         open={zeroAmountModal.open}
         onClose={closeZeroModal}
         onProceed={() => {
-                if (zeroAmountModal.pending != null) {
-                  void handleProceedWithZero(
-                    event.id,
-                    event.answers,
-                    zeroAmountModal.pending.answerIndex,
-                  );
-                }
-              }}
+          if (zeroAmountModal.pending != null) {
+            void handleProceedWithZero(
+              event.id,
+              event.answers,
+              zeroAmountModal.pending.answerIndex,
+            );
+          }
+        }}
       />
 
       <main className="max-w-7xl mx-auto px-4 md:px-10 py-6">
@@ -335,10 +372,11 @@ await refetchEvent(eventId);
                         </p>
                         <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
                           <span className="text-lg font-bold text-[#9A6BFF] dark:text-[#9A6BFF]">
-                            {userBet.answer}
+                            {userBet[0].answer}
                           </span>
                           <span className="font-bold text-[#1c1c1c] dark:text-white">
-                            {formatUsdt(userBet.amount)} {userBet.token || "USDT"}
+                            {formatAmountUsdt(userBet)}{" "}
+                            {userBet[0].token || "USDT"}
                           </span>
                         </div>
                       </div>
@@ -350,18 +388,34 @@ await refetchEvent(eventId);
                           value={increaseAmount}
                           onChange={(e) => {
                             const value = e.target.value.replace(",", ".");
-                            const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                            const match = value.match(
+                              /^(\d+)?(\.(\d{0,2})?)?$/,
+                            );
                             if (match || value === "") setIncreaseAmount(value);
                           }}
                           className="w-40 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2 text-sm text-[#1c1c1c] dark:text-slate-100"
                         />
                         <button
                           type="button"
-                          disabled={submitting || !increaseAmount || Number(increaseAmount) <= 0}
+                          disabled={
+                            submitting ||
+                            !increaseAmount ||
+                            Number(increaseAmount) <= 0
+                          }
                           onClick={() => {
-                            const idx = event.answers.indexOf(userBet.answer);
-                            if (idx >= 0 && increaseAmount && Number(increaseAmount) > 0) {
-                              handleSubmitAnswer(event.id, event.answers, idx, increaseAmount);
+                            const idx = event.answers.indexOf(
+                              userBet[0].answer,
+                            );
+                            if (
+                              idx >= 0 &&
+                              increaseAmount &&
+                              Number(increaseAmount) > 0
+                            ) {
+                              handleIncreaseAnswer(
+                                event.id,
+                                increaseAmount,
+                                Number(userBet[0].id),
+                              );
                             }
                           }}
                           className="rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
@@ -382,7 +436,9 @@ await refetchEvent(eventId);
                           value={amount}
                           onChange={(e) => {
                             const value = e.target.value.replace(",", ".");
-                            const match = value.match(/^(\d+)?(\.(\d{0,2})?)?$/);
+                            const match = value.match(
+                              /^(\d+)?(\.(\d{0,2})?)?$/,
+                            );
                             if (match || value === "") setAmount(value);
                           }}
                           placeholder="0"
@@ -400,11 +456,18 @@ await refetchEvent(eventId);
                             disabled={submitting}
                             onClick={() => {
                               if (!address) {
-                                setWalletError("Connect your wallet to place a bet.");
+                                setWalletError(
+                                  "Connect your wallet to place a bet.",
+                                );
                                 return;
                               }
                               setWalletError("");
-                              handleSubmitAnswer(event.id, event.answers, idx, amount);
+                              handleSubmitAnswer(
+                                event.id,
+                                event.answers,
+                                idx,
+                                amount,
+                              );
                             }}
                             className={`rounded-xl px-4 py-3 text-sm font-bold text-white transition disabled:opacity-50 ${
                               idx % 2 === 0

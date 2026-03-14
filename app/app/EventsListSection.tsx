@@ -19,6 +19,11 @@ type Props = {
     amount: string,
     answerIndex: number,
   ) => void;
+  onIncreaseAnswer: (
+    eventId: number | string,
+    amount: string,
+    partId: number,
+  ) => void;
 };
 
 const createEventLinkClass =
@@ -34,6 +39,7 @@ export function EventsListSection({
   noMoreEvents,
   onSelect,
   onSubmitAnswer,
+  onIncreaseAnswer,
 }: Props) {
   const { creatorPercent } = useConfigStore();
   const showList = tab !== "my-bets" || address;
@@ -75,6 +81,7 @@ export function EventsListSection({
                   selected={selected}
                   handleSelect={onSelect}
                   handleSubmitAnswer={onSubmitAnswer}
+                  handleIncreaseAnswer={onIncreaseAnswer}
                 />
               </div>
             ))}

@@ -12,7 +12,7 @@ export async function fetchEventsList(
   status: StatusFilter | "",
   category: string,
   address: string | null | undefined,
-  page = 1,
+  page = 0,
 ): Promise<FetchEventsResult> {
   const params = new URLSearchParams();
   params.set("limit", String(EVENTS_PAGE_SIZE));
@@ -21,7 +21,7 @@ export async function fetchEventsList(
   if (category) params.set("category", category);
 
   const res = await fetch(`/api/events?${params.toString()}`);
-  if (!res.ok) return { events: [], totalPages: 0, page: 1 };
+  if (!res.ok) return { events: [], totalPages: 0, page: 0 };
   const data = await res.json();
   let list = data.events ?? [];
   if (tab === "my-bets" && address) {
@@ -32,6 +32,6 @@ export async function fetchEventsList(
   return {
     events: list,
     totalPages: data.totalPages ?? 0,
-    page: data.page ?? 1,
+    page: data.page ?? 0,
   };
 }

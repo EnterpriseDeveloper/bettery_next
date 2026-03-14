@@ -57,8 +57,7 @@ export default function Navbar() {
       await connect();
       const currentAddress = useWalletStore.getState().address;
       if (currentAddress) {
-        console.log("Connected address:", currentAddress);
-        await letsMintToken();
+        await letsMintToken(currentAddress);
         const balanceData = await fetchBalance(currentAddress);
         useWalletStore.getState().setBalance(balanceData.balance);
       }
@@ -67,20 +66,18 @@ export default function Navbar() {
     }
   };
 
-  const letsMintToken = async () => {
-    if (address) {
-      console.log("Connected address:", address);
-      try {
-        await fetch(`/api/mint`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address }),
-        });
-        const balanceData = await fetchBalance(address);
-        useWalletStore.getState().setBalance(balanceData.balance);
-      } catch (error) {
-        console.log("Error minting token:", error);
-      }
+  const letsMintToken = async (address: string) => {
+    console.log("Connected address:", address);
+    try {
+      await fetch(`/api/mint`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
+      });
+      const balanceData = await fetchBalance(address);
+      useWalletStore.getState().setBalance(balanceData.balance);
+    } catch (error) {
+      console.log("Error minting token:", error);
     }
   };
 
