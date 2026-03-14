@@ -1,181 +1,36 @@
 "use client";
 
-import EventCard from "@/components/block/event";
 import Navbar from "@/components/block/navbar";
-import { txParticipateEvent } from "@/blockchain/cosmos/events";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useWalletStore } from "../../store/useWalletStore";
-import { categories } from "@/config/config";
-import { ChevronDown, LayoutGrid } from "lucide-react";
-import { parseUnits } from "viem";
-import Link from "next/link";
 import BetModal from "@/components/modals/betModal";
-
-type Tab = "all" | "my-bets";
-type StatusFilter = "ACTIVE" | "FINISHED" | "REJECTED";
-
-const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "FINISHED", label: "Finished" },
-  { value: "REJECTED", label: "Rejected" },
-];
-
-type PendingZeroBet = { eventId: number | string; answerIndex: number };
-
-const EVENTS_PAGE_SIZE = 12;
+import { categories } from "@/config/config";
+import { useEventsList } from "./useEventsList";
+import { EventsPageTabs } from "./EventsPageTabs";
+import { EventsPageHeader } from "./EventsPageHeader";
+import { CategoryDropdown } from "./CategoryDropdown";
+import { EventsListSection } from "./EventsListSection";
 
 export default function Page() {
-  const { address, signer } = useWalletStore();
-  const [tab, setTab] = useState<Tab>("all");
-  const [status, setStatus] = useState<StatusFilter | "">("ACTIVE");
-  const [category, setCategory] = useState<string>("");
-  const [events, setEvents] = useState<any[]>([]);
-  const [selected, setSelected] = useState<Record<number, number | null>>({});
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [zeroAmountModal, setZeroAmountModal] = useState<{
-    open: boolean;
-    pending: PendingZeroBet | null;
-  }>({ open: false, pending: null });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [noMoreEvents, setNoMoreEvents] = useState(false);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  async function fetchEventsList(
-    tab: Tab,
-    status: StatusFilter | "",
-    category: string,
-    address: string | null | undefined,
-    page = 1,
-  ): Promise<{ events: any[]; totalPages: number; page: number }> {
-    const params = new URLSearchParams();
-    params.set("limit", String(EVENTS_PAGE_SIZE));
-    params.set("page", String(page));
-    if (status) params.set("status", status);
-    if (category) params.set("category", category);
-
-    const res = await fetch(`/api/events?${params.toString()}`);
-    if (!res.ok) return { events: [], totalPages: 0, page: 1 };
-    const data = await res.json();
-    let list = data.events ?? [];
-    if (tab === "my-bets" && address) {
-      list = list.filter((ev: any) =>
-        ev.bets?.some((b: any) => b.creator === address),
-      );
-    }
-
-    if (data.totalPages === data.page) {
-      setNoMoreEvents(true);
-    }
-    return {
-      events: list,
-      totalPages: data.totalPages ?? 0,
-      page: data.page ?? 1,
-    };
-  }
-
-  useEffect(() => {
-    setEvents([]);
-    setCurrentPage(1);
-    setTotalPages(0);
-    let cancelled = false;
-    fetchEventsList(tab, status, category, address, 1).then(
-      ({ events: list, totalPages: pages, page }) => {
-        if (!cancelled) {
-          setEvents(list);
-          setCurrentPage(page);
-          setTotalPages(pages);
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [tab, status, category, address]);
-
-  const loadMore = useCallback(() => {
-    if (loadingMore || currentPage >= totalPages) return;
-    setLoadingMore(true);
-    fetchEventsList(tab, status, category, address, currentPage + 1)
-      .then(({ events: nextEvents, totalPages: pages, page }) => {
-        setEvents((prev) => [...prev, ...nextEvents]);
-        setCurrentPage(page);
-        setTotalPages(pages);
-      })
-      .finally(() => setLoadingMore(false));
-  }, [tab, status, category, address, currentPage, totalPages, loadingMore]);
-
-  useEffect(() => {
-    const el = loadMoreRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
-      },
-      { rootMargin: "200px", threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [loadMore]);
-
-  const handleSelect = (eventId: number | string, answerIndex: number) => {
-    setSelected((s) => ({ ...s, [eventId]: answerIndex }));
-  };
-
-  const handleSubmitAnswer = async (
-    eventId: number | string,
-    amount: string,
-    answerIndex: number,
-  ) => {
-    const ev = events.find((e) => String(e.id) === String(eventId));
-    if (!ev) return;
-    if (answerIndex < 0) return;
-    const answer = ev.answers[answerIndex];
-    if (answer == null) {
-      alert("Please select an answer");
-      return;
-    }
-    if (!amount || Number(amount) <= 0) {
-      setZeroAmountModal({ open: true, pending: { eventId, answerIndex } });
-      return;
-    }
-    const amountBigInt = parseUnits(amount, 6);
-    await txParticipateEvent(
-      signer!,
-      address!,
-      Number(eventId),
-      answer,
-      amountBigInt,
-    );
-    const data = await fetchEventsList(tab, status, category, address, 1);
-    setEvents(data.events);
-    setCurrentPage(data.page);
-    setTotalPages(data.totalPages);
-  };
-
-  const handleProceedWithZero = async () => {
-    const { pending } = zeroAmountModal;
-    if (!pending || !signer || !address) {
-      setZeroAmountModal({ open: false, pending: null });
-      return;
-    }
-    const ev = events.find((e) => String(e.id) === String(pending.eventId));
-    const answer = ev?.answers[pending.answerIndex];
-    if (!ev || answer == null) {
-      setZeroAmountModal({ open: false, pending: null });
-      return;
-    }
-    setZeroAmountModal({ open: false, pending: null });
-    const txResp = await txParticipateEvent(
-      signer,
-      address,
-      Number(pending.eventId),
-      answer,
-      0n,
-    );
-    console.log(txResp);
-  };
+  const {
+    address,
+    tab,
+    setTab,
+    status,
+    setStatus,
+    category,
+    setCategory,
+    categoryOpen,
+    setCategoryOpen,
+    events,
+    selected,
+    zeroAmountModal,
+    loadMoreRef,
+    loadingMore,
+    noMoreEvents,
+    handleSelect,
+    handleSubmitAnswer,
+    handleProceedWithZero,
+    closeZeroAmountModal,
+  } = useEventsList();
 
   const categoryLabel = category
     ? (categories.find((c) => c.name === category)?.name ?? "All Categories")
@@ -187,197 +42,37 @@ export default function Page() {
 
       <BetModal
         open={zeroAmountModal.open}
-        onClose={() => setZeroAmountModal({ open: false, pending: null })}
+        onClose={closeZeroAmountModal}
         onProceed={handleProceedWithZero}
       />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Tabs */}
-        <div className="flex gap-8 border-b border-slate-200 dark:border-white/10">
-          <button
-            type="button"
-            onClick={() => setTab("all")}
-            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-              tab === "all"
-                ? "text-[#9A6BFF] border-b-2 border-[#9A6BFF] dark:border-[#9A6BFF]"
-                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            }`}
-          >
-            All Events
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("my-bets")}
-            className={`pb-3 text-sm font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-              tab === "my-bets"
-                ? "text-[#9A6BFF] border-b-2 border-[#9A6BFF] dark:border-[#9A6BFF]"
-                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            }`}
-          >
-            My Bets
-          </button>
-        </div>
+        <EventsPageTabs tab={tab} onTabChange={setTab} />
 
-        {/* Title row: title + subtitle on left, status pills on right */}
-        <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white lg:text-4xl">
-              Live Prediction Markets
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Bet on outcomes using decentralized intelligence.
-            </p>
-          </div>
-          <div className="flex shrink-0 gap-2">
-            {STATUS_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setStatus(opt.value)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors cursor-pointer ${
-                  status === opt.value
-                    ? "bg-[#9A6BFF] text-white"
-                    : "bg-slate-200/80 text-slate-600 dark:bg-white/10 dark:text-slate-400 dark:hover:bg-white/15"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <EventsPageHeader status={status} onStatusChange={setStatus} />
 
-        {/* Category dropdown */}
-        <div className="relative mt-6 w-full max-w-xs">
-          <button
-            type="button"
-            onClick={() => setCategoryOpen((o) => !o)}
-            className="cursor-pointer flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-[#9A6BFF]/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
-          >
-            <LayoutGrid className="h-5 w-5 shrink-0 text-slate-500 dark:text-slate-400" />
-            <span className="flex-1">{categoryLabel}</span>
-            <ChevronDown
-              className={`h-4 w-4 shrink-0 text-slate-500 transition-transform dark:text-slate-400 ${
-                categoryOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {categoryOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                aria-hidden
-                onClick={() => setCategoryOpen(false)}
-              />
-              <div className="absolute top-full left-0 z-20 mt-1 w-full rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#0a0b10]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCategory("");
-                    setCategoryOpen(false);
-                  }}
-                  className={`w-full px-4 py-2.5 text-left text-sm cursor-pointer ${
-                    !category
-                      ? "bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20"
-                      : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
-                  }`}
-                >
-                  All Categories
-                </button>
-                {categories.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => {
-                      setCategory(c.name);
-                      setCategoryOpen(false);
-                    }}
-                    className={`w-full px-4 py-2.5 text-left text-sm cursor-pointer ${
-                      category === c.name
-                        ? "bg-[#9A6BFF]/10 text-[#9A6BFF] dark:bg-[#9A6BFF]/20"
-                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
-                    }`}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <CategoryDropdown
+          category={category}
+          categoryLabel={categoryLabel}
+          open={categoryOpen}
+          onToggle={() => setCategoryOpen((o) => !o)}
+          onSelect={(c) => {
+            setCategory(c);
+            setCategoryOpen(false);
+          }}
+        />
 
-        {/* Events list */}
-        <div className="mt-10 space-y-6">
-          {tab === "my-bets" && !address && (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <p className="text-slate-600 dark:text-slate-400">
-                Connect your wallet and see your events here.
-              </p>
-            </div>
-          )}
-          {tab !== "my-bets" || address ? (
-            <>
-              {events.length === 0 && (
-                <div
-                  className="flex flex-col items-center justify-center"
-                  style={{ paddingTop: "100px" }}
-                >
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                    No events yet? Create your new event and earn{" "}
-                    <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
-                      1% of the total event pool
-                    </span>
-                    .
-                  </p>
-                  <Link
-                    href="/create"
-                    className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition"
-                  >
-                    Create New Event
-                  </Link>
-                </div>
-              )}
-                  <div className="flex flex-wrap gap-6">
-                {events.map((ev) => (
-                  <div key={ev.id} className="w-[388px] flex-shrink-0">
-                    <EventCard
-                      ev={ev}
-                      currentAddress={address}
-                      selected={selected}
-                      handleSelect={handleSelect}
-                      handleSubmitAnswer={handleSubmitAnswer}
-                    />
-                  </div>
-                ))}
-              </div>
-              {noMoreEvents && (
-                <div
-                  className="flex flex-col items-center justify-center"
-                  style={{ paddingTop: "100px" }}
-                >
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                    No more events found? Create your new event and earn{" "}
-                    <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
-                      1% of the total event pool
-                    </span>
-                    .
-                  </p>
-                  <Link
-                    href="/create"
-                    className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition"
-                  >
-                    Create New Event
-                  </Link>
-                </div>
-              )}
-              <div ref={loadMoreRef} className="h-10 w-full" aria-hidden />
-              {loadingMore && (
-                <div className="mt-4 flex justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
-                  Loading more…
-                </div>
-              )}
-            </>
-          ) : null}
-        </div>
+        <EventsListSection
+          tab={tab}
+          address={address}
+          events={events}
+          selected={selected}
+          loadMoreRef={loadMoreRef}
+          loadingMore={loadingMore}
+          noMoreEvents={noMoreEvents}
+          onSelect={handleSelect}
+          onSubmitAnswer={handleSubmitAnswer}
+        />
       </main>
     </div>
   );
