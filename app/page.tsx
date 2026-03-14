@@ -63,7 +63,7 @@ function PredictionCard({
         </div>
       </div>
       <p className={styles.body + " text-sm text-white/80"}>
-        Total pool: {totalPool}
+        Total pool: {Number(totalPool) / 100} USDT
       </p>
     </div>
   );

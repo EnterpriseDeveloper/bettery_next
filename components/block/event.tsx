@@ -97,7 +97,7 @@ export default function EventCard({
           </span>
         </div>
         <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          Total pool: {totalPool} USDT
+          Total pool: {Number(totalPool) / 100} USDT
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export default function EventCard({
                   Locked
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {userBet!.amount} {userBet!.token ?? "USDT"}
+                  {Number(userBet!.amount) / 100} {userBet!.token ?? "USDT"}
                 </span>
               </div>
             </div>

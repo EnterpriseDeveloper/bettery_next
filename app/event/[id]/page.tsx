@@ -270,7 +270,7 @@ export default function EventPage({ params }: EventPageProps) {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Total Pool</span>
                   <span className="text-foreground font-bold text-lg">
-                    {totalPool} USDT
+                    {Number(totalPool) / 100} USDT
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
