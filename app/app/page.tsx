@@ -3,7 +3,7 @@
 import EventCard from "@/components/block/event";
 import Navbar from "@/components/block/navbar";
 import { txParticipateEvent } from "@/blockchain/cosmos/events";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
 import { categories } from "@/config/config";
 import { ChevronDown, LayoutGrid } from "lucide-react";
@@ -22,28 +22,7 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
 
 type PendingZeroBet = { eventId: number | string; answerIndex: number };
 
-async function fetchEventsList(
-  tab: Tab,
-  status: StatusFilter | "",
-  category: string,
-  address: string | null | undefined,
-): Promise<any[]> {
-  const params = new URLSearchParams();
-  params.set("limit", "50");
-  if (status) params.set("status", status);
-  if (category) params.set("category", category);
-
-  const res = await fetch(`/api/events?${params.toString()}`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  let list = data.events ?? [];
-  if (tab === "my-bets" && address) {
-    list = list.filter((ev: any) =>
-      ev.bets?.some((b: any) => b.creator === address),
-    );
-  }
-  return list;
-}
+const EVENTS_PAGE_SIZE = 6;
 
 export default function Page() {
   const { address, signer } = useWalletStore();
@@ -57,16 +36,85 @@ export default function Page() {
     open: boolean;
     pending: PendingZeroBet | null;
   }>({ open: false, pending: null });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [noMoreEvents, setNoMoreEvents] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  async function fetchEventsList(
+    tab: Tab,
+    status: StatusFilter | "",
+    category: string,
+    address: string | null | undefined,
+    page = 1,
+  ): Promise<{ events: any[]; totalPages: number; page: number }> {
+    const params = new URLSearchParams();
+    params.set("limit", String(EVENTS_PAGE_SIZE));
+    params.set("page", String(page));
+    if (status) params.set("status", status);
+    if (category) params.set("category", category);
+
+    const res = await fetch(`/api/events?${params.toString()}`);
+    if (!res.ok) return { events: [], totalPages: 0, page: 1 };
+    const data = await res.json();
+    let list = data.events ?? [];
+    if (tab === "my-bets" && address) {
+      list = list.filter((ev: any) =>
+        ev.bets?.some((b: any) => b.creator === address),
+      );
+    }
+
+    if (data.totalPages === data.page) {
+      setNoMoreEvents(true);
+    }
+    return {
+      events: list,
+      totalPages: data.totalPages ?? 0,
+      page: data.page ?? 1,
+    };
+  }
 
   useEffect(() => {
     let cancelled = false;
-    fetchEventsList(tab, status, category, address).then((list) => {
-      if (!cancelled) setEvents(list);
-    });
+    fetchEventsList(tab, status, category, address, 1).then(
+      ({ events: list, totalPages: pages, page }) => {
+        if (!cancelled) {
+          setEvents(list);
+          setCurrentPage(page);
+          setTotalPages(pages);
+        }
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, [tab, status, category, address]);
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || currentPage >= totalPages) return;
+    setLoadingMore(true);
+    fetchEventsList(tab, status, category, address, currentPage + 1)
+      .then(({ events: nextEvents, totalPages: pages, page }) => {
+        setEvents((prev) => [...prev, ...nextEvents]);
+        setCurrentPage(page);
+        setTotalPages(pages);
+      })
+      .finally(() => setLoadingMore(false));
+  }, [tab, status, category, address, currentPage, totalPages, loadingMore]);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: "200px", threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   const handleSelect = (eventId: number | string, answerIndex: number) => {
     setSelected((s) => ({ ...s, [eventId]: answerIndex }));
@@ -97,8 +145,10 @@ export default function Page() {
       answer,
       amountBigInt,
     );
-    const list = await fetchEventsList(tab, status, category, address);
-    setEvents(list);
+    const data = await fetchEventsList(tab, status, category, address, 1);
+    setEvents(data.events);
+    setCurrentPage(data.page);
+    setTotalPages(data.totalPages);
   };
 
   const handleProceedWithZero = async () => {
@@ -287,6 +337,32 @@ export default function Page() {
               </div>
             ))}
           </div>
+          {loadingMore && (
+            <div className="mt-4 flex justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
+              Loading more events...
+            </div>
+          )}
+          <div className="h-10 w-full" aria-hidden />
+          {noMoreEvents && !loadingMore && (
+            <div
+              className="flex flex-col items-center justify-center"
+              style={{ paddingBottom: "50px" }}
+            >
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                No events found for yourself? Create your new event and earn{" "}
+                <span className="font-semibold text-[#9A6BFF] dark:text-[#3CE6FF]">
+                  1% of the total event pool
+                </span>
+                .
+              </p>
+              <Link
+                href="/create"
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#9A6BFF] to-[#3CE6FF] px-4 py-2 text-sm font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition"
+              >
+                Create New Event
+              </Link>
+            </div>
+          )}
         </div>
       </main>
     </div>
