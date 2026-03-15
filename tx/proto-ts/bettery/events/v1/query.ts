@@ -106,6 +106,18 @@ export interface QueryParticipantByIdResponse {
   participant: Participant | undefined;
 }
 
+/** QueryParticipantStatusRequest defines the QueryParticipantStatusRequest message. */
+export interface QueryParticipantStatusRequest {
+  eventId: number;
+  participantId: number;
+}
+
+/** QueryParticipantStatusResponse defines the QueryParticipantStatusResponse message. */
+export interface QueryParticipantStatusResponse {
+  eventStatus: string;
+  resultAmount: number;
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -1230,6 +1242,178 @@ export const QueryParticipantByIdResponse: MessageFns<QueryParticipantByIdRespon
   },
 };
 
+function createBaseQueryParticipantStatusRequest(): QueryParticipantStatusRequest {
+  return { eventId: 0, participantId: 0 };
+}
+
+export const QueryParticipantStatusRequest: MessageFns<QueryParticipantStatusRequest> = {
+  encode(message: QueryParticipantStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.eventId !== 0) {
+      writer.uint32(8).uint64(message.eventId);
+    }
+    if (message.participantId !== 0) {
+      writer.uint32(16).uint64(message.participantId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryParticipantStatusRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryParticipantStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.eventId = longToNumber(reader.uint64());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.participantId = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryParticipantStatusRequest {
+    return {
+      eventId: isSet(object.eventId)
+        ? globalThis.Number(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.Number(object.event_id)
+        : 0,
+      participantId: isSet(object.participantId)
+        ? globalThis.Number(object.participantId)
+        : isSet(object.participant_id)
+        ? globalThis.Number(object.participant_id)
+        : 0,
+    };
+  },
+
+  toJSON(message: QueryParticipantStatusRequest): unknown {
+    const obj: any = {};
+    if (message.eventId !== 0) {
+      obj.eventId = Math.round(message.eventId);
+    }
+    if (message.participantId !== 0) {
+      obj.participantId = Math.round(message.participantId);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryParticipantStatusRequest>, I>>(base?: I): QueryParticipantStatusRequest {
+    return QueryParticipantStatusRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryParticipantStatusRequest>, I>>(
+    object: I,
+  ): QueryParticipantStatusRequest {
+    const message = createBaseQueryParticipantStatusRequest();
+    message.eventId = object.eventId ?? 0;
+    message.participantId = object.participantId ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryParticipantStatusResponse(): QueryParticipantStatusResponse {
+  return { eventStatus: "", resultAmount: 0 };
+}
+
+export const QueryParticipantStatusResponse: MessageFns<QueryParticipantStatusResponse> = {
+  encode(message: QueryParticipantStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.eventStatus !== "") {
+      writer.uint32(10).string(message.eventStatus);
+    }
+    if (message.resultAmount !== 0) {
+      writer.uint32(16).uint64(message.resultAmount);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QueryParticipantStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryParticipantStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.eventStatus = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.resultAmount = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryParticipantStatusResponse {
+    return {
+      eventStatus: isSet(object.eventStatus)
+        ? globalThis.String(object.eventStatus)
+        : isSet(object.event_status)
+        ? globalThis.String(object.event_status)
+        : "",
+      resultAmount: isSet(object.resultAmount)
+        ? globalThis.Number(object.resultAmount)
+        : isSet(object.result_amount)
+        ? globalThis.Number(object.result_amount)
+        : 0,
+    };
+  },
+
+  toJSON(message: QueryParticipantStatusResponse): unknown {
+    const obj: any = {};
+    if (message.eventStatus !== "") {
+      obj.eventStatus = message.eventStatus;
+    }
+    if (message.resultAmount !== 0) {
+      obj.resultAmount = Math.round(message.resultAmount);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryParticipantStatusResponse>, I>>(base?: I): QueryParticipantStatusResponse {
+    return QueryParticipantStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryParticipantStatusResponse>, I>>(
+    object: I,
+  ): QueryParticipantStatusResponse {
+    const message = createBaseQueryParticipantStatusResponse();
+    message.eventStatus = object.eventStatus ?? "";
+    message.resultAmount = object.resultAmount ?? 0;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -1250,6 +1434,8 @@ export interface Query {
   ListEventsForValidator(request: QueryAllEventsForValidatorRequest): Promise<QueryEventsForValidatorResponse>;
   /** ParticipantById Queries a list of ParticipantById items. */
   ParticipantById(request: QueryParticipantByIdRequest): Promise<QueryParticipantByIdResponse>;
+  /** ParticipantStatus Queries a list of ParticipantStatus items. */
+  ParticipantStatus(request: QueryParticipantStatusRequest): Promise<QueryParticipantStatusResponse>;
 }
 
 export const QueryServiceName = "bettery.events.v1.Query";
@@ -1268,6 +1454,7 @@ export class QueryClientImpl implements Query {
     this.ListValidator = this.ListValidator.bind(this);
     this.ListEventsForValidator = this.ListEventsForValidator.bind(this);
     this.ParticipantById = this.ParticipantById.bind(this);
+    this.ParticipantStatus = this.ParticipantStatus.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -1321,6 +1508,12 @@ export class QueryClientImpl implements Query {
     const data = QueryParticipantByIdRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "ParticipantById", data);
     return promise.then((data) => QueryParticipantByIdResponse.decode(new BinaryReader(data)));
+  }
+
+  ParticipantStatus(request: QueryParticipantStatusRequest): Promise<QueryParticipantStatusResponse> {
+    const data = QueryParticipantStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ParticipantStatus", data);
+    return promise.then((data) => QueryParticipantStatusResponse.decode(new BinaryReader(data)));
   }
 }
 
