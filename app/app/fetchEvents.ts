@@ -23,6 +23,7 @@ export async function fetchEventsList(
   const res = await fetch(`/api/events?${params.toString()}`);
   if (!res.ok) return { events: [], totalPages: 0, page: 0 };
   const data = await res.json();
+  console.log("data", data);
   let list = data.events ?? [];
   if (tab === "my-bets" && address) {
     list = list.filter((ev: any) =>

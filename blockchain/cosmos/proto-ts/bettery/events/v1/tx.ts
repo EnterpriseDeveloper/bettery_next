@@ -64,6 +64,29 @@ export interface MsgValidateEvent {
 export interface MsgValidateEventResponse {
 }
 
+/** MsgSetIncreasePart defines the MsgSetIncreasePart message. */
+export interface MsgSetIncreasePart {
+  creator: string;
+  eventId: number;
+  amount: string;
+  partId: number;
+}
+
+/** MsgSetIncreasePartResponse defines the MsgSetIncreasePartResponse message. */
+export interface MsgSetIncreasePartResponse {
+}
+
+/** MsgGetMoneyPart defines the MsgGetMoneyPart message. */
+export interface MsgGetMoneyPart {
+  creator: string;
+  eventId: string;
+  partId: string;
+}
+
+/** MsgGetMoneyPartResponse defines the MsgGetMoneyPartResponse message. */
+export interface MsgGetMoneyPartResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -701,6 +724,308 @@ export const MsgValidateEventResponse: MessageFns<MsgValidateEventResponse> = {
   },
 };
 
+function createBaseMsgSetIncreasePart(): MsgSetIncreasePart {
+  return { creator: "", eventId: 0, amount: "", partId: 0 };
+}
+
+export const MsgSetIncreasePart: MessageFns<MsgSetIncreasePart> = {
+  encode(message: MsgSetIncreasePart, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.eventId !== 0) {
+      writer.uint32(16).uint64(message.eventId);
+    }
+    if (message.amount !== "") {
+      writer.uint32(26).string(message.amount);
+    }
+    if (message.partId !== 0) {
+      writer.uint32(32).uint64(message.partId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgSetIncreasePart {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetIncreasePart();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.eventId = longToNumber(reader.uint64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.partId = longToNumber(reader.uint64());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSetIncreasePart {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      eventId: isSet(object.eventId)
+        ? globalThis.Number(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.Number(object.event_id)
+        : 0,
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      partId: isSet(object.partId)
+        ? globalThis.Number(object.partId)
+        : isSet(object.part_id)
+        ? globalThis.Number(object.part_id)
+        : 0,
+    };
+  },
+
+  toJSON(message: MsgSetIncreasePart): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.eventId !== 0) {
+      obj.eventId = Math.round(message.eventId);
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.partId !== 0) {
+      obj.partId = Math.round(message.partId);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetIncreasePart>, I>>(base?: I): MsgSetIncreasePart {
+    return MsgSetIncreasePart.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetIncreasePart>, I>>(object: I): MsgSetIncreasePart {
+    const message = createBaseMsgSetIncreasePart();
+    message.creator = object.creator ?? "";
+    message.eventId = object.eventId ?? 0;
+    message.amount = object.amount ?? "";
+    message.partId = object.partId ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgSetIncreasePartResponse(): MsgSetIncreasePartResponse {
+  return {};
+}
+
+export const MsgSetIncreasePartResponse: MessageFns<MsgSetIncreasePartResponse> = {
+  encode(_: MsgSetIncreasePartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgSetIncreasePartResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetIncreasePartResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgSetIncreasePartResponse {
+    return {};
+  },
+
+  toJSON(_: MsgSetIncreasePartResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetIncreasePartResponse>, I>>(base?: I): MsgSetIncreasePartResponse {
+    return MsgSetIncreasePartResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetIncreasePartResponse>, I>>(_: I): MsgSetIncreasePartResponse {
+    const message = createBaseMsgSetIncreasePartResponse();
+    return message;
+  },
+};
+
+function createBaseMsgGetMoneyPart(): MsgGetMoneyPart {
+  return { creator: "", eventId: "", partId: "" };
+}
+
+export const MsgGetMoneyPart: MessageFns<MsgGetMoneyPart> = {
+  encode(message: MsgGetMoneyPart, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.eventId !== "") {
+      writer.uint32(18).string(message.eventId);
+    }
+    if (message.partId !== "") {
+      writer.uint32(26).string(message.partId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgGetMoneyPart {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGetMoneyPart();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.eventId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.partId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgGetMoneyPart {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      eventId: isSet(object.eventId)
+        ? globalThis.String(object.eventId)
+        : isSet(object.event_id)
+        ? globalThis.String(object.event_id)
+        : "",
+      partId: isSet(object.partId)
+        ? globalThis.String(object.partId)
+        : isSet(object.part_id)
+        ? globalThis.String(object.part_id)
+        : "",
+    };
+  },
+
+  toJSON(message: MsgGetMoneyPart): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.eventId !== "") {
+      obj.eventId = message.eventId;
+    }
+    if (message.partId !== "") {
+      obj.partId = message.partId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGetMoneyPart>, I>>(base?: I): MsgGetMoneyPart {
+    return MsgGetMoneyPart.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGetMoneyPart>, I>>(object: I): MsgGetMoneyPart {
+    const message = createBaseMsgGetMoneyPart();
+    message.creator = object.creator ?? "";
+    message.eventId = object.eventId ?? "";
+    message.partId = object.partId ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgGetMoneyPartResponse(): MsgGetMoneyPartResponse {
+  return {};
+}
+
+export const MsgGetMoneyPartResponse: MessageFns<MsgGetMoneyPartResponse> = {
+  encode(_: MsgGetMoneyPartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgGetMoneyPartResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGetMoneyPartResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgGetMoneyPartResponse {
+    return {};
+  },
+
+  toJSON(_: MsgGetMoneyPartResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGetMoneyPartResponse>, I>>(base?: I): MsgGetMoneyPartResponse {
+    return MsgGetMoneyPartResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGetMoneyPartResponse>, I>>(_: I): MsgGetMoneyPartResponse {
+    const message = createBaseMsgGetMoneyPartResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -714,6 +1039,10 @@ export interface Msg {
   CreatePartEvent(request: MsgCreatePartEvent): Promise<MsgCreatePartEventResponse>;
   /** ValidateEvent defines the ValidateEvent RPC. */
   ValidateEvent(request: MsgValidateEvent): Promise<MsgValidateEventResponse>;
+  /** SetIncreasePart defines the SetIncreasePart RPC. */
+  SetIncreasePart(request: MsgSetIncreasePart): Promise<MsgSetIncreasePartResponse>;
+  /** GetMoneyPart defines the GetMoneyPart RPC. */
+  GetMoneyPart(request: MsgGetMoneyPart): Promise<MsgGetMoneyPartResponse>;
 }
 
 export const MsgServiceName = "bettery.events.v1.Msg";
@@ -727,6 +1056,8 @@ export class MsgClientImpl implements Msg {
     this.CreateEvent = this.CreateEvent.bind(this);
     this.CreatePartEvent = this.CreatePartEvent.bind(this);
     this.ValidateEvent = this.ValidateEvent.bind(this);
+    this.SetIncreasePart = this.SetIncreasePart.bind(this);
+    this.GetMoneyPart = this.GetMoneyPart.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -750,6 +1081,18 @@ export class MsgClientImpl implements Msg {
     const data = MsgValidateEvent.encode(request).finish();
     const promise = this.rpc.request(this.service, "ValidateEvent", data);
     return promise.then((data) => MsgValidateEventResponse.decode(new BinaryReader(data)));
+  }
+
+  SetIncreasePart(request: MsgSetIncreasePart): Promise<MsgSetIncreasePartResponse> {
+    const data = MsgSetIncreasePart.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SetIncreasePart", data);
+    return promise.then((data) => MsgSetIncreasePartResponse.decode(new BinaryReader(data)));
+  }
+
+  GetMoneyPart(request: MsgGetMoneyPart): Promise<MsgGetMoneyPartResponse> {
+    const data = MsgGetMoneyPart.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetMoneyPart", data);
+    return promise.then((data) => MsgGetMoneyPartResponse.decode(new BinaryReader(data)));
   }
 }
 

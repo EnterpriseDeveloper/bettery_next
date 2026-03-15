@@ -39,8 +39,17 @@ function endsInDays(endTimeStr: string): string {
   const endSec = Number(endTimeStr);
   const endMs = endSec * 1000;
   const now = Date.now();
-  if (endMs <= now) return "Ended";
-  const days = Math.ceil((endMs - now) / (24 * 60 * 60 * 1000));
+  const diffMs = endMs - now;
+  if (diffMs <= 0) return "Ended";
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  if (diffMs < oneDayMs) {
+    const totalSec = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSec / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    return `Ends in ${hours}h ${minutes}m ${seconds}s`;
+  }
+  const days = Math.ceil(diffMs / oneDayMs);
   return `Ends in ${days} day${days !== 1 ? "s" : ""}`;
 }
 
@@ -63,9 +72,8 @@ export default function EventCard({
       : 0,
   );
 
-  const userBet =
-    currentAddress && ev.bets?.filter((b) => b.creator === currentAddress);
-  const hasBet = !!userBet;
+  const userBet = ev.bets?.filter((b) => b.creator === currentAddress);
+  const hasBet = userBet && userBet.length > 0;
 
   useEffect(() => {
     if (currentAddress) setWalletError("");
@@ -95,7 +103,7 @@ export default function EventCard({
       }`}
     >
       {/* Header: category + ends | total pool */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
@@ -115,9 +123,10 @@ export default function EventCard({
             {endsLabel}
           </span>
         </div>
-        <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          Total pool: {Number(totalPool) / 100} USDT
-        </div>
+      </div>
+      <div className="mb-2 w-full text-right text-sm font-medium text-slate-600 dark:text-slate-300">
+        Total pool:{" "}
+        <span className="text-[#9A6BFF]">{Number(totalPool) / 100} USDT</span>
       </div>
 
       {/* Question */}
@@ -165,14 +174,14 @@ export default function EventCard({
             </p>
             <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-lg font-bold text-[#9A6BFF]">
-                {userBet![0].answer}
+                {userBet?.[0]?.answer}
               </span>
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   Locked
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {formatAmountUsdt(userBet)} {userBet![0].token ?? "USDT"}
+                  {formatAmountUsdt(userBet)} {userBet?.[0]?.token ?? "USDT"}
                 </span>
               </div>
             </div>
@@ -205,12 +214,12 @@ export default function EventCard({
                       setWalletError("Enter an amount greater than 0");
                       return;
                     }
-                    const idx = ev.answers.indexOf(userBet[0].answer);
+                    const idx = ev.answers.indexOf(userBet?.[0]?.answer);
                     if (idx >= 0) {
                       handleIncreaseAnswer?.(
                         eventId,
                         increaseAmount,
-                        Number(userBet[0].id),
+                        Number(userBet?.[0]?.id),
                       );
                       setIncreaseAmount("");
                     }

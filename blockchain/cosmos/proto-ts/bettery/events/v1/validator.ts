@@ -18,10 +18,20 @@ export interface Validator {
   refunded: boolean;
   companyAmount: string;
   createdAt: number;
+  creatorAmount: string;
 }
 
 function createBaseValidator(): Validator {
-  return { id: 0, eventId: 0, answer: "", source: "", refunded: false, companyAmount: "", createdAt: 0 };
+  return {
+    id: 0,
+    eventId: 0,
+    answer: "",
+    source: "",
+    refunded: false,
+    companyAmount: "",
+    createdAt: 0,
+    creatorAmount: "",
+  };
 }
 
 export const Validator: MessageFns<Validator> = {
@@ -46,6 +56,9 @@ export const Validator: MessageFns<Validator> = {
     }
     if (message.createdAt !== 0) {
       writer.uint32(56).uint64(message.createdAt);
+    }
+    if (message.creatorAmount !== "") {
+      writer.uint32(66).string(message.creatorAmount);
     }
     return writer;
   },
@@ -113,6 +126,14 @@ export const Validator: MessageFns<Validator> = {
           message.createdAt = longToNumber(reader.uint64());
           continue;
         }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.creatorAmount = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -143,6 +164,11 @@ export const Validator: MessageFns<Validator> = {
         : isSet(object.created_at)
         ? globalThis.Number(object.created_at)
         : 0,
+      creatorAmount: isSet(object.creatorAmount)
+        ? globalThis.String(object.creatorAmount)
+        : isSet(object.creator_amount)
+        ? globalThis.String(object.creator_amount)
+        : "",
     };
   },
 
@@ -169,6 +195,9 @@ export const Validator: MessageFns<Validator> = {
     if (message.createdAt !== 0) {
       obj.createdAt = Math.round(message.createdAt);
     }
+    if (message.creatorAmount !== "") {
+      obj.creatorAmount = message.creatorAmount;
+    }
     return obj;
   },
 
@@ -184,6 +213,7 @@ export const Validator: MessageFns<Validator> = {
     message.refunded = object.refunded ?? false;
     message.companyAmount = object.companyAmount ?? "";
     message.createdAt = object.createdAt ?? 0;
+    message.creatorAmount = object.creatorAmount ?? "";
     return message;
   },
 };

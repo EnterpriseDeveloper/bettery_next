@@ -5,7 +5,7 @@ import {
   defaultRegistryTypes,
 } from "@cosmjs/stargate";
 import { MsgCreatePartEvent } from "./proto-ts/bettery/events/v1/tx";
-import { MsgSetIncreasePart } from "@/tx/proto-ts/bettery/events/v1/tx";
+import { MsgSetIncreasePart } from "./proto-ts/bettery/events/v1/tx";
 import { OfflineAminoSigner } from "@keplr-wallet/types";
 
 const registry = new Registry(defaultRegistryTypes);
