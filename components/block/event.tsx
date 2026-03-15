@@ -20,6 +20,9 @@ type EventCardProps = {
       answer: string;
       amount: string;
       token?: string;
+      increase?: boolean;
+      paid?: boolean;
+      status?: string;
     }[];
   };
   currentAddress?: string | null;
@@ -81,6 +84,9 @@ export default function EventCard({
 
   const userBet = ev.bets?.filter((b) => b.creator === currentAddress);
   const hasBet = userBet && userBet.length > 0;
+  /** First bet (increase: false) holds the main amount and refund status */
+  const firstBet = userBet?.find((b) => b.increase === false) ?? userBet?.[0];
+  const isRefunded = firstBet?.paid === true;
 
   useEffect(() => {
     if (currentAddress) setWalletError("");
@@ -179,59 +185,71 @@ export default function EventCard({
 
       {isRefund ? (
         <>
-          {/* Refund state: show user amount and refund button */}
-          {hasBet && userBet && (
+          {/* Refund state: show user amount and refund button, or "Refunded" if already paid */}
+          {hasBet && userBet && firstBet && (
             <div className="mt-5 space-y-4">
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Your amount
+              {isRefunded ? (
+                <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
+                  Refunded: {Number(firstBet.amount) / 100} USDT
                 </p>
-                <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
-                  {formatAmountUsdt(userBet)} {userBet[0]?.token ?? "USDT"}
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={refundLoading}
-                onClick={async () => {
-                  setWalletError("");
-                  if (!signer || !walletAddress) {
-                    setWalletError("Connect your wallet to request a refund.");
-                    return;
-                  }
-                  const partId = userBet[0]?.id;
-                  if (partId == null) return;
-                  setRefundLoading(true);
-                  try {
-                    const result = await getMoneyFromEvent(
-                      signer,
-                      walletAddress,
-                      eventId,
-                      String(partId),
-                    );
-                    if (result) {
-                      onRefund?.(eventId);
-                    } else {
-                      setWalletError("Refund request failed.");
-                    }
-                  } catch (e) {
-                    setWalletError(
-                      e instanceof Error ? e.message : "Refund request failed.",
-                    );
-                  } finally {
-                    setRefundLoading(false);
-                  }
-                }}
-                className="w-full rounded-xl bg-amber-500 py-3 px-4 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-500 dark:hover:bg-amber-600"
-              >
-                {refundLoading
-                  ? "Refunding…"
-                  : `Refund money (${formatAmountUsdt(userBet)} ${userBet[0]?.token ?? "USDT"})`}
-              </button>
-              {walletError && (
-                <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
-                  {walletError}
-                </p>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
+                    <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Your amount
+                    </p>
+                    <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
+                      {Number(firstBet.amount) / 100} {firstBet.token ?? "USDT"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={refundLoading}
+                    onClick={async () => {
+                      setWalletError("");
+                      if (!signer || !walletAddress) {
+                        setWalletError(
+                          "Connect your wallet to request a refund.",
+                        );
+                        return;
+                      }
+                      const partId = firstBet.id;
+                      if (partId == null) return;
+                      setRefundLoading(true);
+                      try {
+                        const result = await getMoneyFromEvent(
+                          signer,
+                          walletAddress,
+                          eventId,
+                          String(partId),
+                        );
+                        if (result) {
+                          onRefund?.(eventId);
+                        } else {
+                          setWalletError("Refund request failed.");
+                        }
+                      } catch (e) {
+                        setWalletError(
+                          e instanceof Error
+                            ? e.message
+                            : "Refund request failed.",
+                        );
+                      } finally {
+                        setRefundLoading(false);
+                      }
+                    }}
+                    className="cursor-pointer w-full rounded-xl bg-amber-500 py-3 px-4 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-500 dark:hover:bg-amber-600"
+                  >
+                    {refundLoading
+                      ? "Refunding…"
+                      : `Refund money (${Number(firstBet.amount) / 100} ${firstBet.token ?? "USDT"})`}
+                  </button>
+                  {walletError && (
+                    <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
+                      {walletError}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           )}
