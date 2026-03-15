@@ -24,6 +24,7 @@ type Props = {
     amount: string,
     partId: number,
   ) => void;
+  onRefund?: (eventId: string | number) => void;
 };
 
 const createEventLinkClass =
@@ -40,6 +41,7 @@ export function EventsListSection({
   onSelect,
   onSubmitAnswer,
   onIncreaseAnswer,
+  onRefund,
 }: Props) {
   const { creatorPercent } = useConfigStore();
   const showList = tab !== "my-bets" || address;
@@ -82,6 +84,7 @@ export function EventsListSection({
                   handleSelect={onSelect}
                   handleSubmitAnswer={onSubmitAnswer}
                   handleIncreaseAnswer={onIncreaseAnswer}
+                  onRefund={onRefund}
                 />
               </div>
             ))}

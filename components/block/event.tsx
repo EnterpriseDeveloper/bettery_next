@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useWalletStore } from "@/store/useWalletStore";
+import { getMoneyFromEvent } from "@/blockchain/cosmos/participate";
 
 type EventCardProps = {
   ev: {
@@ -33,6 +35,7 @@ type EventCardProps = {
     amount: string,
     partId: number,
   ) => void;
+  onRefund?: (eventId: string | number) => void;
 };
 
 function endsInDays(endTimeStr: string): string {
@@ -59,10 +62,14 @@ export default function EventCard({
   handleSelect,
   handleSubmitAnswer,
   handleIncreaseAnswer,
+  onRefund,
 }: EventCardProps) {
+  const { signer, address: walletAddress } = useWalletStore();
+  const isRefund = ev.status?.toUpperCase() === "REFUND";
   const [amount, setAmount] = useState("");
   const [increaseAmount, setIncreaseAmount] = useState("");
   const [walletError, setWalletError] = useState("");
+  const [refundLoading, setRefundLoading] = useState(false);
 
   const pools = (ev.answersPool ?? []).map((p) => BigInt(p));
   const totalPool = pools.reduce((s, p) => s + p, 0n);
@@ -114,7 +121,12 @@ export default function EventCard({
           >
             {ev.category}
           </span>
-          {hasBet && (
+          {isRefund && (
+            <span className="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-500/30 dark:border-amber-400/30">
+              Refund
+            </span>
+          )}
+          {hasBet && !isRefund && (
             <span className="rounded-full bg-[#9A6BFF] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
               Your participation
             </span>
@@ -165,7 +177,79 @@ export default function EventCard({
         ))}
       </div>
 
-      {hasBet ? (
+      {isRefund ? (
+        <>
+          {/* Refund state: show user amount and refund button */}
+          {hasBet && userBet && (
+            <div className="mt-5 space-y-4">
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Your amount
+                </p>
+                <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
+                  {formatAmountUsdt(userBet)} {userBet[0]?.token ?? "USDT"}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={refundLoading}
+                onClick={async () => {
+                  setWalletError("");
+                  if (!signer || !walletAddress) {
+                    setWalletError("Connect your wallet to request a refund.");
+                    return;
+                  }
+                  const partId = userBet[0]?.id;
+                  if (partId == null) return;
+                  setRefundLoading(true);
+                  try {
+                    const result = await getMoneyFromEvent(
+                      signer,
+                      walletAddress,
+                      eventId,
+                      String(partId),
+                    );
+                    if (result) {
+                      onRefund?.(eventId);
+                    } else {
+                      setWalletError("Refund request failed.");
+                    }
+                  } catch (e) {
+                    setWalletError(
+                      e instanceof Error ? e.message : "Refund request failed.",
+                    );
+                  } finally {
+                    setRefundLoading(false);
+                  }
+                }}
+                className="w-full rounded-xl bg-amber-500 py-3 px-4 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-500 dark:hover:bg-amber-600"
+              >
+                {refundLoading
+                  ? "Refunding…"
+                  : `Refund money (${formatAmountUsdt(userBet)} ${userBet[0]?.token ?? "USDT"})`}
+              </button>
+              {walletError && (
+                <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
+                  {walletError}
+                </p>
+              )}
+            </div>
+          )}
+          {!hasBet && (
+            <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">
+              This event has been refunded.
+            </p>
+          )}
+          <div className="mt-4">
+            <Link
+              href={`/event/${eventId}`}
+              className="inline-block rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/10"
+            >
+              Show details
+            </Link>
+          </div>
+        </>
+      ) : hasBet ? (
         <>
           {/* Your bet summary */}
           <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">

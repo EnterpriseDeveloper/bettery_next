@@ -131,6 +131,17 @@ export function useEventsList() {
     [tab, status, category, address, signer],
   );
 
+  const handleRefund = useCallback(
+    async (_eventId: string | number) => {
+      const data = await fetchEventsList(tab, status, category, address);
+      setEvents(data.events);
+      setCurrentPage(data.page);
+      setTotalPages(data.totalPages);
+      setNoMoreEvents(data.totalPages > 0 && data.page >= data.totalPages);
+    },
+    [tab, status, category, address],
+  );
+
   const handleProceedWithZero = useCallback(async () => {
     const { pending } = zeroAmountModal;
     if (!pending || !signer || !address) {
@@ -182,5 +193,6 @@ export function useEventsList() {
     handleProceedWithZero,
     closeZeroAmountModal,
     handleIncreaseAnswer,
+    handleRefund,
   };
 }

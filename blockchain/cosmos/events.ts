@@ -4,10 +4,7 @@ import {
   SigningStargateClient,
   defaultRegistryTypes,
 } from "@cosmjs/stargate";
-import {
-  MsgCreateEvent,
-  MsgCreatePartEvent,
-} from "./proto-ts/bettery/events/v1/tx";
+import { MsgCreateEvent } from "./proto-ts/bettery/events/v1/tx";
 import { OfflineAminoSigner } from "@keplr-wallet/types";
 import { TxCreateEvent } from "@/types/events";
 
