@@ -1,5 +1,5 @@
 export type Tab = "all" | "my-bets";
-export type StatusFilter = "ACTIVE" | "FINISHED" | "REJECTED";
+export type StatusFilter = "ACTIVE" | "FINISHED" | "REFUND";
 
 export type PendingZeroBet = {
   eventId: number | string;
@@ -9,7 +9,7 @@ export type PendingZeroBet = {
 export const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "ACTIVE", label: "Active" },
   { value: "FINISHED", label: "Finished" },
-  { value: "REJECTED", label: "Rejected" },
+  { value: "REFUND", label: "Refund" },
 ];
 
 export const EVENTS_PAGE_SIZE = 12;
