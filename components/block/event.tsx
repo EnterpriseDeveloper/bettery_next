@@ -69,6 +69,7 @@ export default function EventCard({
 }: EventCardProps) {
   const { signer, address: walletAddress } = useWalletStore();
   const isRefund = ev.status?.toUpperCase() === "REFUND";
+  const isFinished = ev.status?.toUpperCase() === "FINISHED";
   const [amount, setAmount] = useState("");
   const [increaseAmount, setIncreaseAmount] = useState("");
   const [walletError, setWalletError] = useState("");
@@ -267,6 +268,20 @@ export default function EventCard({
             </Link>
           </div>
         </>
+      ) : isFinished ? (
+        <>
+          <p className="mt-5 text-center text-sm font-semibold text-green-600 dark:text-green-400">
+            Event is FINISHED
+          </p>
+          <div className="mt-4">
+            <Link
+              href={`/event/${eventId}`}
+              className="inline-block rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/10"
+            >
+              Show details
+            </Link>
+          </div>
+        </>
       ) : hasBet ? (
         <>
           {/* Your bet summary */}
@@ -326,7 +341,7 @@ export default function EventCard({
                       setIncreaseAmount("");
                     }
                   }}
-                  className="rounded-xl bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                  className="cursor-pointer rounded-xl bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
                 >
                   Increase stake
                 </button>

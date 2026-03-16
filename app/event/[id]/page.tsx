@@ -418,7 +418,7 @@ export default function EventPage({ params }: EventPageProps) {
                               );
                             }
                           }}
-                          className="rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+                          className="cursor-pointer rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
                         >
                           {submitting ? "Submitting…" : "Increase stake"}
                         </button>
