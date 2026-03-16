@@ -26,6 +26,7 @@ import {
 import { refreshWalletBalance } from "@/lib/balance";
 import { RefundSection } from "@/components/ui/refund-section";
 import { FinishedSection } from "@/components/ui/finished-section";
+import { Spinner } from "@/components/ui/spinner";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -506,7 +507,8 @@ export default function EventPage({ params }: EventPageProps) {
                               const match = value.match(
                                 /^(\d+)?(\.(\d{0,2})?)?$/,
                               );
-                              if (match || value === "") setIncreaseAmount(value);
+                              if (match || value === "")
+                                setIncreaseAmount(value);
                             }}
                             className="w-40 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2 text-sm text-[#1c1c1c] dark:text-slate-100"
                           />
@@ -517,7 +519,8 @@ export default function EventPage({ params }: EventPageProps) {
                               !increaseAmount ||
                               Number(increaseAmount) <= 0
                             }
-                            onClick={() => {
+                            onClick={async () => {
+                              setSubmitting(true);
                               const idx = event.answers.indexOf(
                                 userBet[0].answer,
                               );
@@ -526,15 +529,19 @@ export default function EventPage({ params }: EventPageProps) {
                                 increaseAmount &&
                                 Number(increaseAmount) > 0
                               ) {
-                                handleIncreaseAnswer(
+                                await handleIncreaseAnswer(
                                   event.id,
                                   increaseAmount,
                                   Number(userBet[0].id),
                                 );
                               }
+                              setSubmitting(false);
                             }}
-                            className="cursor-pointer rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+                            className="cursor-pointer rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
                           >
+                            {submitting && (
+                              <Spinner className="h-4 w-4 text-white" />
+                            )}
                             {submitting ? "Submitting…" : "Increase stake"}
                           </button>
                         </div>

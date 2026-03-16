@@ -32,6 +32,7 @@ export default function Page() {
     closeZeroAmountModal,
     handleIncreaseAnswer,
     handleRefund,
+    increaseStakeLoadingEventId,
   } = useEventsList();
 
   const categoryLabel = category
@@ -72,6 +73,7 @@ export default function Page() {
           loadMoreRef={loadMoreRef}
           loadingMore={loadingMore}
           noMoreEvents={noMoreEvents}
+          increaseStakeLoadingEventId={increaseStakeLoadingEventId}
           onSelect={handleSelect}
           onSubmitAnswer={handleSubmitAnswer}
           onIncreaseAnswer={handleIncreaseAnswer}

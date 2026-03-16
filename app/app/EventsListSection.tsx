@@ -13,6 +13,7 @@ type Props = {
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   loadingMore: boolean;
   noMoreEvents: boolean;
+  increaseStakeLoadingEventId: string | number | null;
   onSelect: (eventId: number | string, answerIndex: number) => void;
   onSubmitAnswer: (
     eventId: number | string,
@@ -38,6 +39,7 @@ export function EventsListSection({
   loadMoreRef,
   loadingMore,
   noMoreEvents,
+  increaseStakeLoadingEventId,
   onSelect,
   onSubmitAnswer,
   onIncreaseAnswer,
@@ -85,6 +87,10 @@ export function EventsListSection({
                   handleSubmitAnswer={onSubmitAnswer}
                   handleIncreaseAnswer={onIncreaseAnswer}
                   onRefund={onRefund}
+                  increaseStakeLoading={
+                  increaseStakeLoadingEventId != null &&
+                  String(increaseStakeLoadingEventId) === String(ev.id)
+                }
                 />
               </div>
             ))}

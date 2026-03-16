@@ -7,6 +7,7 @@ import { getMoneyFromEvent } from "@/blockchain/cosmos/participate";
 import { refreshWalletBalance } from "@/lib/balance";
 import { RefundSection } from "@/components/ui/refund-section";
 import { FinishedSection } from "@/components/ui/finished-section";
+import { Spinner } from "@/components/ui/spinner";
 
 type EventCardProps = {
   ev: {
@@ -44,6 +45,8 @@ type EventCardProps = {
     partId: number,
   ) => void;
   onRefund?: (eventId: string | number) => void;
+  /** When true, show spinner on Increase stake button (e.g. while tx is in progress). */
+  increaseStakeLoading?: boolean;
 };
 
 function endsInDays(endTimeStr: string): string {
@@ -71,6 +74,7 @@ export default function EventCard({
   handleSubmitAnswer,
   handleIncreaseAnswer,
   onRefund,
+  increaseStakeLoading = false,
 }: EventCardProps) {
   const { signer, address: walletAddress } = useWalletStore();
   const isRefund = ev.status?.toUpperCase() === "REFUND";
@@ -342,6 +346,7 @@ export default function EventCard({
                 />
                 <button
                   type="button"
+                  disabled={increaseStakeLoading}
                   onClick={() => {
                     if (!currentAddress) {
                       setWalletError("Connect to the wallet");
@@ -362,9 +367,12 @@ export default function EventCard({
                       setIncreaseAmount("");
                     }
                   }}
-                  className="cursor-pointer rounded-xl bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                  className="cursor-pointer rounded-xl bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
                 >
-                  Increase stake
+                  {increaseStakeLoading && (
+                    <Spinner className="h-4 w-4 text-white" />
+                  )}
+                  {increaseStakeLoading ? "Increasing…" : "Increase stake"}
                 </button>
               </>
             )}

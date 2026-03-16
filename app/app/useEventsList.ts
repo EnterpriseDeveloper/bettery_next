@@ -27,6 +27,8 @@ export function useEventsList() {
   const [totalPages, setTotalPages] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [noMoreEvents, setNoMoreEvents] = useState(false);
+  const [increaseStakeLoadingEventId, setIncreaseStakeLoadingEventId] =
+    useState<string | number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,20 +118,25 @@ export function useEventsList() {
   const handleIncreaseAnswer = useCallback(
     async (eventId: number | string, amount: string, partId: number) => {
       if (!signer || !address) return;
-      const amountBigInt = parseUnits(amount, 6);
-      await txIncreasePart(
-        signer,
-        address,
-        partId,
-        Number(eventId),
-        amountBigInt,
-      );
-      await refreshWalletBalance(address);
-      const data = await fetchEventsList(tab, status, category, address);
-      setEvents(data.events);
-      setCurrentPage(data.page);
-      setTotalPages(data.totalPages);
-      setNoMoreEvents(data.totalPages > 0 && data.page >= data.totalPages);
+      setIncreaseStakeLoadingEventId(eventId);
+      try {
+        const amountBigInt = parseUnits(amount, 6);
+        await txIncreasePart(
+          signer,
+          address,
+          partId,
+          Number(eventId),
+          amountBigInt,
+        );
+        await refreshWalletBalance(address);
+        const data = await fetchEventsList(tab, status, category, address);
+        setEvents(data.events);
+        setCurrentPage(data.page);
+        setTotalPages(data.totalPages);
+        setNoMoreEvents(data.totalPages > 0 && data.page >= data.totalPages);
+      } finally {
+        setIncreaseStakeLoadingEventId(null);
+      }
     },
     [tab, status, category, address, signer],
   );
@@ -198,5 +205,6 @@ export function useEventsList() {
     closeZeroAmountModal,
     handleIncreaseAnswer,
     handleRefund,
+    increaseStakeLoadingEventId,
   };
 }
