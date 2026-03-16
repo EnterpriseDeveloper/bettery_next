@@ -23,6 +23,7 @@ import {
   txIncreasePart,
   txParticipateEvent,
 } from "@/blockchain/cosmos/participate";
+import { refreshWalletBalance } from "@/lib/balance";
 import { RefundSection } from "@/components/ui/refund-section";
 import { FinishedSection } from "@/components/ui/finished-section";
 
@@ -162,6 +163,7 @@ export default function EventPage({ params }: EventPageProps) {
           amountBigInt,
         );
         await refetchEvent(eventId);
+        await refreshWalletBalance(address);
         setAmount("");
         setIncreaseAmount("");
       } finally {
@@ -188,6 +190,7 @@ export default function EventPage({ params }: EventPageProps) {
           amountBigInt,
         );
         await refetchEvent(eventId);
+        await refreshWalletBalance(address);
         setIncreaseAmount("");
       } finally {
         setSubmitting(false);
@@ -212,6 +215,7 @@ export default function EventPage({ params }: EventPageProps) {
       try {
         await txParticipateEvent(signer, address, Number(eventId), answer, 0n);
         await refetchEvent(eventId);
+        await refreshWalletBalance(address);
       } finally {
         setSubmitting(false);
       }
@@ -401,8 +405,10 @@ export default function EventPage({ params }: EventPageProps) {
                               event.id,
                               String(firstBet.id),
                             );
-                            if (result) await refetchEvent(event.id);
-                            else setWalletError("Refund request failed.");
+                            if (result) {
+                              await refetchEvent(event.id);
+                              await refreshWalletBalance(address);
+                            } else setWalletError("Refund request failed.");
                           } catch (e) {
                             setWalletError(
                               e instanceof Error
@@ -454,8 +460,10 @@ export default function EventPage({ params }: EventPageProps) {
                           event.id,
                           String(firstBet.id),
                         );
-                        if (result) await refetchEvent(event.id);
-                        else setWalletError("Claim reward failed.");
+                        if (result) {
+                          await refetchEvent(event.id);
+                          await refreshWalletBalance(address);
+                        } else setWalletError("Claim reward failed.");
                       } catch (e) {
                         setWalletError(
                           e instanceof Error

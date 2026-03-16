@@ -6,6 +6,7 @@ import {
   txIncreasePart,
   txParticipateEvent,
 } from "@/blockchain/cosmos/participate";
+import { refreshWalletBalance } from "@/lib/balance";
 import { parseUnits } from "viem";
 import type { Tab, StatusFilter, PendingZeroBet } from "./types";
 import { fetchEventsList } from "./fetchEvents";
@@ -102,6 +103,7 @@ export function useEventsList() {
         answer,
         amountBigInt,
       );
+      await refreshWalletBalance(address);
       const data = await fetchEventsList(tab, status, category, address);
       setEvents(data.events);
       setCurrentPage(data.page);
@@ -122,6 +124,7 @@ export function useEventsList() {
         Number(eventId),
         amountBigInt,
       );
+      await refreshWalletBalance(address);
       const data = await fetchEventsList(tab, status, category, address);
       setEvents(data.events);
       setCurrentPage(data.page);
@@ -162,6 +165,7 @@ export function useEventsList() {
       answer,
       0n,
     );
+    await refreshWalletBalance(address);
     const data = await fetchEventsList(tab, status, category, address);
     setEvents(data.events);
     setCurrentPage(data.page);

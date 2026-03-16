@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWalletStore } from "@/store/useWalletStore";
 import { getMoneyFromEvent } from "@/blockchain/cosmos/participate";
+import { refreshWalletBalance } from "@/lib/balance";
 import { RefundSection } from "@/components/ui/refund-section";
 import { FinishedSection } from "@/components/ui/finished-section";
 
@@ -217,8 +218,10 @@ export default function EventCard({
                       eventId,
                       String(partId),
                     );
-                    if (result) onRefund?.(eventId);
-                    else setWalletError("Refund request failed.");
+                    if (result) {
+                      onRefund?.(eventId);
+                      await refreshWalletBalance(walletAddress);
+                    } else setWalletError("Refund request failed.");
                   } catch (e) {
                     setWalletError(
                       e instanceof Error
@@ -275,8 +278,10 @@ export default function EventCard({
                     eventId,
                     String(partId),
                   );
-                  if (result) onRefund?.(eventId);
-                  else setWalletError("Claim reward failed.");
+                  if (result) {
+                    onRefund?.(eventId);
+                    await refreshWalletBalance(walletAddress);
+                  } else setWalletError("Claim reward failed.");
                 } catch (e) {
                   setWalletError(
                     e instanceof Error
