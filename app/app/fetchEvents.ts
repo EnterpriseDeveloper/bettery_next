@@ -19,19 +19,15 @@ export async function fetchEventsList(
   params.set("page", String(page));
   if (status) params.set("status", status);
   if (category) params.set("category", category);
+  if (tab === "my-bets" && address) {
+    params.set("address", address);
+  }
 
   const res = await fetch(`/api/events?${params.toString()}`);
   if (!res.ok) return { events: [], totalPages: 0, page: 0 };
   const data = await res.json();
-  console.log("data", data);
-  let list = data.events ?? [];
-  if (tab === "my-bets" && address) {
-    list = list.filter((ev: any) =>
-      ev.bets?.some((b: any) => b.creator === address),
-    );
-  }
   return {
-    events: list,
+    events: data.events ?? [],
     totalPages: data.totalPages ?? 0,
     page: data.page ?? 0,
   };

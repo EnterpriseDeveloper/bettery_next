@@ -6,15 +6,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category") ?? undefined;
     const status = searchParams.get("status") ?? undefined;
+    const address = searchParams.get("address") ?? undefined;
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const limit = Math.min(
       50,
       Math.max(1, parseInt(searchParams.get("limit") ?? "10", 10)),
     );
 
-    const where: { category?: string; status?: string } = {};
+    const where: {
+      category?: string;
+      status?: string;
+      bets?: { some: { creator: string } };
+    } = {};
     if (category) where.category = category;
     if (status) where.status = status;
+    if (address) where.bets = { some: { creator: address } };
 
     const skip = (page - 1) * limit;
 
