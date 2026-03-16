@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWalletStore } from "@/store/useWalletStore";
 import { getMoneyFromEvent } from "@/blockchain/cosmos/participate";
+import { RefundSection } from "@/components/ui/refund-section";
+import { FinishedSection } from "@/components/ui/finished-section";
 
 type EventCardProps = {
   ev: {
@@ -189,75 +191,47 @@ export default function EventCard({
 
       {isRefund ? (
         <>
-          {/* Refund state: show user amount and refund button, or "Refunded" if already paid */}
-          {hasBet && userBet && firstBet && (
-            <div className="mt-5 space-y-4">
-              {isRefunded ? (
-                <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
-                  Refunded: {Number(firstBet.amount) / 100} USDT
-                </p>
-              ) : (
-                <>
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 dark:border-amber-400/20 dark:bg-amber-500/10">
-                    <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Your amount
-                    </p>
-                    <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
-                      {Number(firstBet.amount) / 100} {firstBet.token ?? "USDT"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={refundLoading}
-                    onClick={async () => {
-                      setWalletError("");
-                      if (!signer || !walletAddress) {
-                        setWalletError(
-                          "Connect your wallet to request a refund.",
-                        );
-                        return;
-                      }
-                      const partId = firstBet.id;
-                      if (partId == null) return;
-                      setRefundLoading(true);
-                      try {
-                        const result = await getMoneyFromEvent(
-                          signer,
-                          walletAddress,
-                          eventId,
-                          String(partId),
-                        );
-                        if (result) {
-                          onRefund?.(eventId);
-                        } else {
-                          setWalletError("Refund request failed.");
-                        }
-                      } catch (e) {
-                        setWalletError(
-                          e instanceof Error
-                            ? e.message
-                            : "Refund request failed.",
-                        );
-                      } finally {
-                        setRefundLoading(false);
-                      }
-                    }}
-                    className="cursor-pointer w-full rounded-xl bg-amber-500 py-3 px-4 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-500 dark:hover:bg-amber-600"
-                  >
-                    {refundLoading
-                      ? "Refunding…"
-                      : `Refund money (${Number(firstBet.amount) / 100} ${firstBet.token ?? "USDT"})`}
-                  </button>
-                  {walletError && (
-                    <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
-                      {walletError}
-                    </p>
-                  )}
-                </>
-              )}
+          {hasBet && userBet && firstBet ? (
+            <div className="mt-5">
+              <RefundSection
+                amountDisplay={String(Number(firstBet.amount) / 100)}
+                token={firstBet.token ?? "USDT"}
+                isRefunded={isRefunded}
+                loading={refundLoading}
+                error={walletError || null}
+                onRefundClick={async () => {
+                  setWalletError("");
+                  if (!signer || !walletAddress) {
+                    setWalletError(
+                      "Connect your wallet to request a refund.",
+                    );
+                    return;
+                  }
+                  const partId = firstBet.id;
+                  if (partId == null) return;
+                  setRefundLoading(true);
+                  try {
+                    const result = await getMoneyFromEvent(
+                      signer,
+                      walletAddress,
+                      eventId,
+                      String(partId),
+                    );
+                    if (result) onRefund?.(eventId);
+                    else setWalletError("Refund request failed.");
+                  } catch (e) {
+                    setWalletError(
+                      e instanceof Error
+                        ? e.message
+                        : "Refund request failed.",
+                    );
+                  } finally {
+                    setRefundLoading(false);
+                  }
+                }}
+              />
             </div>
-          )}
-          {!hasBet && (
+          ) : (
             <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">
               This event has been refunded.
             </p>
@@ -273,75 +247,48 @@ export default function EventCard({
         </>
       ) : isFinished ? (
         <>
-          {firstBet ? (
-            <div className="mt-5 space-y-3">
-              {Number(firstBet.result ?? 0) === 0 ? (
-                <p className="text-center text-sm font-semibold text-red-600 dark:text-red-400">
-                  You lost {Number(firstBet.amount) / 100}{" "}
-                  {firstBet.token ?? "USDT"}
-                </p>
-              ) : firstBet.paid === true ? (
-                <p className="text-center text-sm font-semibold text-green-600 dark:text-green-400">
-                  Winner {Number(firstBet.result) / 100}{" "}
-                  {firstBet.token ?? "USDT"}
-                </p>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    disabled={rewardLoading}
-                    onClick={async () => {
-                      setWalletError("");
-                      if (!signer || !walletAddress) {
-                        setWalletError(
-                          "Connect your wallet to claim your reward.",
-                        );
-                        return;
-                      }
-                      const partId = firstBet.id;
-                      if (partId == null) return;
-                      setRewardLoading(true);
-                      try {
-                        const result = await getMoneyFromEvent(
-                          signer,
-                          walletAddress,
-                          eventId,
-                          String(partId),
-                        );
-                        if (result) {
-                          onRefund?.(eventId);
-                        } else {
-                          setWalletError("Claim reward failed.");
-                        }
-                      } catch (e) {
-                        setWalletError(
-                          e instanceof Error
-                            ? e.message
-                            : "Claim reward failed.",
-                        );
-                      } finally {
-                        setRewardLoading(false);
-                      }
-                    }}
-                    className="cursor-pointer w-full rounded-xl border-2 border-green-500 bg-green-500/10 py-3 px-4 text-sm font-bold text-green-600 transition hover:bg-green-500/20 disabled:opacity-50 dark:border-green-400 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20"
-                  >
-                    {rewardLoading
-                      ? "Claiming…"
-                      : `Get my reward ${Number(firstBet.result) / 100} ${firstBet.token ?? "USDT"}`}
-                  </button>
-                  {walletError && (
-                    <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
-                      {walletError}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          ) : (
-            <p className="mt-5 text-center text-sm font-semibold text-green-600 dark:text-green-400">
-              Event is FINISHED
-            </p>
-          )}
+          <div className="mt-5">
+            <FinishedSection
+              hasBet={!!firstBet}
+              resultDisplay={firstBet ? String(Number(firstBet.result ?? 0) / 100) : "0"}
+              amountDisplay={firstBet ? String(Number(firstBet.amount) / 100) : "0"}
+              token={firstBet?.token ?? "USDT"}
+              paid={firstBet?.paid === true}
+              loading={rewardLoading}
+              error={walletError || null}
+              onClaimClick={async () => {
+                if (!firstBet) return;
+                setWalletError("");
+                if (!signer || !walletAddress) {
+                  setWalletError(
+                    "Connect your wallet to claim your reward.",
+                  );
+                  return;
+                }
+                const partId = firstBet.id;
+                if (partId == null) return;
+                setRewardLoading(true);
+                try {
+                  const result = await getMoneyFromEvent(
+                    signer,
+                    walletAddress,
+                    eventId,
+                    String(partId),
+                  );
+                  if (result) onRefund?.(eventId);
+                  else setWalletError("Claim reward failed.");
+                } catch (e) {
+                  setWalletError(
+                    e instanceof Error
+                      ? e.message
+                      : "Claim reward failed.",
+                  );
+                } finally {
+                  setRewardLoading(false);
+                }
+              }}
+            />
+          </div>
           <div className="mt-4">
             <Link
               href={`/event/${eventId}`}

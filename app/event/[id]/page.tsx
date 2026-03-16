@@ -19,9 +19,12 @@ import Navbar from "@/components/block/navbar";
 import BetModal from "@/components/modals/betModal";
 import { useWalletStore } from "@/store/useWalletStore";
 import {
+  getMoneyFromEvent,
   txIncreasePart,
   txParticipateEvent,
 } from "@/blockchain/cosmos/participate";
+import { RefundSection } from "@/components/ui/refund-section";
+import { FinishedSection } from "@/components/ui/finished-section";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -46,6 +49,9 @@ interface EventFromApi {
     amount: string;
     token: string;
     status: string;
+    increase?: boolean;
+    paid?: boolean;
+    result?: number | string;
   }[];
   validators: { id: string; creator: string; answer: string }[];
 }
@@ -93,6 +99,8 @@ export default function EventPage({ params }: EventPageProps) {
     open: boolean;
     pending: { answerIndex: number } | null;
   }>({ open: false, pending: null });
+  const [refundLoading, setRefundLoading] = useState(false);
+  const [rewardLoading, setRewardLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -247,7 +255,11 @@ export default function EventPage({ params }: EventPageProps) {
   const userBet = address
     ? event.bets.filter((b) => b.creator === address)
     : null;
-
+  /** First bet (increase: false) holds main amount, refund/reward status */
+  const firstBet = userBet?.find((b) => b.increase === false) ?? userBet?.[0];
+  const isRefund = event.status.toUpperCase() === "REFUND";
+  const isFinished = event.status.toUpperCase() === "FINISHED";
+  const isRefunded = firstBet?.paid === true;
   const isActive = event.status.toUpperCase() === "ACTIVE";
 
   return (
@@ -356,133 +368,229 @@ export default function EventPage({ params }: EventPageProps) {
                 })}
               </div>
 
-              {/* Participate — only when event is active */}
-              {isActive && (
-                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
-                  {walletError && (
-                    <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
-                      {walletError}
-                    </div>
-                  )}
-                  {userBet ? (
-                    <>
-                      <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4 mb-4">
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Your bet
-                        </p>
-                        <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-                          <span className="text-lg font-bold text-[#9A6BFF] dark:text-[#9A6BFF]">
-                            {userBet[0].answer}
-                          </span>
-                          <span className="font-bold text-[#1c1c1c] dark:text-white">
-                            {formatAmountUsdt(userBet)}{" "}
-                            {userBet[0].token || "USDT"}
+              {/* Participate / Refund / Finished */}
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
+                {isActive && walletError && (
+                  <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+                    {walletError}
+                  </div>
+                )}
+
+                {isRefund && (
+                  <>
+                    {firstBet ? (
+                      <RefundSection
+                        amountDisplay={String(Number(firstBet.amount) / 100)}
+                        token={firstBet.token || "USDT"}
+                        isRefunded={isRefunded}
+                        loading={refundLoading}
+                        error={walletError || null}
+                        onRefundClick={async () => {
+                          setWalletError("");
+                          if (!signer || !address) {
+                            setWalletError(
+                              "Connect your wallet to request a refund.",
+                            );
+                            return;
+                          }
+                          setRefundLoading(true);
+                          try {
+                            const result = await getMoneyFromEvent(
+                              signer,
+                              address,
+                              event.id,
+                              String(firstBet.id),
+                            );
+                            if (result) await refetchEvent(event.id);
+                            else setWalletError("Refund request failed.");
+                          } catch (e) {
+                            setWalletError(
+                              e instanceof Error
+                                ? e.message
+                                : "Refund request failed.",
+                            );
+                          } finally {
+                            setRefundLoading(false);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        This event has been refunded.
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {isFinished && (
+                  <FinishedSection
+                    hasBet={!!firstBet}
+                    resultDisplay={
+                      firstBet
+                        ? String(Number(firstBet.result ?? 0) / 100)
+                        : "0"
+                    }
+                    amountDisplay={
+                      firstBet ? String(Number(firstBet.amount) / 100) : "0"
+                    }
+                    token={firstBet?.token || "USDT"}
+                    paid={firstBet?.paid === true}
+                    loading={rewardLoading}
+                    error={walletError || null}
+                    onClaimClick={async () => {
+                      if (!firstBet) return;
+                      setWalletError("");
+                      if (!signer || !address) {
+                        setWalletError(
+                          "Connect your wallet to claim your reward.",
+                        );
+                        return;
+                      }
+                      setRewardLoading(true);
+                      try {
+                        const result = await getMoneyFromEvent(
+                          signer,
+                          address,
+                          event.id,
+                          String(firstBet.id),
+                        );
+                        if (result) await refetchEvent(event.id);
+                        else setWalletError("Claim reward failed.");
+                      } catch (e) {
+                        setWalletError(
+                          e instanceof Error
+                            ? e.message
+                            : "Claim reward failed.",
+                        );
+                      } finally {
+                        setRewardLoading(false);
+                      }
+                    }}
+                  />
+                )}
+
+                {isActive && (
+                  <>
+                    {userBet && userBet.length > 0 ? (
+                      <>
+                        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4 mb-4">
+                          <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Your bet
+                          </p>
+                          <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <span className="text-lg font-bold text-[#9A6BFF] dark:text-[#9A6BFF]">
+                              {userBet[0].answer}
+                            </span>
+                            <span className="font-bold text-[#1c1c1c] dark:text-white">
+                              {formatAmountUsdt(userBet)}{" "}
+                              {userBet[0].token || "USDT"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="Add amount (USDT)"
+                            value={increaseAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(",", ".");
+                              const match = value.match(
+                                /^(\d+)?(\.(\d{0,2})?)?$/,
+                              );
+                              if (match || value === "") setIncreaseAmount(value);
+                            }}
+                            className="w-40 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2 text-sm text-[#1c1c1c] dark:text-slate-100"
+                          />
+                          <button
+                            type="button"
+                            disabled={
+                              submitting ||
+                              !increaseAmount ||
+                              Number(increaseAmount) <= 0
+                            }
+                            onClick={() => {
+                              const idx = event.answers.indexOf(
+                                userBet[0].answer,
+                              );
+                              if (
+                                idx >= 0 &&
+                                increaseAmount &&
+                                Number(increaseAmount) > 0
+                              ) {
+                                handleIncreaseAnswer(
+                                  event.id,
+                                  increaseAmount,
+                                  Number(userBet[0].id),
+                                );
+                              }
+                            }}
+                            className="cursor-pointer rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+                          >
+                            {submitting ? "Submitting…" : "Increase stake"}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Amount (USDT)
+                        </label>
+                        <div className="relative mb-4">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={amount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(",", ".");
+                              const match = value.match(
+                                /^(\d+)?(\.(\d{0,2})?)?$/,
+                              );
+                              if (match || value === "") setAmount(value);
+                            }}
+                            placeholder="0"
+                            className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 py-3 pl-4 pr-14 text-[#1c1c1c] dark:text-slate-100 outline-none focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20"
+                          />
+                          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+                            USDT
                           </span>
                         </div>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="Add amount (USDT)"
-                          value={increaseAmount}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(",", ".");
-                            const match = value.match(
-                              /^(\d+)?(\.(\d{0,2})?)?$/,
-                            );
-                            if (match || value === "") setIncreaseAmount(value);
-                          }}
-                          className="w-40 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2 text-sm text-[#1c1c1c] dark:text-slate-100"
-                        />
-                        <button
-                          type="button"
-                          disabled={
-                            submitting ||
-                            !increaseAmount ||
-                            Number(increaseAmount) <= 0
-                          }
-                          onClick={() => {
-                            const idx = event.answers.indexOf(
-                              userBet[0].answer,
-                            );
-                            if (
-                              idx >= 0 &&
-                              increaseAmount &&
-                              Number(increaseAmount) > 0
-                            ) {
-                              handleIncreaseAnswer(
-                                event.id,
-                                increaseAmount,
-                                Number(userBet[0].id),
-                              );
-                            }
-                          }}
-                          className="cursor-pointer rounded-xl bg-[#9A6BFF] dark:bg-[#9A6BFF] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
-                        >
-                          {submitting ? "Submitting…" : "Increase stake"}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Amount (USDT)
-                      </label>
-                      <div className="relative mb-4">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={amount}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(",", ".");
-                            const match = value.match(
-                              /^(\d+)?(\.(\d{0,2})?)?$/,
-                            );
-                            if (match || value === "") setAmount(value);
-                          }}
-                          placeholder="0"
-                          className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 py-3 pl-4 pr-14 text-[#1c1c1c] dark:text-slate-100 outline-none focus:border-[#9A6BFF] focus:ring-2 focus:ring-[#9A6BFF]/20"
-                        />
-                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">
-                          USDT
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        {event.answers.map((answer, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            disabled={submitting}
-                            onClick={() => {
-                              if (!address) {
-                                setWalletError(
-                                  "Connect your wallet to place a bet.",
+                        <div className="grid grid-cols-2 gap-3">
+                          {event.answers.map((answer, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              disabled={submitting}
+                              onClick={() => {
+                                if (!address) {
+                                  setWalletError(
+                                    "Connect your wallet to place a bet.",
+                                  );
+                                  return;
+                                }
+                                setWalletError("");
+                                handleSubmitAnswer(
+                                  event.id,
+                                  event.answers,
+                                  idx,
+                                  amount,
                                 );
-                                return;
-                              }
-                              setWalletError("");
-                              handleSubmitAnswer(
-                                event.id,
-                                event.answers,
-                                idx,
-                                amount,
-                              );
-                            }}
-                            className={`rounded-xl px-4 py-3 text-sm font-bold text-white transition disabled:opacity-50 ${
-                              idx % 2 === 0
-                                ? "bg-[#3CE6FF] hover:opacity-90"
-                                : "bg-[#9A6BFF] hover:opacity-90"
-                            }`}
-                          >
-                            Bet {answer}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+                              }}
+                              className={`rounded-xl px-4 py-3 text-sm font-bold text-white transition disabled:opacity-50 ${
+                                idx % 2 === 0
+                                  ? "bg-[#3CE6FF] hover:opacity-90"
+                                  : "bg-[#9A6BFF] hover:opacity-90"
+                              }`}
+                            >
+                              Bet {answer}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
             </section>
 
             {/* Schedule */}
