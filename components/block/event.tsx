@@ -23,6 +23,8 @@ type EventCardProps = {
       increase?: boolean;
       paid?: boolean;
       status?: string;
+      /** Reward amount (same units as amount, e.g. /100 for USDT). 0 = lost. */
+      result?: number | string;
     }[];
   };
   currentAddress?: string | null;
@@ -74,6 +76,7 @@ export default function EventCard({
   const [increaseAmount, setIncreaseAmount] = useState("");
   const [walletError, setWalletError] = useState("");
   const [refundLoading, setRefundLoading] = useState(false);
+  const [rewardLoading, setRewardLoading] = useState(false);
 
   const pools = (ev.answersPool ?? []).map((p) => BigInt(p));
   const totalPool = pools.reduce((s, p) => s + p, 0n);
@@ -270,9 +273,75 @@ export default function EventCard({
         </>
       ) : isFinished ? (
         <>
-          <p className="mt-5 text-center text-sm font-semibold text-green-600 dark:text-green-400">
-            Event is FINISHED
-          </p>
+          {firstBet ? (
+            <div className="mt-5 space-y-3">
+              {Number(firstBet.result ?? 0) === 0 ? (
+                <p className="text-center text-sm font-semibold text-red-600 dark:text-red-400">
+                  You lost {Number(firstBet.amount) / 100}{" "}
+                  {firstBet.token ?? "USDT"}
+                </p>
+              ) : firstBet.paid === true ? (
+                <p className="text-center text-sm font-semibold text-green-600 dark:text-green-400">
+                  Winner {Number(firstBet.result) / 100}{" "}
+                  {firstBet.token ?? "USDT"}
+                </p>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={rewardLoading}
+                    onClick={async () => {
+                      setWalletError("");
+                      if (!signer || !walletAddress) {
+                        setWalletError(
+                          "Connect your wallet to claim your reward.",
+                        );
+                        return;
+                      }
+                      const partId = firstBet.id;
+                      if (partId == null) return;
+                      setRewardLoading(true);
+                      try {
+                        const result = await getMoneyFromEvent(
+                          signer,
+                          walletAddress,
+                          eventId,
+                          String(partId),
+                        );
+                        if (result) {
+                          onRefund?.(eventId);
+                        } else {
+                          setWalletError("Claim reward failed.");
+                        }
+                      } catch (e) {
+                        setWalletError(
+                          e instanceof Error
+                            ? e.message
+                            : "Claim reward failed.",
+                        );
+                      } finally {
+                        setRewardLoading(false);
+                      }
+                    }}
+                    className="cursor-pointer w-full rounded-xl border-2 border-green-500 bg-green-500/10 py-3 px-4 text-sm font-bold text-green-600 transition hover:bg-green-500/20 disabled:opacity-50 dark:border-green-400 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20"
+                  >
+                    {rewardLoading
+                      ? "Claiming…"
+                      : `Get my reward ${Number(firstBet.result) / 100} ${firstBet.token ?? "USDT"}`}
+                  </button>
+                  {walletError && (
+                    <p className="mt-2 text-center text-xs text-red-500 dark:text-red-400">
+                      {walletError}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="mt-5 text-center text-sm font-semibold text-green-600 dark:text-green-400">
+              Event is FINISHED
+            </p>
+          )}
           <div className="mt-4">
             <Link
               href={`/event/${eventId}`}
