@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { getCreatorPercent, getCompanyPercent } from "@/blockchain/cosmos/config";
 
 type ConfigState = {
   creatorPercent: number | null;
@@ -18,13 +17,15 @@ export const useConfigStore = create<ConfigState>((set) => ({
   fetchConfig: async () => {
     set({ loading: true, error: null });
     try {
-      const [creatorPercent, companyPercent] = await Promise.all([
-        getCreatorPercent(),
-        getCompanyPercent(),
-      ]);
+      const res = await fetch("/api/config", { cache: "no-store" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to load config");
+      }
+      const { creatorPercent, companyPercent } = await res.json();
       set({
-        creatorPercent,
-        companyPercent,
+        creatorPercent: creatorPercent ?? null,
+        companyPercent: companyPercent ?? null,
         loading: false,
         error: null,
       });
