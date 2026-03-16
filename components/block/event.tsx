@@ -207,9 +207,7 @@ export default function EventCard({
                 onRefundClick={async () => {
                   setWalletError("");
                   if (!signer || !walletAddress) {
-                    setWalletError(
-                      "Connect your wallet to request a refund.",
-                    );
+                    setWalletError("Connect your wallet to request a refund.");
                     return;
                   }
                   const partId = firstBet.id;
@@ -228,9 +226,7 @@ export default function EventCard({
                     } else setWalletError("Refund request failed.");
                   } catch (e) {
                     setWalletError(
-                      e instanceof Error
-                        ? e.message
-                        : "Refund request failed.",
+                      e instanceof Error ? e.message : "Refund request failed.",
                     );
                   } finally {
                     setRefundLoading(false);
@@ -257,8 +253,12 @@ export default function EventCard({
           <div className="mt-5">
             <FinishedSection
               hasBet={!!firstBet}
-              resultDisplay={firstBet ? String(Number(firstBet.result ?? 0) / 100) : "0"}
-              amountDisplay={firstBet ? String(Number(firstBet.amount) / 100) : "0"}
+              resultDisplay={
+                firstBet ? String(Number(firstBet.result ?? 0) / 100) : "0"
+              }
+              amountDisplay={
+                firstBet ? String(Number(firstBet.amount) / 100) : "0"
+              }
               token={firstBet?.token ?? "USDT"}
               paid={firstBet?.paid === true}
               loading={rewardLoading}
@@ -267,9 +267,7 @@ export default function EventCard({
                 if (!firstBet) return;
                 setWalletError("");
                 if (!signer || !walletAddress) {
-                  setWalletError(
-                    "Connect your wallet to claim your reward.",
-                  );
+                  setWalletError("Connect your wallet to claim your reward.");
                   return;
                 }
                 const partId = firstBet.id;
@@ -288,9 +286,7 @@ export default function EventCard({
                   } else setWalletError("Claim reward failed.");
                 } catch (e) {
                   setWalletError(
-                    e instanceof Error
-                      ? e.message
-                      : "Claim reward failed.",
+                    e instanceof Error ? e.message : "Claim reward failed.",
                   );
                 } finally {
                   setRewardLoading(false);
@@ -329,7 +325,7 @@ export default function EventCard({
             </div>
           </div>
           {/* Actions */}
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3 justify-between">
             {userBet && (
               <>
                 <input
@@ -346,17 +342,17 @@ export default function EventCard({
                 />
                 <button
                   type="button"
-                  disabled={increaseStakeLoading}
+                  disabled={
+                    increaseStakeLoading ||
+                    !increaseAmount ||
+                    Number(increaseAmount) <= 0
+                  }
                   onClick={() => {
                     if (!currentAddress) {
                       setWalletError("Connect to the wallet");
                       return;
                     }
                     setWalletError("");
-                    if (!increaseAmount || Number(increaseAmount) <= 0) {
-                      setWalletError("Enter an amount greater than 0");
-                      return;
-                    }
                     const idx = ev.answers.indexOf(userBet?.[0]?.answer);
                     if (idx >= 0) {
                       handleIncreaseAnswer?.(
