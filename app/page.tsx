@@ -62,7 +62,7 @@ function PredictionCard({
         </div>
       </div>
       <p className={styles.body + " text-sm text-white/80"}>
-        Total pool: {Number(totalPool) / 100} USDT
+        Total pool: {totalPool} USDT
       </p>
     </div>
   );
@@ -223,7 +223,7 @@ export default function Home() {
                 question="Will Bitcoin hit $100K by 2025?"
                 yesPercent={46}
                 noPercent={54}
-                totalPool="$120,500 USDT"
+                totalPool="$120,523.75"
               />
             </div>
           </div>
@@ -334,7 +334,7 @@ export default function Home() {
                 question="Will SpaceX land humans on Mars before 2030?"
                 yesPercent={62}
                 noPercent={38}
-                totalPool="$184,000 USDT"
+                totalPool="$184,423.43"
               />
             </div>
           </div>
@@ -382,6 +382,103 @@ export default function Home() {
               title="Result on-chain"
               description="Final result is written to the blockchain and payouts are executed."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Stack */}
+      <section className="py-24 px-6 bg-[#03060c]">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2
+              className={
+                styles.heading + " text-[36px] font-semibold text-white mb-4"
+              }
+            >
+              Technology Stack
+            </h2>
+            <p
+              className={
+                styles.body + " text-[16px] text-white/80 max-w-2xl mx-auto"
+              }
+            >
+              Built with the world&apos;s most advanced decentralized and AI
+              infrastructure.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Cosmos SDK */}
+            <div className="glass overflow-hidden rounded-3xl border border-white/10 group hover:border-[#9A6BFF]/50 transition-all duration-500 cursor-pointer">
+              <Link href="https://cosmos.network/" target="_blank">
+                <div className="aspect-video relative overflow-hidden">
+                  <Image
+                    src="/cosmos.png"
+                    alt="Cosmos SDK"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark to-transparent opacity-60" />
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">
+                    Cosmos SDK
+                  </h3>
+                  <p className={styles.body + " text-sm text-slate-400"}>
+                    Powering the interoperable blockchain infrastructure with
+                    modular, high-performance architecture.
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            {/* LangChain */}
+            <div className="glass overflow-hidden rounded-3xl border border-white/10 group hover:border-accent-blue/50 transition-all duration-500 cursor-pointer">
+              <Link href="https://langchain.com/" target="_blank">
+                <div className="aspect-video relative overflow-hidden">
+                  <Image
+                    src="/langchain.jpg"
+                    alt="LangChain"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark to-transparent opacity-60" />
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">
+                    LangChain
+                  </h3>
+                  <p className={styles.body + " text-sm text-slate-400"}>
+                    Orchestrating the AI-driven market analysis for unbiased
+                    event verification and resolution.
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            {/* Keplr Wallet */}
+            <div className="glass overflow-hidden rounded-3xl border border-white/10 group hover:border-accent/50 transition-all duration-500 cursor-pointer">
+              <Link href="https://keplr.app/" target="_blank">
+                <div className="aspect-video relative overflow-hidden">
+                  <Image
+                    src="/keptl.webp"
+                    alt="Keplr Wallet"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark to-transparent opacity-60" />
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">
+                    Keplr Wallet
+                  </h3>
+                  <p className={styles.body + " text-sm text-slate-400"}>
+                    Providing secure and seamless wallet integration for
+                    cross-chain identity and asset management.
+                  </p>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
