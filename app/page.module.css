@@ -116,6 +116,15 @@
   animation: fadeInUp 700ms ease-out forwards;
 }
 
+/* Animated prediction progress bars */
+.predictionBar {
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  width: var(--target-width, 0%);
+  animation: fillBar 900ms ease-out forwards;
+}
+
 @keyframes pageGlow {
   0% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -151,5 +160,14 @@
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fillBar {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: var(--target-width, 0%);
   }
 }

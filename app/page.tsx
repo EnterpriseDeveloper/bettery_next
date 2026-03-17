@@ -43,8 +43,8 @@ function PredictionCard({
           </div>
           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#3CE6FF] transition-all duration-500"
-              style={{ width: `${yesPercent}%` }}
+              className={styles.predictionBar + " bg-[#3CE6FF]"}
+              style={{ ["--target-width" as any]: `${yesPercent}%` }}
             />
           </div>
         </div>
@@ -55,8 +55,8 @@ function PredictionCard({
           </div>
           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#9A6BFF] transition-all duration-500"
-              style={{ width: `${noPercent}%` }}
+              className={styles.predictionBar + " bg-[#9A6BFF]"}
+              style={{ ["--target-width" as any]: `${noPercent}%` }}
             />
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function Home() {
               <PredictionCard
                 question="Will Bitcoin hit $100K by 2025?"
                 yesPercent={46}
-                noPercent={54}
+                noPercent={64}
                 totalPool="$120,523.75"
               />
             </div>
