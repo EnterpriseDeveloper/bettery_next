@@ -164,7 +164,7 @@ export default function Home() {
           alt=""
           fill
           priority
-          className="absolute inset-0 object-cover opacity-80 pointer-events-none"
+          className="absolute inset-0 object-cover opacity-80 pointer-events-none floatSlow"
         />
         <div className="max-w-7xl mx-auto px-4 relative">
           <Link
@@ -180,7 +180,7 @@ export default function Home() {
             />
           </Link>
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+            <div className="space-y-8 fadeInUp">
               <h1
                 className={
                   styles.heading +
@@ -218,7 +218,7 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative fadeInUp">
               <PredictionCard
                 question="Will Bitcoin hit $100K by 2025?"
                 yesPercent={46}

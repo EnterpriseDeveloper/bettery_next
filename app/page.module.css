@@ -9,6 +9,24 @@
   --brand-glow-cyan: #5af0ff;
   --card-bg: rgba(255, 255, 255, 0.03);
   --card-border: rgba(255, 255, 255, 0.08);
+
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Soft animated gradient backdrop for whole page */
+.page::before {
+  content: "";
+  position: fixed;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(154, 107, 255, 0.22), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(60, 230, 255, 0.18), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(25, 34, 94, 0.9), transparent 60%);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: -2;
+  animation: pageGlow 24s ease-in-out infinite alternate;
 }
 
 /* Headings: Space Grotesk */
@@ -61,6 +79,21 @@
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: translateY(0) translateZ(0);
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease,
+    background 260ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px) translateZ(0);
+  border-color: rgba(156, 163, 255, 0.6);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow:
+    0 18px 45px rgba(3, 7, 18, 0.7),
+    0 0 32px rgba(148, 163, 255, 0.25);
 }
 
 /* Glow effects */
@@ -69,4 +102,54 @@
 }
 .glowCyan {
   box-shadow: 0 0 20px rgba(90, 240, 255, 0.4);
+}
+
+/* Subtle floating animation for hero art / media */
+.floatSlow {
+  animation: floatSlow 16s ease-in-out infinite;
+}
+
+/* Fade + slide up entrance (can be combined with Tailwind delay classes) */
+.fadeInUp {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  animation: fadeInUp 700ms ease-out forwards;
+}
+
+@keyframes pageGlow {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-2%, 1%, 0) scale(1.03);
+    filter: hue-rotate(10deg);
+  }
+  100% {
+    transform: translate3d(3%, -1%, 0) scale(1.06);
+    filter: hue-rotate(24deg);
+  }
+}
+
+@keyframes floatSlow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
