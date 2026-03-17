@@ -10,11 +10,10 @@ import {
   Lock,
   Sparkles,
   Check,
-  ArrowRight,
   Github,
-  Twitter,
 } from "lucide-react";
 import styles from "./page.module.css";
+import { LaunchAppButton } from "@/components/block/launch-app-button";
 
 function PredictionCard({
   question,
@@ -202,16 +201,7 @@ export default function Home() {
                 truth — blockchain enforces it.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/app"
-                  className={
-                    styles.btnPrimary +
-                    " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
-                  }
-                >
-                  Launch App
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <LaunchAppButton />
               </div>
               <div className="flex flex-wrap items-center gap-6 text-[16px] text-white/80">
                 <span className="flex items-center gap-2">
@@ -419,16 +409,7 @@ export default function Home() {
             </span>
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/app"
-              className={
-                styles.btnPrimary +
-                " inline-flex items-center gap-2 px-8 py-3 text-[16px]"
-              }
-            >
-              Launch App
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <LaunchAppButton />
           </div>
         </div>
       </section>
@@ -453,7 +434,7 @@ export default function Home() {
               Community
             </Link> */}
             <Link
-              href="#"
+              href="https://github.com/EnterpriseDeveloper"
               className="hover:text-white transition-colors flex items-center gap-1"
             >
               <Github className="w-4 h-4" /> Github
