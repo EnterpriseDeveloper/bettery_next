@@ -27,6 +27,21 @@ export const metadata: Metadata = {
   title: "BetMe — Bet on reality. Not opinions.",
   description:
     "Create prediction events. Stake real value. AI resolves the truth — blockchain enforces it.",
+  openGraph: {
+    title: "BetMe — Bet on reality. Not opinions.",
+    description:
+      "Create prediction events. Stake real value. AI resolves the truth — blockchain enforces it.",
+    url: "https://betme.life",
+    siteName: "BetMe",
+    images: [
+      {
+        url: "https://betme.life/preview.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
